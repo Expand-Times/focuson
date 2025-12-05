@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "minimallife",
+    "name": "MinimalLife Launcher",
     "slug": "minimallife",
     "version": "1.0.0",
 
     "scheme": "minimallife",
-    "platforms": ["ios", "android"],
+    "platforms": ["android"],
     "web": {
       "bundler": "metro",
       "output": "static",
@@ -14,7 +14,6 @@
     "plugins": ["expo-router"],
     "experiments": {
       "typedRoutes": true,
-
       "tsconfigPaths": true
     },
 
@@ -30,13 +29,16 @@
     },
     "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.expandtimes.minimallife"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.expandtimes.minimallife",
+      "edgeToEdgeEnabled": true
     }
   }
 }

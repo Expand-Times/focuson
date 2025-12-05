@@ -1,0 +1,9 @@
+{
+  "platforms": ["apple", "android", "web"],
+  "apple": {
+    "modules": ["LauncherModule"]
+  },
+  "android": {
+    "modules": ["com.expandtimes.modules.launcher.LauncherModule"]
+  }
+}
