@@ -18,6 +18,9 @@ export default function Home() {
         <Link href={{ pathname: '/permissions', params: { name: 'Dan' } }} asChild>
           <Button title="Show Permissions" />
         </Link>
+        <Link href={{ pathname: '/home' }} asChild>
+          <Button title="Go to New Home Screen" />
+        </Link>
       </Container>
     </View>
   );
