@@ -96,7 +96,7 @@ export default function IntroEight() {
             {/* Next Button */}
             <TouchableOpacity 
                 className="w-full bg-[#7EA6E0] py-4 rounded-full flex-row items-center justify-center mb-4"
-                onPress={() => router.push('/permissions')}
+                onPress={() => router.push('/intro/nine')}
             >
                 <Text className="text-white text-lg font-semibold mr-2">Next</Text>
                 <MaterialCommunityIcons name="arrow-right" size={20} color="white" />
