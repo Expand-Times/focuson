@@ -1,11 +1,14 @@
 import { View, Text, TouchableOpacity, Linking, Platform } from 'react-native';
-import { Stack, Link } from 'expo-router';
+import { Stack, Link, useRouter } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useEffect, useState } from 'react';
+import { Gesture, GestureDetector, GestureHandlerRootView, Directions } from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 
 export default function Home() {
+  const router = useRouter();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(Battery.BatteryState.UNKNOWN);
 
@@ -59,11 +62,35 @@ export default function Home() {
     }
   };
 
+  const navigateToAllApps = () => {
+    router.push('/all-apps');
+  };
+
+  const navigateToCategoryApps = () => {
+    router.push('/AllAppListByCategoryScreen');
+  };
+
+  const leftSwipeGesture = Gesture.Fling()
+    .direction(Directions.LEFT)
+    .onEnd(() => {
+      runOnJS(navigateToAllApps)();
+    });
+
+  const rightSwipeGesture = Gesture.Fling()
+    .direction(Directions.RIGHT)
+    .onEnd(() => {
+      runOnJS(navigateToCategoryApps)();
+    });
+
+  const composedGestures = Gesture.Simultaneous(leftSwipeGesture, rightSwipeGesture);
+
   return (
-    <View className="flex-1 bg-[#EFF6FC] px-6 justify-between py-12">
-       <Stack.Screen options={{ headerShown: false }} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureDetector gesture={composedGestures}>
+        <View className="flex-1 bg-[#EFF6FC] px-6 justify-between py-12">
+          <Stack.Screen options={{ headerShown: false }} />
        
-       {/* Header: Time, Date, Battery */}
+          {/* Header: Time, Date, Battery */}
        <View className="items-center mt-10">
          <View className="flex-row items-baseline">
             <Text className="text-6xl font-normal text-slate-700">10:47</Text>
@@ -126,6 +153,8 @@ export default function Home() {
              </TouchableOpacity>
           </View>
        </View>
-    </View>
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }

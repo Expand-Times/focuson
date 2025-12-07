@@ -127,7 +127,7 @@ export default function IntroTen() {
         {/* Button */}
         <TouchableOpacity 
             className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-8 shadow-sm"
-            onPress={() => router.push('/permissions')}
+            onPress={() => router.push('/intro/PermissionAccessScreen')}
         >
             <Text className="text-white text-lg font-bold">Got It!</Text>
         </TouchableOpacity>
