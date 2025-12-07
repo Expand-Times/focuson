@@ -177,10 +177,10 @@ export default function Permissions() {
         </View>
         
         <TouchableOpacity 
-          onPress={() => router.back()}
+          onPress={() => router.replace('/home')}
           className="mt-4 py-4 items-center"
         >
-          <Text className="text-blue-500 font-medium">Go Back</Text>
+          <Text className="text-blue-500 font-medium">Continue to Home</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>
