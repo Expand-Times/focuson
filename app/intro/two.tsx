@@ -59,7 +59,7 @@ export default function IntroTwo() {
         {/* Navigation Arrow (Consistent with Screen 1) */}
         <TouchableOpacity 
           className="absolute bottom-12 right-8"
-          onPress={() => router.push('/permissions')}
+          onPress={() => router.push('/intro/three')}
         >
           <MaterialCommunityIcons name="arrow-right" size={32} color="#334155" />
         </TouchableOpacity>
