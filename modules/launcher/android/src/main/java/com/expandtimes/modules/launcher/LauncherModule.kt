@@ -23,6 +23,7 @@ import java.io.ByteArrayOutputStream
 import java.util.Collections
 import java.util.Calendar
 import android.app.usage.UsageStatsManager
+import android.app.usage.UsageEvents
 
 class LauncherModule : Module() {
   private val context: Context
@@ -166,6 +167,41 @@ class LauncherModule : Module() {
         intent.putExtra("DURATION_MS", durationMs.toLong())
         intent.putExtra("TARGET_PACKAGE", targetPackageName)
         context.startService(intent)
+    }
+
+    Function("getWeeklyUsageStats") {
+        val endTime = System.currentTimeMillis()
+        val startTime = endTime - (7 * 24 * 60 * 60 * 1000)
+        
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        
+        // Average Screen Time
+        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
+        var totalTime = 0L
+        for (usageStats in usageStatsMap.values) {
+            totalTime += usageStats.totalTimeInForeground
+        }
+        val averageDailyUsage = totalTime / 7
+        
+        // Average Unlocks
+        var unlockCount = 0
+        val events = usageStatsManager.queryEvents(startTime, endTime)
+        val event = UsageEvents.Event()
+        
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            // Event.KEYGUARD_HIDDEN = 18 (API 28+)
+            if (event.eventType == 18) {
+                unlockCount++
+            }
+        }
+        
+        val averageDailyUnlocks = if (unlockCount > 0) unlockCount / 7 else 0
+        
+        return@Function mapOf(
+            "averageDailyUsage" to averageDailyUsage,
+            "averageDailyUnlocks" to averageDailyUnlocks
+        )
     }
 
     View(LauncherView::class) {

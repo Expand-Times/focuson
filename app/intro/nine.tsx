@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,9 +8,39 @@ export default function IntroNine() {
   const router = useRouter();
   const [hours, setHours] = useState(3.5);
   const [unlocks, setUnlocks] = useState(25);
-
+  
+  // Slider state
+  const [sliderWidth, setSliderWidth] = useState(0);
+  
   const incrementHours = () => setHours(prev => Math.min(prev + 0.5, 24));
   const decrementHours = () => setHours(prev => Math.max(prev - 0.5, 0));
+
+  // Handle slider interaction
+  const handleSlide = (evt: GestureResponderEvent) => {
+    if (sliderWidth === 0) return;
+    const locationX = evt.nativeEvent.locationX;
+    const percentage = Math.max(0, Math.min(1, locationX / sliderWidth));
+    // Map percentage to 0-100 unlocks
+    const newUnlocks = Math.round(percentage * 100);
+    setUnlocks(newUnlocks);
+  };
+
+  const panResponder = useRef(
+    PanResponder.create({
+      onStartShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onPanResponderGrant: (evt: GestureResponderEvent) => {
+        // Handle touch start
+        // We need the location relative to the view, which we can get if we use the View's onTouch/Responder props directly
+        // But PanResponder gives global coordinates usually unless we do some math.
+        // Simpler approach for this specific case: use onTouchMove/Start on the View directly.
+      },
+      onPanResponderMove: (evt: GestureResponderEvent, gestureState: PanResponderGestureState) => {
+        // This is tricky without knowing the view's absolute position.
+        // Let's stick to the View's onTouch events for simplicity in this constrained environment.
+      },
+    })
+  ).current;
 
   return (
     <SafeAreaView className="flex-1 bg-white">
@@ -42,13 +72,27 @@ export default function IntroNine() {
 
             <Text className="text-4xl font-bold text-slate-800 mb-8">{unlocks}x</Text>
 
-            {/* Custom Slider Visual */}
+            {/* Custom Slider Visual & Interaction */}
             <View className="w-full px-4 mb-2">
-                <View className="h-12 bg-slate-100 rounded-full flex-row items-center relative overflow-hidden">
+                <View 
+                    className="h-12 bg-slate-100 rounded-full flex-row items-center relative overflow-hidden"
+                    onLayout={(event) => setSliderWidth(event.nativeEvent.layout.width)}
+                    onTouchStart={(e: GestureResponderEvent) => handleSlide(e)}
+                    onTouchMove={(e: GestureResponderEvent) => handleSlide(e)}
+                >
                     {/* Progress Bar */}
-                    <View className="h-full bg-blue-200 rounded-full" style={{ width: '30%' }} />
-                    {/* Thumb */}
-                    <View className="absolute left-[25%] w-10 h-10 bg-[#7EA6E0] rounded-full shadow-sm" />
+                    <View 
+                        className="h-full bg-blue-200 rounded-full" 
+                        style={{ width: `${(unlocks / 100) * 100}%` }} 
+                    />
+                    {/* Thumb - positioned based on percentage */}
+                    {/* We subtract thumb width/2 to center it, but clamping is needed */}
+                    <View 
+                        className="absolute w-10 h-10 bg-[#7EA6E0] rounded-full shadow-sm"
+                        style={{ 
+                            left: `${Math.min(Math.max((unlocks / 100) * 100 - 5, 0), 90)}%` // Approximate centering adjustment
+                        }} 
+                    />
                 </View>
                 <View className="flex-row justify-between mt-2 px-1">
                     <Text className="text-slate-400 text-xs">0</Text>
@@ -61,7 +105,13 @@ export default function IntroNine() {
         <View className="w-full items-center">
             <TouchableOpacity 
                 className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-4 shadow-sm"
-                onPress={() => router.push('/intro/ten')}
+                onPress={() => router.push({
+                    pathname: '/intro/ten',
+                    params: { 
+                        hours: hours.toString(), 
+                        unlocks: unlocks.toString() 
+                    }
+                })}
             >
                 <Text className="text-white text-lg font-semibold">Submit</Text>
             </TouchableOpacity>

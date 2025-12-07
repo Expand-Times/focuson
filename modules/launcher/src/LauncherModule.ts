@@ -17,6 +17,7 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
 
   getInstalledApps(): AppItem[];
   startTimerOverlay(durationMs: number, targetPackageName?: string): void;
+  getWeeklyUsageStats(): { averageDailyUsage: number, averageDailyUnlocks: number };
 }
 
 // This call loads the native module object from the JSI.
