@@ -22,5 +22,7 @@ export type AppItem = {
   packageName: string;
   label: string;
   icon: string;
-  usageTime?: number;
+  usageTime: number; // in milliseconds
+  launchCount?: number; // Number of times opened today
+  category?: string;
 };

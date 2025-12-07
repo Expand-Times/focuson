@@ -25,6 +25,7 @@ export default function Home() {
           <Button title="Go to Intro One Screen" />
         </Link>
       </Container>
+      {/* create new screen using attachment in this file */}
     </View>
   );
 }

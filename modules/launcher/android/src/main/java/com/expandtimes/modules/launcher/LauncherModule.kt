@@ -70,6 +70,52 @@ class LauncherModule : Module() {
       }
   }
 
+  private fun getAppLaunchCounts(): Map<String, Int> {
+      if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) return emptyMap()
+
+      try {
+          val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+          val calendar = Calendar.getInstance()
+          calendar.set(Calendar.HOUR_OF_DAY, 0)
+          calendar.set(Calendar.MINUTE, 0)
+          calendar.set(Calendar.SECOND, 0)
+          calendar.set(Calendar.MILLISECOND, 0)
+          val startTime = calendar.timeInMillis
+          val endTime = System.currentTimeMillis()
+
+          val events = usageStatsManager.queryEvents(startTime, endTime)
+          val counts = mutableMapOf<String, Int>()
+          val event = UsageEvents.Event()
+
+          while (events.hasNextEvent()) {
+              events.getNextEvent(event)
+              if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                  val pkg = event.packageName
+                  counts[pkg] = (counts[pkg] ?: 0) + 1
+              }
+          }
+          return counts
+      } catch (e: Exception) {
+          e.printStackTrace()
+          return emptyMap()
+      }
+  }
+
+  private fun getCategoryLabel(category: Int): String {
+      return when (category) {
+          0 -> "Game" // ApplicationInfo.CATEGORY_GAME
+          1 -> "Audio" // ApplicationInfo.CATEGORY_AUDIO
+          2 -> "Video" // ApplicationInfo.CATEGORY_VIDEO
+          3 -> "Image" // ApplicationInfo.CATEGORY_IMAGE
+          4 -> "Social" // ApplicationInfo.CATEGORY_SOCIAL
+          5 -> "News" // ApplicationInfo.CATEGORY_NEWS
+          6 -> "Maps" // ApplicationInfo.CATEGORY_MAPS
+          7 -> "Productivity" // ApplicationInfo.CATEGORY_PRODUCTIVITY
+          8 -> "Accessibility" // ApplicationInfo.CATEGORY_ACCESSIBILITY (API 31+)
+          else -> "Other"
+      }
+  }
+
   override fun definition() = ModuleDefinition {
     Name("Launcher")
 
@@ -136,6 +182,7 @@ class LauncherModule : Module() {
         val appList = mutableListOf<Map<String, Any>>()
         
         val usageMap = getUsageStatsMap()
+        val launchCountMap = getAppLaunchCounts()
 
         for (app in apps) {
             try {
@@ -144,12 +191,21 @@ class LauncherModule : Module() {
                 val iconDrawable = app.loadIcon(pm)
                 val iconBase64 = getIconBase64(iconDrawable)
                 val usageTime = usageMap[packageName] ?: 0L
+                val launchCount = launchCountMap[packageName] ?: 0
                 
+                val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    getCategoryLabel(app.activityInfo.applicationInfo.category)
+                } else {
+                    "Other"
+                }
+
                 appList.add(mapOf(
                     "packageName" to packageName,
                     "label" to label,
                     "icon" to iconBase64,
-                    "usageTime" to usageTime
+                    "usageTime" to usageTime,
+                    "launchCount" to launchCount,
+                    "category" to category
                 ))
             } catch (e: Exception) {
                 e.printStackTrace()
@@ -160,6 +216,16 @@ class LauncherModule : Module() {
         appList.sortBy { (it["label"] as String).lowercase() }
         
         return@Function appList
+    }
+
+    Function("launchApp") { packageName: String ->
+        val launchIntent = context.packageManager.getLaunchIntentForPackage(packageName)
+        if (launchIntent != null) {
+            launchIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            context.startActivity(launchIntent)
+            return@Function true
+        }
+        return@Function false
     }
 
     Function("startTimerOverlay") { durationMs: Double, targetPackageName: String? ->
@@ -201,6 +267,43 @@ class LauncherModule : Module() {
         return@Function mapOf(
             "averageDailyUsage" to averageDailyUsage,
             "averageDailyUnlocks" to averageDailyUnlocks
+        )
+    }
+
+    Function("getTodayUsageStats") {
+        val calendar = Calendar.getInstance()
+        calendar.set(Calendar.HOUR_OF_DAY, 0)
+        calendar.set(Calendar.MINUTE, 0)
+        calendar.set(Calendar.SECOND, 0)
+        calendar.set(Calendar.MILLISECOND, 0)
+        val startTime = calendar.timeInMillis
+        val endTime = System.currentTimeMillis()
+        
+        val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        
+        // Total Screen Time
+        val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
+        var totalTime = 0L
+        for (usageStats in usageStatsMap.values) {
+            totalTime += usageStats.totalTimeInForeground
+        }
+        
+        // Unlocks
+        var unlockCount = 0
+        val events = usageStatsManager.queryEvents(startTime, endTime)
+        val event = UsageEvents.Event()
+        
+        while (events.hasNextEvent()) {
+            events.getNextEvent(event)
+            // Event.KEYGUARD_HIDDEN = 18 (API 28+)
+            if (event.eventType == 18) {
+                unlockCount++
+            }
+        }
+        
+        return@Function mapOf(
+            "totalUsageTime" to totalTime,
+            "unlockCount" to unlockCount
         )
     }
 

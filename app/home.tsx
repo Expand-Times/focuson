@@ -1,16 +1,51 @@
 import { View, Text, TouchableOpacity, Linking, Platform } from 'react-native';
-import { Stack, Link, useRouter } from 'expo-router';
+import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView, Directions } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
+import Launcher from '../modules/launcher';
 
 export default function Home() {
   const router = useRouter();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(Battery.BatteryState.UNKNOWN);
+  const [currentTime, setCurrentTime] = useState(new Date());
+  const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
+
+  useEffect(() => {
+    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      const fetchStats = () => {
+        try {
+          const stats = Launcher.getTodayUsageStats();
+          setTodayStats(stats);
+        } catch (e) {
+          console.error("Failed to fetch usage stats", e);
+        }
+      };
+
+      fetchStats();
+      // Update stats every minute while focused
+      const interval = setInterval(fetchStats, 60000);
+      return () => clearInterval(interval);
+    }, [])
+  );
+
+  const formatUsageTime = (millis: number) => {
+    const minutes = Math.floor(millis / (1000 * 60));
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+    
+    if (hours > 0) return `${hours}h ${mins}m`;
+    return `${mins}m`;
+  };
 
   useEffect(() => {
     async function getBatteryStatus() {
@@ -93,10 +128,16 @@ export default function Home() {
           {/* Header: Time, Date, Battery */}
        <View className="items-center mt-10">
          <View className="flex-row items-baseline">
-            <Text className="text-6xl font-normal text-slate-700">10:47</Text>
-            <Text className="text-xl text-slate-500 ml-1">PM</Text>
+            <Text className="text-6xl font-normal text-slate-700">
+              {currentTime.getHours() % 12 || 12}:{currentTime.getMinutes().toString().padStart(2, '0')}
+            </Text>
+            <Text className="text-xl text-slate-500 ml-1">
+              {currentTime.getHours() >= 12 ? 'PM' : 'AM'}
+            </Text>
          </View>
-         <Text className="text-slate-500 text-lg mt-1">Tuesday, 24 Oct 2025</Text>
+         <Text className="text-slate-500 text-lg mt-1">
+           {currentTime.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' })}
+         </Text>
          <View className="mt-3 flex-row items-center gap-2">
            <Ionicons name={getBatteryIcon()} size={24} color="#5B8BDF" />
            {batteryLevel !== null && (
@@ -133,9 +174,9 @@ export default function Home() {
        {/* Footer Info */}
        <View className="w-full items-center">
           <View className="flex-row items-center mb-2 gap-4">
-             <Text className="text-slate-500 text-base">Today Unlock: <Text className="font-bold text-slate-600">5</Text></Text>
+             <Text className="text-slate-500 text-base">Today Unlock: <Text className="font-bold text-slate-600">{todayStats.unlockCount}</Text></Text>
              <Text className="text-slate-300">||</Text>
-             <Text className="text-slate-500 text-base">Today Use: <Text className="font-bold text-slate-600">120 M</Text></Text>
+             <Text className="text-slate-500 text-base">Today Use: <Text className="font-bold text-slate-600">{formatUsageTime(todayStats.totalUsageTime)}</Text></Text>
           </View>
           <Text className="text-[#A0C4E8] text-sm mb-10">Leave it! Do something mindful in real world.</Text>
 
