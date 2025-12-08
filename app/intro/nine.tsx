@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponde
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export default function IntroNine() {
   const router = useRouter();
@@ -44,65 +45,74 @@ export default function IntroNine() {
 
   return (
     <SafeAreaView className="flex-1 bg-white">
-      <View className="flex-1 items-center justify-between py-12 px-6">
+      <View className="flex-1 px-6 pt-12">
         
-        {/* Top Section */}
-        <View className="w-full items-center mt-8">
-            <Text className="text-xl font-medium text-slate-800 text-center mb-8 px-4">
-                How much time do you spend your Phone?
-            </Text>
+        {/* Main Content Area */}
+        <View className="flex-1 items-center justify-start">
+            {/* Top Section */}
+            <View className="w-full items-center ">
+                <Text allowFontScaling={false} className="text-[16px] font-regular text-[#2E3B4D]  text-center mb-8 px-4">
+                    How much time do you spend your {'\n'} Phone?
+                </Text>
 
-            <View className="flex-row items-center space-x-4 mb-16">
-                <TouchableOpacity onPress={decrementHours}>
-                    <MaterialCommunityIcons name="minus" size={24} color="#1E293B" />
-                </TouchableOpacity>
-                
-                <View className="bg-blue-50 border border-blue-200 rounded-lg px-6 py-2">
-                    <Text className="text-3xl font-bold text-slate-800">{hours.toFixed(1)}</Text>
+                <View className="flex-row items-center space-x-4 mb-16">
+                    <TouchableOpacity onPress={decrementHours}>
+                        <MaterialCommunityIcons className="" name="minus-thick" size={24} color="#1E293B" />
+                    </TouchableOpacity>
+                    
+                    <View className="bg-[#E1EAF5] border border-[#7EA9E5] rounded-lg px-6 py-2">
+                        <Text allowFontScaling={false} className="text-[24px] font-bold text-[#2E3B4D]">{hours.toFixed(1)}<Text className="text-[24px] font-regular text-[#858E9D]">|</Text></Text>
+                    </View>
+
+                    <TouchableOpacity onPress={incrementHours}>
+                        <MaterialCommunityIcons name="plus-thick" size={24} color="#1E293B" />
+                    </TouchableOpacity>
                 </View>
-
-                <TouchableOpacity onPress={incrementHours}>
-                    <MaterialCommunityIcons name="plus" size={24} color="#1E293B" />
-                </TouchableOpacity>
             </View>
 
-            <Text className="text-xl font-medium text-slate-800 text-center mb-8 px-4">
-                How many time daily unlock your phone?
-            </Text>
+            <View className="flex-1 w-full items-center justify-center">
+                <Text allowFontScaling={false} className="text-[16px] font-regular text-[#2E3B4D] text-center mb-8 px-4">
+                    How many time daily unlock your {'\n'} phone?
+                </Text>
 
-            <Text className="text-4xl font-bold text-slate-800 mb-8">{unlocks}x</Text>
+                <Text className="text-[24px] font-bold text-[#2E3B4D] mb-8">{unlocks}x</Text>
 
-            {/* Custom Slider Visual & Interaction */}
-            <View className="w-full px-4 mb-2">
-                <View 
-                    className="h-12 bg-slate-100 rounded-full flex-row items-center relative overflow-hidden"
-                    onLayout={(event) => setSliderWidth(event.nativeEvent.layout.width)}
-                    onTouchStart={(e: GestureResponderEvent) => handleSlide(e)}
-                    onTouchMove={(e: GestureResponderEvent) => handleSlide(e)}
-                >
-                    {/* Progress Bar */}
+                {/* Custom Slider Visual & Interaction */}
+                <View className="w-full px-4 mb-2">
                     <View 
-                        className="h-full bg-blue-200 rounded-full" 
-                        style={{ width: `${(unlocks / 100) * 100}%` }} 
-                    />
-                    {/* Thumb - positioned based on percentage */}
-                    {/* We subtract thumb width/2 to center it, but clamping is needed */}
-                    <View 
-                        className="absolute w-10 h-10 bg-[#7EA6E0] rounded-full shadow-sm"
-                        style={{ 
-                            left: `${Math.min(Math.max((unlocks / 100) * 100 - 5, 0), 90)}%` // Approximate centering adjustment
-                        }} 
-                    />
-                </View>
-                <View className="flex-row justify-between mt-2 px-1">
-                    <Text className="text-slate-400 text-xs">0</Text>
-                    <Text className="text-slate-400 text-xs">100+</Text>
+                        className="h-12 bg-[#ECF0FF] rounded-full flex-row items-center relative overflow-hidden"
+                        onLayout={(event) => setSliderWidth(event.nativeEvent.layout.width)}
+                        onTouchStart={(e: GestureResponderEvent) => handleSlide(e)}
+                        onTouchMove={(e: GestureResponderEvent) => handleSlide(e)}
+                    >
+                        {/* Progress Bar */}
+                        <LinearGradient
+                            colors={['#ECF0FF', '#7EA6E0']}
+                            start={{ x: 0, y: 0 }}
+                            end={{ x: 1, y: 0 }}
+                            className="h-full rounded-full" 
+                            style={{ width: `${(unlocks / 100) * 100}%` }} 
+                        />
+                        {/* Thumb - positioned based on percentage */}
+                        {/* We subtract thumb width/2 to center it, but clamping is needed */}
+                        <View 
+                            className="absolute w-12 h-12 bg-[#5D8BCC] rounded-full shadow-sm"
+                            pointerEvents="none"
+                            style={{ 
+                                left: `${Math.min(Math.max((unlocks / 100) * 100 - 5, 0), 90)}%` // Approximate centering adjustment
+                            }} 
+                        />
+                    </View>
+                    <View className="flex-row justify-between mt-2 px-1">
+                        <Text className="text-slate-400 text-xs">0</Text>
+                        <Text className="text-slate-400 text-xs">100+</Text>
+                    </View>
                 </View>
             </View>
         </View>
 
-        {/* Footer Section */}
-        <View className="w-full items-center">
+        {/* Fixed Footer Section */}
+        <View className="w-full items-center pb-8 pt-4">
             <TouchableOpacity 
                 className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-4 shadow-sm"
                 onPress={() => router.push({
