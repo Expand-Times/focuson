@@ -104,8 +104,8 @@ export default function IntroNine() {
                         />
                     </View>
                     <View className="flex-row justify-between mt-2 px-1">
-                        <Text className="text-slate-400 text-xs">0</Text>
-                        <Text className="text-slate-400 text-xs">100+</Text>
+                        <Text allowFontScaling={false} className="text-[#89A2CA] font-bold text-[14px]">0</Text>
+                        <Text allowFontScaling={false} className="text-[#89A2CA] font-bold text-[14px]">100+</Text>
                     </View>
                 </View>
             </View>
@@ -123,10 +123,10 @@ export default function IntroNine() {
                     }
                 })}
             >
-                <Text className="text-white text-lg font-semibold">Submit</Text>
+                <Text allowFontScaling={false} className="text-white text-[16px] font-regular">Submit</Text>
             </TouchableOpacity>
             
-            <Text className="text-slate-400 text-xs text-center">
+            <Text allowFontScaling={false} className="text-[#8698B2] text-[10px] font-light text-center">
                 Ready to be amazed by actual data!
             </Text>
         </View>
