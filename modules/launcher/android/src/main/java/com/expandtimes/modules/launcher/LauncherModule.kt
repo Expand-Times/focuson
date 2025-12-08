@@ -180,6 +180,7 @@ class LauncherModule : Module() {
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val apps = pm.queryIntentActivities(intent, 0)
         val appList = mutableListOf<Map<String, Any>>()
+        val currentPackageName = context.packageName
         
         val usageMap = getUsageStatsMap()
         val launchCountMap = getAppLaunchCounts()
@@ -187,6 +188,9 @@ class LauncherModule : Module() {
         for (app in apps) {
             try {
                 val packageName = app.activityInfo.packageName
+                // Skip the launcher itself
+                if (packageName == currentPackageName) continue
+
                 val label = app.loadLabel(pm).toString()
                 val iconDrawable = app.loadIcon(pm)
                 val iconBase64 = getIconBase64(iconDrawable)
@@ -240,12 +244,15 @@ class LauncherModule : Module() {
         val startTime = endTime - (7 * 24 * 60 * 60 * 1000)
         
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val currentPackageName = context.packageName
         
         // Average Screen Time
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
         var totalTime = 0L
-        for (usageStats in usageStatsMap.values) {
-            totalTime += usageStats.totalTimeInForeground
+        for ((packageName, usageStats) in usageStatsMap) {
+            if (packageName != currentPackageName) {
+                totalTime += usageStats.totalTimeInForeground
+            }
         }
         val averageDailyUsage = totalTime / 7
         
@@ -280,12 +287,15 @@ class LauncherModule : Module() {
         val endTime = System.currentTimeMillis()
         
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        val currentPackageName = context.packageName
         
         // Total Screen Time
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
         var totalTime = 0L
-        for (usageStats in usageStatsMap.values) {
-            totalTime += usageStats.totalTimeInForeground
+        for ((packageName, usageStats) in usageStatsMap) {
+            if (packageName != currentPackageName) {
+                totalTime += usageStats.totalTimeInForeground
+            }
         }
         
         // Unlocks
