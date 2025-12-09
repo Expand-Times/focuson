@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Linking, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert } from 'react-native';
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import * as Battery from 'expo-battery';
@@ -7,6 +7,9 @@ import { useEffect, useState, useCallback } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView, Directions } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
 import Launcher from '../modules/launcher';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AppItem } from '../modules/launcher/src/Launcher.types';
+import { openApplication } from 'expo-intent-launcher';
 
 export default function Home() {
   const router = useRouter();
@@ -14,6 +17,11 @@ export default function Home() {
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(Battery.BatteryState.UNKNOWN);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
+  
+  // Home Apps State
+  const [homeApps, setHomeApps] = useState<AppItem[]>([]);
+  const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
@@ -31,7 +39,19 @@ export default function Home() {
         }
       };
 
+      const loadHomeApps = async () => {
+        try {
+          const stored = await AsyncStorage.getItem('homeApps');
+          if (stored) {
+            setHomeApps(JSON.parse(stored));
+          }
+        } catch (e) {
+          console.error("Failed to load home apps", e);
+        }
+      };
+
       fetchStats();
+      loadHomeApps();
       // Update stats every minute while focused
       const interval = setInterval(fetchStats, 60000);
       return () => clearInterval(interval);
@@ -69,6 +89,56 @@ export default function Home() {
       subscriptionState.remove();
     };
   }, []);
+
+  const handleLaunchApp = (durationMinutes: number) => {
+    if (selectedApp) {
+      try {
+        // Check permission
+        const hasUsagePermission = Launcher.checkUsageStatsPermission();
+        if (!hasUsagePermission) {
+             Alert.alert(
+                "Permission Required",
+                "To track usage limits, please grant Usage Access permission.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Open Settings", onPress: () => {
+                        Launcher.openUsageAccessSettings();
+                    }}
+                ]
+             );
+             return;
+        }
+
+        const hasNotificationPermission = Launcher.checkNotificationPermission();
+        if (!hasNotificationPermission) {
+             Alert.alert(
+                "Permission Required",
+                "To show the usage monitor notification, please grant Notification permission.",
+                [
+                    { text: "Cancel", style: "cancel" },
+                    { text: "Open Settings", onPress: () => {
+                        Launcher.openNotificationSettings();
+                    }}
+                ]
+             );
+             return;
+        }
+
+        // Start the overlay timer
+        const durationMs = durationMinutes * 15 * 1000;
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName);
+        
+        // Open the app
+        openApplication(selectedApp.packageName);
+        
+        // Close modal
+        setModalVisible(false);
+        setSelectedApp(null);
+      } catch (error) {
+        console.error("Failed to launch app:", error);
+      }
+    }
+  };
 
   const getBatteryIcon = () => {
     if (batteryState === Battery.BatteryState.CHARGING || batteryState === Battery.BatteryState.FULL) {
@@ -149,20 +219,24 @@ export default function Home() {
        </View>
 
        {/* Main Actions */}
-       <View className="w-full items-center">
-          {/* Calendar Button */}
-          <TouchableOpacity className="w-full bg-[#E2EEF9] py-5 rounded-[30px] items-center border border-white shadow-sm">
-             <Text className="text-slate-700 text-xl tracking-wide">Calender</Text>
-          </TouchableOpacity>
-
-          {/* Whatsapp Button */}
-          <TouchableOpacity className="w-full bg-[#E2EEF9] py-5 rounded-[30px] items-center border border-white shadow-sm mt-4">
-             <Text className="text-slate-700 text-xl tracking-wide">Whatsapp</Text>
-          </TouchableOpacity>
+       <View className="w-full items-center px-4">
+          {/* Render Home Apps */}
+          {homeApps.map((app) => (
+            <TouchableOpacity 
+                key={app.packageName}
+                className="w-full bg-[#E2EEF9] py-5 rounded-[30px] items-center border border-white shadow-sm mb-4"
+                onPress={() => {
+                    setSelectedApp(app);
+                    setModalVisible(true);
+                }}
+            >
+                <Text className="text-slate-700 text-xl tracking-wide">{app.label}</Text>
+            </TouchableOpacity>
+          ))}
 
           {/* Add Icon */}
-          <Link href="/all-apps" asChild>
-            <TouchableOpacity className="mt-8 items-center">
+          <Link href="/all-apps?mode=select" asChild>
+            <TouchableOpacity className="mt-4 items-center">
                <View className="border border-[#A0C4E8] rounded-full p-1">
                   <Ionicons name="add" size={24} color="#A0C4E8" />
                </View>
@@ -194,7 +268,57 @@ export default function Home() {
              </TouchableOpacity>
           </View>
        </View>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View className="flex-1 justify-center items-center bg-black/70">
+          <View className="bg-white w-[85%] rounded-3xl p-6 shadow-xl">
+            <View className="items-center mb-6">
+                <Text className="text-xl font-bold text-center text-gray-900 mb-4">
+                Open {selectedApp?.label}
+                </Text>
+                
+                {selectedApp?.icon && (
+                    <Image 
+                    source={{ uri: `data:image/png;base64,${selectedApp.icon}` }} 
+                    className="w-20 h-20 mb-6"
+                    resizeMode="contain"
+                    />
+                )}
+                
+                <Text className="text-gray-800 text-center text-base font-medium">
+                    Select estimated use time
+                </Text>
+            </View>
+
+            <View className="flex-row flex-wrap justify-between mb-6">
+                {[2, 5, 10, 20].map((mins) => (
+                    <TouchableOpacity
+                        key={mins}
+                        className="w-[48%] bg-[#7EA6E0] py-3 rounded-full mb-3 items-center active:opacity-80"
+                        onPress={() => handleLaunchApp(mins)}
+                    >
+                        <Text className="text-base font-medium text-white">{mins} min</Text>
+                    </TouchableOpacity>
+                ))}
+            </View>
+
+            <View className="border-t border-gray-200 pt-6 mt-2">
+              <TouchableOpacity 
+                className="w-full bg-[#4B7ABE] py-3 rounded-full items-center active:opacity-80"
+                onPress={() => setModalVisible(false)}
+              >
+                <Text className="text-white text-base font-medium">Quit</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
+      </Modal>
+      </View>
       </GestureDetector>
     </GestureHandlerRootView>
   );

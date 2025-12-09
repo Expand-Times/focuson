@@ -2,19 +2,53 @@ import { View, Text, FlatList, Image, TouchableOpacity, TextInput, Modal, Alert 
 import { useState, useEffect, useMemo } from 'react';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
 
 export default function AllApps() {
   const [apps, setApps] = useState<AppItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  
+  // Selection Mode State
+  const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
+  
   const router = useRouter();
+  const params = useLocalSearchParams();
+  const isSelectMode = params.mode === 'select';
 
   useEffect(() => {
     loadApps();
-  }, []);
+    if (isSelectMode) {
+      loadSelectedApps();
+    }
+  }, [isSelectMode]);
+
+  const loadSelectedApps = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('homeApps');
+      if (stored) {
+        const parsed: AppItem[] = JSON.parse(stored);
+        setSelectedPackageNames(parsed.map(a => a.packageName));
+      }
+    } catch (e) {
+      console.error("Failed to load home apps", e);
+    }
+  };
+
+  const handleSaveSelection = async () => {
+    try {
+      // Filter the full apps list to get the full AppItem objects for selected packages
+      const selectedAppItems = apps.filter(app => selectedPackageNames.includes(app.packageName));
+      await AsyncStorage.setItem('homeApps', JSON.stringify(selectedAppItems));
+      router.back();
+    } catch (e) {
+      console.error("Failed to save selection", e);
+    }
+  };
 
   const loadApps = async () => {
     try {
@@ -33,8 +67,18 @@ export default function AllApps() {
   }, [apps, searchQuery]);
 
   const handleAppPress = (app: AppItem) => {
-    setSelectedApp(app);
-    setModalVisible(true);
+    if (isSelectMode) {
+      setSelectedPackageNames(prev => {
+        if (prev.includes(app.packageName)) {
+          return prev.filter(p => p !== app.packageName);
+        } else {
+          return [...prev, app.packageName];
+        }
+      });
+    } else {
+      setSelectedApp(app);
+      setModalVisible(true);
+    }
   };
 
   const handleLaunchApp = (durationMinutes: number) => {
@@ -100,12 +144,22 @@ export default function AllApps() {
     };
 
     const usageText = formatUsageTime(item.usageTime);
+    const isSelected = selectedPackageNames.includes(item.packageName);
 
     return (
     <TouchableOpacity 
-      className="flex-row items-center p-4 border-b border-gray-100 active:bg-gray-50"
+      className={`flex-row items-center p-4 border-b border-gray-100 active:bg-gray-50 ${isSelectMode && isSelected ? 'bg-blue-50' : ''}`}
       onPress={() => handleAppPress(item)}
     >
+      {isSelectMode && (
+        <View className="mr-3">
+          <Ionicons 
+            name={isSelected ? "checkbox" : "square-outline"} 
+            size={24} 
+            color={isSelected ? "#3B82F6" : "#9CA3AF"} 
+          />
+        </View>
+      )}
       {item.icon ? (
         <Image 
           source={{ uri: `data:image/png;base64,${item.icon}` }} 
@@ -130,8 +184,8 @@ export default function AllApps() {
 
   return (
     <View className="flex-1 bg-white pt-12">
-      <View className="px-4 pb-4 border-b border-gray-200 flex-row items-center">
-        <TouchableOpacity onPress={() => router.back()} className="mr-4 p-2">
+      <View className="px-4 pb-4 border-b border-gray-200 flex-row items-center justify-between gap-2">
+        <TouchableOpacity onPress={() => router.back()} className="p-2">
              <Text className="text-blue-500 font-bold">Back</Text>
         </TouchableOpacity>
         <TextInput
@@ -142,6 +196,11 @@ export default function AllApps() {
           autoCapitalize="none"
           autoCorrect={false}
         />
+        {isSelectMode && (
+          <TouchableOpacity onPress={handleSaveSelection} className="p-2">
+             <Text className="text-blue-500 font-bold">Done</Text>
+          </TouchableOpacity>
+        )}
       </View>
       
       <FlatList

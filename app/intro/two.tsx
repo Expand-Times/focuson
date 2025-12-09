@@ -9,7 +9,7 @@ export default function IntroTwo() {
   useEffect(() => {
       const timer = setTimeout(() => {
         router.push('/intro/three');
-      }, 5000);
+      }, 500);
   
       return () => clearTimeout(timer);
     }, []);
