@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert, StatusBar } from 'react-native';
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import * as Battery from 'expo-battery';
@@ -207,6 +207,7 @@ export default function Home() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar backgroundColor="#EEF2F6" barStyle="dark-content" />
       <GestureDetector gesture={composedGestures}>
         <View className="flex-1 justify-between bg-[#EFF6FC] px-6 py-12">
           <Stack.Screen options={{ headerShown: false }} />
@@ -246,7 +247,7 @@ export default function Home() {
             {homeApps.map((app) => (
               <TouchableOpacity 
                 key={app.packageName}
-                className="w-full bg-[#E2EEF9] py-5 rounded-[30px] items-center border border-[#C2DEF240] border-b-[#C2DEF2] border-x-transparent shadow-sm mb-4"
+                className="w-full bg-[#E2EEF9] py-3 rounded-[30px] items-center border border-[#C2DEF240] border-b-[#C2DEF2] border-x-transparent shadow-sm mb-4"
                 onPress={() => {
                     setSelectedApp(app);
                     setModalVisible(true);

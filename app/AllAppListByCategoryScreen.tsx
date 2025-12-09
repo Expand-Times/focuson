@@ -10,14 +10,20 @@ import {
   Modal,
   TouchableWithoutFeedback,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+  Directions,
+} from 'react-native-gesture-handler';
+import { runOnJS } from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { StatusBar } from 'react-native';
+
 
 type Category = {
   title: string;
@@ -298,14 +304,22 @@ export default function AllAppListByCategoryScreen() {
     );
   }
 
+  const leftSwipeGesture = Gesture.Fling()
+    .direction(Directions.LEFT)
+    .onEnd(() => {
+      runOnJS(router.back)();
+    });
+
   return (
-    <SafeAreaView className="flex-1 bg-[#EEF2F6]">
-      <View className="flex-1 px-4 pt-2">
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <GestureDetector gesture={leftSwipeGesture}>
+        <View className="flex-1 bg-[#EEF2F6] pt-12">
+          <View className="flex-1 px-4">
         {/* Search Bar */}
         <View className="mb-6 flex-row items-center rounded-full border border-slate-100 bg-white px-4 py-1 shadow-sm">
           <MaterialCommunityIcons name="magnify" size={20} color="#5C8BCC" />
           <TextInput
-            className="ml-3 flex-1 text-[16px] text-slate-600"
+            className="ml-3 flex-1 text-[16px] text-[#A3B9D9]"
             placeholder="Search app here|"
             placeholderTextColor="#A3B9D9"
             value={searchQuery}
@@ -339,7 +353,7 @@ export default function AllAppListByCategoryScreen() {
         <ScrollView
           showsVerticalScrollIndicator={false}
           contentContainerStyle={{ paddingBottom: 40 }}>
-            <StatusBar backgroundColor="#EEF2F6" barStyle="dark-content" />
+    
           {filteredCategories.map((category, index) => {
             const displayTitle = renamedCategories[category.title] || category.title;
             const isEditing = editingCategory === category.title;
@@ -577,6 +591,8 @@ export default function AllAppListByCategoryScreen() {
           </View>
         </TouchableWithoutFeedback>
       </Modal>
-    </SafeAreaView>
+        </View>
+      </GestureDetector>
+    </GestureHandlerRootView>
   );
 }
