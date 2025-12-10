@@ -292,9 +292,12 @@ class LauncherModule : Module() {
         // Total Screen Time
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
         var totalTime = 0L
+        val packageUsage = mutableMapOf<String, Long>()
+
         for ((packageName, usageStats) in usageStatsMap) {
-            if (packageName != currentPackageName) {
-                totalTime += usageStats.totalTimeInForeground
+            totalTime += usageStats.totalTimeInForeground
+            if (usageStats.totalTimeInForeground > 0) {
+                packageUsage[packageName] = usageStats.totalTimeInForeground
             }
         }
         
@@ -313,7 +316,8 @@ class LauncherModule : Module() {
         
         return@Function mapOf(
             "totalUsageTime" to totalTime,
-            "unlockCount" to unlockCount
+            "unlockCount" to unlockCount,
+            "packageUsage" to packageUsage
         )
     }
 

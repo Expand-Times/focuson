@@ -17,14 +17,49 @@ import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 
+const isBroadSystemApp = (pkg: string) => { 
+  const systemPackages = [
+    'com.android.systemui',
+    'com.android.settings',
+    'com.android.vending', // Google Play Store
+    'com.google.android.gms', // Google Play Services
+    'com.google.android.googlequicksearchbox', // Google App
+    'android',
+    'com.android.phone',
+    'com.android.providers',
+    'com.android.permissioncontroller',
+  ];
+  return systemPackages.some(sys => pkg.startsWith(sys)) || pkg.includes('.overlay') || pkg.includes('.service');
+}; 
+
+const isLauncherPackage = (pkg: string) => { 
+  const launchers = [
+    'com.expandtimes.minimallife', // This app
+    'com.sec.android.app.launcher', // Samsung
+    'com.google.android.apps.nexuslauncher', // Pixel
+    'com.miui.home', // Xiaomi
+    'com.huawei.android.launcher', // Huawei
+    'com.oppo.launcher', // Oppo
+    'com.bbk.launcher2', // Vivo
+    'com.oneplus.launcher', // OnePlus
+    'com.teslacoilsw.launcher', // Nova Launcher
+    'com.android.launcher', // Generic
+    'com.android.launcher3', // AOSP
+    'com.microsoft.launcher', // Microsoft Launcher
+    'com.actionlauncher.playstore', // Action Launcher
+  ];
+  const lowerPkg = pkg.toLowerCase();
+  return launchers.some(l => lowerPkg === l.toLowerCase()) || lowerPkg.includes('launcher') || lowerPkg.endsWith('.home');
+};
+
 export default function Home() {
   const router = useRouter();
-  const { isDarkMode, wallpaper } = useColorContext();
+  const { isDarkMode, wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset } = useColorContext();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
     Battery.BatteryState.UNKNOWN
   );
-  const [currentTime, setCurrentTime] = useState(new Date());
+  const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
 
   // Home Apps State
@@ -33,16 +68,28 @@ export default function Home() {
   const [modalVisible, setModalVisible] = useState(false);
 
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    // Update time immediately when timeOffset changes
+    setCurrentTime(new Date(Date.now() + (timeOffset || 0)));
+    const timer = setInterval(() => setCurrentTime(new Date(Date.now() + (timeOffset || 0))), 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [timeOffset]);
 
   useFocusEffect(
     useCallback(() => {
       const fetchStats = () => {
         try {
           const stats = Launcher.getTodayUsageStats();
-          setTodayStats(stats);
+          if (stats.packageUsage) {
+            let filteredTotal = 0;
+            Object.entries(stats.packageUsage).forEach(([pkg, time]) => {
+              if (!isBroadSystemApp(pkg) && !isLauncherPackage(pkg)) {
+                filteredTotal += (time as number);
+              }
+            });
+            setTodayStats({ ...stats, totalUsageTime: filteredTotal });
+          } else {
+            setTodayStats(stats);
+          }
         } catch (e) {
           console.error('Failed to fetch usage stats', e);
         }
@@ -233,21 +280,46 @@ export default function Home() {
           {/* Header: Time, Date, Battery */}
           <View className="mt-10 items-center">
             <View className="flex-row items-baseline">
-              <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
-                {currentTime.getHours() % 12 || 12}:
-                {currentTime.getMinutes().toString().padStart(2, '0')}
-              </Text>
-              <Text allowFontScaling={false} className={`ml-1 text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-[#2E3A4C]'}`}>
-                {currentTime.getHours() >= 12 ? 'PM' : 'AM'}
-              </Text>
+              {timeFormat === '12h' ? (
+                <>
+                  <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                    {currentTime.getHours() % 12 || 12}:
+                    {currentTime.getMinutes().toString().padStart(2, '0')}
+                  </Text>
+                  <Text allowFontScaling={false} className={`ml-1 text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-[#2E3A4C]'}`}>
+                    {currentTime.getHours() >= 12 ? 'PM' : 'AM'}
+                  </Text>
+                </>
+              ) : (
+                <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                  {currentTime.getHours().toString().padStart(2, '0')}:
+                  {currentTime.getMinutes().toString().padStart(2, '0')}
+                </Text>
+              )}
             </View>
             <Text allowFontScaling={false} className={`font-regular mt-1 text-[14px] ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
-              {currentTime.toLocaleDateString('en-GB', {
+              {dateFormat === 'weekday, day month year' && currentTime.toLocaleDateString('en-GB', {
                 weekday: 'long',
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric',
               })}
+              {dateFormat === 'day month year' && currentTime.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+              })}
+              {dateFormat === 'day/month/year' && currentTime.toLocaleDateString('en-GB', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })}
+              {dateFormat === 'month/day/year' && currentTime.toLocaleDateString('en-US', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric',
+              })}
+              {dateFormat === 'year-month-day' && currentTime.toISOString().split('T')[0]}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
               <Ionicons name={getBatteryIcon()} size={24} color={isDarkMode ? "#64748B" : "#5B8BDF"} />
@@ -309,13 +381,21 @@ export default function Home() {
             <View className="w-full flex-row gap-1">
               <TouchableOpacity
                 onPress={openDialer}
-                className={`flex-1 items-center rounded-l-[30px] border-r py-5 ${isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-[#DAE4F2] border-white'}`}>
-                <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Dialer</Text>
+                className={`flex-1 items-center justify-center rounded-l-[30px] border-r py-5 ${isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-[#DAE4F2] border-white'}`}>
+                {showPhoneDialer ? (
+                   <Ionicons name="call-outline" size={24} color={isDarkMode ? "#CBD5E1" : "#2E3A4C"} />
+                ) : (
+                  <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Dialer</Text>
+                )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={openCamera}
-                className={`flex-1 items-center rounded-r-[30px] py-5 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]'}`}>
-                <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Camera</Text>
+                className={`flex-1 items-center justify-center rounded-r-[30px] py-5 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]'}`}>
+                {showCameraIcon ? (
+                  <Ionicons name="camera-outline" size={24} color={isDarkMode ? "#CBD5E1" : "#2E3A4C"} />
+                ) : (
+                  <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Camera</Text>
+                )}
               </TouchableOpacity>
             </View>
           </View>

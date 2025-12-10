@@ -26,6 +26,17 @@ interface ColorContextType {
   isLoading: boolean;
   wallpaper: WallpaperItem | null;
   setWallpaper: (wallpaper: WallpaperItem) => void;
+  showPhoneDialer: boolean;
+  setShowPhoneDialer: (show: boolean) => void;
+  showCameraIcon: boolean;
+  setShowCameraIcon: (show: boolean) => void;
+  timeFormat: '12h' | '24h';
+  setTimeFormat: (format: '12h' | '24h') => void;
+  toggleTimeFormat: () => void;
+  dateFormat: string;
+  setDateFormat: (format: string) => void;
+  timeOffset: number;
+  setTimeOffset: (offset: number) => void;
 }
 
 const ColorContext = createContext<ColorContextType | undefined>(undefined);
@@ -45,6 +56,11 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [isDarkMode, setIsDarkMode] = useState<boolean>(DEFAULT_DARK_MODE);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
+  const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
+  const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
+  const [timeFormat, setTimeFormatState] = useState<'12h' | '24h'>('12h');
+  const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
+  const [timeOffset, setTimeOffsetState] = useState<number>(0);
 
   // ✅ Load saved data when app starts
   useEffect(() => {
@@ -53,16 +69,26 @@ const ColorProvider = ({children}: ColorProviderProps) => {
 
   const loadPersistedData = async () => {
     try {
-      const [savedColor, savedDarkMode, savedPremium, savedWallpaperIndex] = await Promise.all([
+      const [savedColor, savedDarkMode, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset] = await Promise.all([
         AsyncStorage.getItem('selectedColor'),
         AsyncStorage.getItem('isDarkMode'),
         AsyncStorage.getItem('isPremium'),
         AsyncStorage.getItem('selectedWallpaperIndex'),
+        AsyncStorage.getItem('showPhoneDialer'),
+        AsyncStorage.getItem('showCameraIcon'),
+        AsyncStorage.getItem('timeFormat'),
+        AsyncStorage.getItem('dateFormat'),
+        AsyncStorage.getItem('timeOffset'),
       ]);
 
       if (savedColor) setSelectedColorState(savedColor);
       if (savedDarkMode) setIsDarkMode(savedDarkMode === 'true');
       if (savedPremium) setIsPremium(savedPremium === 'true');
+      if (savedPhoneDialer) setShowPhoneDialerState(savedPhoneDialer === 'true');
+      if (savedCameraIcon) setShowCameraIconState(savedCameraIcon === 'true');
+      if (savedTimeFormat) setTimeFormatState(savedTimeFormat as '12h' | '24h');
+      if (savedDateFormat) setDateFormatState(savedDateFormat);
+      if (savedTimeOffset) setTimeOffsetState(parseInt(savedTimeOffset, 10));
       if (savedWallpaperIndex !== null) {
         const index = parseInt(savedWallpaperIndex, 10);
         if (index >= 0 && index < AVAILABLE_WALLPAPERS.length) {
@@ -124,6 +150,61 @@ const ColorProvider = ({children}: ColorProviderProps) => {
     }
   };
 
+  const setShowPhoneDialer = async (show: boolean) => {
+    try {
+      setShowPhoneDialerState(show);
+      await AsyncStorage.setItem('showPhoneDialer', show.toString());
+    } catch (err) {
+      console.error("Failed to save showPhoneDialer:", err);
+    }
+  };
+
+  const setShowCameraIcon = async (show: boolean) => {
+    try {
+      setShowCameraIconState(show);
+      await AsyncStorage.setItem('showCameraIcon', show.toString());
+    } catch (err) {
+      console.error("Failed to save showCameraIcon:", err);
+    }
+  };
+
+  const toggleTimeFormat = async () => {
+    try {
+      const newFormat = timeFormat === '12h' ? '24h' : '12h';
+      setTimeFormatState(newFormat);
+      await AsyncStorage.setItem('timeFormat', newFormat);
+    } catch (err) {
+      console.error("Failed to save timeFormat:", err);
+    }
+  };
+
+  const setTimeFormat = async (format: '12h' | '24h') => {
+    try {
+      setTimeFormatState(format);
+      await AsyncStorage.setItem('timeFormat', format);
+    } catch (err) {
+      console.error("Failed to save timeFormat:", err);
+    }
+  };
+
+  const setDateFormat = async (format: string) => {
+    try {
+      setDateFormatState(format);
+      await AsyncStorage.setItem('dateFormat', format);
+    } catch (err) {
+      console.error("Failed to save dateFormat:", err);
+    }
+  };
+
+  const setTimeOffset = async (offset: number) => {
+    try {
+      setTimeOffsetState(offset);
+      await AsyncStorage.setItem('timeOffset', offset.toString());
+    } catch (err) {
+      console.error("Failed to save timeOffset:", err);
+    }
+  };
+
   return (
     <ColorContext.Provider
       value={{
@@ -136,6 +217,17 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         isLoading,
         wallpaper,
         setWallpaper,
+        showPhoneDialer,
+        setShowPhoneDialer,
+        showCameraIcon,
+        setShowCameraIcon,
+        timeFormat,
+        setTimeFormat,
+        toggleTimeFormat,
+        dateFormat,
+        setDateFormat,
+        timeOffset,
+        setTimeOffset,
       }}>
       {children}
     </ColorContext.Provider>
