@@ -24,8 +24,10 @@ import { openApplication } from 'expo-intent-launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
+import { useColorContext } from './context/ColorContext';
 
 export default function AllApps() {
+  const { isDarkMode } = useColorContext();
   const [apps, setApps] = useState<AppItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
@@ -174,7 +176,7 @@ export default function AllApps() {
 
     return (
       <TouchableOpacity
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl bg-[#7EA9E5] px-4 py-3 shadow-sm ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#7EA9E5]'} ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
         onPress={() => handleAppPress(item)}>
         <View className="flex-1 flex-row items-center">
           {isSelectMode && (
@@ -185,13 +187,13 @@ export default function AllApps() {
               style={{ marginRight: 8 }}
             />
           )}
-          <Text allowFontScaling={false} className="text-[16px] font-regular text-white" numberOfLines={1}>
+          <Text allowFontScaling={false} className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-white'}`} numberOfLines={1}>
             {item.label}
           </Text>
         </View>
 
         <View className="flex-row items-center">
-          <Text allowFontScaling={false} className="text-[10px] font-light text-white opacity-90">
+          <Text allowFontScaling={false} className={`text-[10px] font-light ${isDarkMode ? 'text-slate-400' : 'text-white'} opacity-90`}>
             TO: {item.launchCount || 0} times || DU: {usageText}
           </Text>
         </View>
@@ -217,22 +219,22 @@ export default function AllApps() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GestureDetector gesture={rightSwipeGesture}>
-        <View className="flex-1 bg-[#EFF6FC] px-4 pt-12">
+        <View className={`flex-1 px-4 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EFF6FC]'}`}>
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center gap-3">
         {/* Back Button (small) */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => router.back()}
           className="rounded-full bg-white p-2 shadow-sm">
           <Ionicons name="arrow-back" size={20} color="#94A3B8" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
-        <View className="flex-1 flex-row items-center rounded-full bg-white px-4 py-1 shadow-sm">
-          <Ionicons name="search" size={20} color="#5C8BCC" className="mr-2" />
+        <View className={`flex-1 flex-row items-center rounded-full px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+          <Ionicons name="search" size={20} color={isDarkMode ? "#94A3B8" : "#5C8BCC"} className="mr-2" />
           <TextInput
-            className="ml-2 flex-1 text-[16px] text-[#A3B9D9]"
+            className={`ml-2 flex-1 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#A3B9D9]'}`}
             placeholder="Search app here|"
-            placeholderTextColor="#94A3B8"
+            placeholderTextColor={isDarkMode ? "#64748B" : "#94A3B8"}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
@@ -243,7 +245,7 @@ export default function AllApps() {
         {isSelectMode && (
           <TouchableOpacity
             onPress={handleSaveSelection}
-            className="rounded-full bg-white p-2 shadow-sm">
+            className={`rounded-full p-2 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
           </TouchableOpacity>
         )}
@@ -253,13 +255,13 @@ export default function AllApps() {
       <View className="mb-4 flex-row items-center justify-between px-1">
         <Text
           allowFontScaling={false}
-          className="text-[18px] font-bold text-[#858E9D] underline decoration-[#858E9D] decoration-2 underline-offset-4">
+          className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
           All Apps
         </Text>
         <Link href="/settingScreen" asChild>
           <TouchableOpacity>
-            <View className="rounded-lg border border-2 border-[#858E9D] ">
-              <MaterialCommunityIcons name="tune-variant" size={24} color="#858E9D" />
+            <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+              <MaterialCommunityIcons name="tune-variant" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
             </View>
           </TouchableOpacity>
         </Link>
@@ -294,7 +296,7 @@ export default function AllApps() {
             contentContainerStyle={{ alignItems: 'center', gap: 4 }}>
             {alphabet.map((letter) => (
               <TouchableOpacity key={letter} onPress={() => scrollToLetter(letter)}>
-                <Text className="py-0.5 text-[10px] font-medium text-[#5B8BDF]">{letter}</Text>
+                <Text className={`py-0.5 text-[10px] font-medium ${isDarkMode ? 'text-blue-400' : 'text-[#5B8BDF]'}`}>{letter}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -307,9 +309,9 @@ export default function AllApps() {
         visible={modalVisible}
         onRequestClose={() => setModalVisible(false)}>
         <View className="flex-1 items-center justify-center bg-black/70">
-          <View className="w-[85%] rounded-3xl bg-white p-6 shadow-xl">
+          <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             <View className="mb-6 items-center">
-              <Text className="mb-4 text-center text-xl font-bold text-gray-900">
+              <Text className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                 Open {selectedApp?.label}
               </Text>
 
@@ -322,7 +324,7 @@ export default function AllApps() {
                 />
               )}
 
-              <Text className="text-center text-base font-medium text-gray-800">
+              <Text className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                 Select estimated use time
               </Text>
             </View>
@@ -338,7 +340,7 @@ export default function AllApps() {
               ))}
             </View>
 
-            <View className="mt-2 border-t border-gray-200 pt-6">
+            <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
               <TouchableOpacity
                 className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
                 onPress={() => setModalVisible(false)}>

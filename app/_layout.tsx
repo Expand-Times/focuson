@@ -1,13 +1,16 @@
 import '../global.css';
 
 import { Stack } from 'expo-router';
+import { ColorProvider } from './context/ColorContext';
 
 export default function Layout() {
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <ColorProvider>
+      <Stack
+        screenOptions={{
+          headerShown: false,
+        }}
+      />
+    </ColorProvider>
   );
 }

@@ -1,8 +1,8 @@
 import React, { useEffect } from 'react';
-import { View, Image } from 'react-native';
+import { View, Image, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
+
 
 export default function IntroOne() {
   const router = useRouter();
@@ -17,7 +17,7 @@ export default function IntroOne() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#E1EAF5]">
-      <StatusBar />
+      <StatusBar backgroundColor="#EEF2F6" barStyle="dark-content" />
       <View className="flex-1 items-center justify-center px-6">
         {/* Central White Circle */}
         <View className="">

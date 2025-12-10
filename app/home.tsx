@@ -15,9 +15,11 @@ import Launcher from '../modules/launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
+import { useColorContext } from './context/ColorContext';
 
 export default function Home() {
   const router = useRouter();
+  const { isDarkMode, wallpaper } = useColorContext();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
     Battery.BatteryState.UNKNOWN
@@ -207,23 +209,39 @@ export default function Home() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar backgroundColor="#EEF2F6" barStyle="dark-content" />
+      <StatusBar 
+        backgroundColor={wallpaper ? 'transparent' : (isDarkMode ? '#0F172A' : '#EFF6FC')} 
+        barStyle={isDarkMode ? "light-content" : "dark-content"} 
+        translucent={!!wallpaper}
+      />
+      
+      {wallpaper && typeof wallpaper !== 'string' && (
+        <Image source={wallpaper} className="absolute w-full h-full" resizeMode="cover" />
+      )}
+
       <GestureDetector gesture={composedGestures}>
-        <View className="flex-1 justify-between bg-[#EFF6FC] px-6 py-12">
+        <View 
+          className="flex-1 justify-between px-6 py-12"
+          style={{
+            backgroundColor: wallpaper 
+              ? (typeof wallpaper === 'string' ? wallpaper : 'transparent')
+              : (isDarkMode ? '#0F172A' : '#EFF6FC')
+          }}
+        >
           <Stack.Screen options={{ headerShown: false }} />
 
           {/* Header: Time, Date, Battery */}
           <View className="mt-10 items-center">
             <View className="flex-row items-baseline">
-              <Text allowFontScaling={false} className="font-regular text-[32px] text-[#2E3A4C]">
+              <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
                 {currentTime.getHours() % 12 || 12}:
                 {currentTime.getMinutes().toString().padStart(2, '0')}
               </Text>
-              <Text allowFontScaling={false} className="ml-1 text-[14px] text-[#2E3A4C]">
+              <Text allowFontScaling={false} className={`ml-1 text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-[#2E3A4C]'}`}>
                 {currentTime.getHours() >= 12 ? 'PM' : 'AM'}
               </Text>
             </View>
-            <Text allowFontScaling={false} className="font-regular mt-1 text-[14px] text-[#8698B2]">
+            <Text allowFontScaling={false} className={`font-regular mt-1 text-[14px] ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
               {currentTime.toLocaleDateString('en-GB', {
                 weekday: 'long',
                 day: 'numeric',
@@ -232,9 +250,9 @@ export default function Home() {
               })}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
-              <Ionicons name={getBatteryIcon()} size={24} color="#5B8BDF" />
+              <Ionicons name={getBatteryIcon()} size={24} color={isDarkMode ? "#64748B" : "#5B8BDF"} />
               {batteryLevel !== null && (
-                <Text className="text-sm font-medium text-[#5B8BDF]">
+                <Text className={`text-sm font-medium ${isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]'}`}>
                   {Math.round(batteryLevel * 100)}%
                 </Text>
               )}
@@ -247,23 +265,23 @@ export default function Home() {
             {homeApps.map((app) => (
               <TouchableOpacity 
                 key={app.packageName}
-                className="w-full bg-[#E2EEF9] py-3 rounded-[30px] items-center border border-[#C2DEF240] border-b-[#C2DEF2] border-x-transparent shadow-sm mb-4"
+                className={`w-full py-3 rounded-[30px] items-center border border-x-transparent shadow-sm mb-4 ${isDarkMode ? 'bg-[#1E293B] border-[#334155]' : 'bg-[#E2EEF9] border-[#C2DEF240] border-b-[#C2DEF2]'}`}
                 onPress={() => {
                     setSelectedApp(app);
                     setModalVisible(true);
                 }}
               >
-                <Text allowFontScaling={false} className="text-[#2E3A4C] text-[18px] tracking-wide font-regular">{app.label}</Text>
+                <Text allowFontScaling={false} className={`text-[18px] tracking-wide font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>{app.label}</Text>
               </TouchableOpacity>
             ))}
 
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
               <TouchableOpacity className="mt-4 items-center">
-                 <View className="border border-2 border-[#A3B9D9] rounded-full p-1">
-                    <MaterialCommunityIcons name="plus" size={24} color="#A3B9D9" />
+                 <View className={`border border-2 rounded-full p-1 ${isDarkMode ? 'border-slate-600' : 'border-[#A3B9D9]'}`}>
+                    <MaterialCommunityIcons name="plus" size={24} color={isDarkMode ? "#64748B" : "#A3B9D9"} />
                  </View>
-                 <Text allowFontScaling={false} className="text-[#A3B9D9] font-regular text-[12px] mt-2">Don't add unnecessary addictive app!</Text>
+                 <Text allowFontScaling={false} className={`font-regular text-[12px] mt-2 ${isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]'}`}>Don't add unnecessary addictive app!</Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -271,19 +289,19 @@ export default function Home() {
           {/* Footer Info */}
           <View className="w-full items-center">
             <View className="mb-2 flex-row items-center gap-4">
-              <Text allowFontScaling={false} className="text-[14px] text-[#8698B2] font-regular">
+              <Text allowFontScaling={false} className={`text-[14px] font-regular ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
                 Today Unlock:{' '}
-                <Text allowFontScaling={false} className="font-bold text-[#8698B2]">{todayStats.unlockCount}</Text>
+                <Text allowFontScaling={false} className={`font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>{todayStats.unlockCount}</Text>
               </Text>
-              <Text allowFontScaling={false} className="text-[#8698B2] font-regular">||</Text>
-              <Text allowFontScaling={false} className="text-[14px] text-[#8698B2] font-regular">
+              <Text allowFontScaling={false} className={`font-regular ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>||</Text>
+              <Text allowFontScaling={false} className={`text-[14px] font-regular ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
                 Today Use:{' '}
-                <Text allowFontScaling={false} className="font-bold text-[#8698B2]">
+                <Text allowFontScaling={false} className={`font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
                   {formatUsageTime(todayStats.totalUsageTime)}
                 </Text>
               </Text>
             </View>
-            <Text allowFontScaling={false} className="mb-10 text-[12px] font-light text-[#A3B9D9]">
+            <Text allowFontScaling={false} className={`mb-10 text-[12px] font-light ${isDarkMode ? 'text-slate-600' : 'text-[#A3B9D9]'}`}>
               Leave it! Do something mindful in real world.
             </Text>
 
@@ -291,13 +309,13 @@ export default function Home() {
             <View className="w-full flex-row gap-1">
               <TouchableOpacity
                 onPress={openDialer}
-                className="flex-1 items-center rounded-l-[30px] border-r border-white bg-[#DAE4F2] py-5">
-                <Text allowFontScaling={false} className="text-[18px] text-[#2E3A4C] font-regular">Dialer</Text>
+                className={`flex-1 items-center rounded-l-[30px] border-r py-5 ${isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-[#DAE4F2] border-white'}`}>
+                <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Dialer</Text>
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={openCamera}
-                className="flex-1 items-center rounded-r-[30px] bg-[#DAE4F2] py-5">
-                <Text allowFontScaling={false} className="text-[18px] text-[#2E3A4C] font-regular">Camera</Text>
+                className={`flex-1 items-center rounded-r-[30px] py-5 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]'}`}>
+                <Text allowFontScaling={false} className={`text-[18px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>Camera</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -308,9 +326,9 @@ export default function Home() {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
-              <View className="w-[85%] rounded-3xl bg-white p-6 shadow-xl">
+              <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
-                  <Text className="mb-4 text-center text-xl font-bold text-gray-900">
+                  <Text className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                     Open {selectedApp?.label}
                   </Text>
 
@@ -322,7 +340,7 @@ export default function Home() {
                     />
                   )}
 
-                  <Text className="text-center text-base font-medium text-gray-800">
+                  <Text className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                     Select estimated use time
                   </Text>
                 </View>
@@ -338,7 +356,7 @@ export default function Home() {
                   ))}
                 </View>
 
-                <View className="mt-2 border-t border-gray-200 pt-6">
+                <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
                     className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
                     onPress={() => setModalVisible(false)}>

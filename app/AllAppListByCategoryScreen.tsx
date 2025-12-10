@@ -23,6 +23,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
+import { useColorContext } from './context/ColorContext';
 
 
 type Category = {
@@ -32,6 +33,7 @@ type Category = {
 
 export default function AllAppListByCategoryScreen() {
   const router = useRouter();
+  const { isDarkMode } = useColorContext();
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -298,7 +300,7 @@ export default function AllAppListByCategoryScreen() {
 
   if (loading) {
     return (
-      <View className="flex-1 items-center justify-center bg-[#EEF2F6]">
+      <View className={`flex-1 items-center justify-center ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
         <ActivityIndicator size="large" color="#7EA6E0" />
       </View>
     );
@@ -313,15 +315,15 @@ export default function AllAppListByCategoryScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GestureDetector gesture={leftSwipeGesture}>
-        <View className="flex-1 bg-[#EEF2F6] pt-12">
+        <View className={`flex-1 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
           <View className="flex-1 px-4">
         {/* Search Bar */}
-        <View className="mb-6 flex-row items-center rounded-full border border-slate-100 bg-white px-4 py-1 shadow-sm">
-          <MaterialCommunityIcons name="magnify" size={20} color="#5C8BCC" />
+        <View className={`mb-6 flex-row items-center rounded-full border px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-100'}`}>
+          <MaterialCommunityIcons name="magnify" size={20} color={isDarkMode ? "#94A3B8" : "#5C8BCC"} />
           <TextInput
-            className="ml-3 flex-1 text-[16px] text-[#A3B9D9]"
+            className={`ml-3 flex-1 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#A3B9D9]'}`}
             placeholder="Search app here|"
-            placeholderTextColor="#A3B9D9"
+            placeholderTextColor={isDarkMode ? "#64748B" : "#A3B9D9"}
             value={searchQuery}
             onChangeText={setSearchQuery}
           />
@@ -331,19 +333,19 @@ export default function AllAppListByCategoryScreen() {
         <View className="mb-4 flex-row items-center justify-between">
           <Text
             allowFontScaling={false}
-            className="text-[18px] font-bold text-[#858E9D] underline decoration-[#858E9D] decoration-2 underline-offset-4">
+            className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
             App Category
           </Text>
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
-              <View className="rounded-lg border border-2 border-[#858E9D] ">
-                <MaterialCommunityIcons name="plus" size={24} color="#858E9D" />
+              <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+                <MaterialCommunityIcons name="plus" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
               </View>
             </TouchableOpacity>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
-                <View className="rounded-lg border border-2 border-[#858E9D] ">
-                  <MaterialCommunityIcons name="tune-variant" size={24} color="#858E9D" />
+                <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+                  <MaterialCommunityIcons name="tune-variant" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
                 </View>
               </TouchableOpacity>
             </Link>
@@ -366,7 +368,7 @@ export default function AllAppListByCategoryScreen() {
                     <TextInput
                       value={tempCategoryName}
                       onChangeText={setTempCategoryName}
-                      className="mr-2 min-w-[100px] border-b border-slate-400 px-1 text-right text-base text-slate-600"
+                      className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${isDarkMode ? 'text-slate-300 border-slate-500' : 'text-slate-600 border-slate-400'}`}
                       autoFocus
                       onSubmitEditing={handleSaveCategoryName}
                     />
@@ -379,11 +381,11 @@ export default function AllAppListByCategoryScreen() {
                   </View>
                 ) : (
                   <View className="mb-2 flex-row items-center justify-end">
-                    <Text allowFontScaling={false} className="mr-2 text-[16px] text-[#858E9D]">{displayTitle}</Text>
+                    <Text allowFontScaling={false} className={`mr-2 text-[16px] ${isDarkMode ? 'text-slate-400' : 'text-[#858E9D]'}`}>{displayTitle}</Text>
                     <TouchableOpacity 
-                      className="border-b border-[#858E9D]"
+                      className={`border-b ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}
                       onPress={() => handleStartEditing(category.title, displayTitle)}>
-                      <MaterialCommunityIcons name="pencil-outline" size={16} color="#858E9D" />
+                      <MaterialCommunityIcons name="pencil-outline" size={16} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -393,11 +395,11 @@ export default function AllAppListByCategoryScreen() {
                   {category.data.map((app) => (
                     <TouchableOpacity
                       key={app.packageName}
-                      className="mb-2 w-full flex-row items-center justify-between rounded-xl bg-[#7FA8E5] px-4 py-3 shadow-sm"
+                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#7FA8E5]'}`}
                       onPress={() => handleLaunchApp(app.packageName)}
                       onLongPress={() => handleLongPress(app)}>
                       <Text allowFontScaling={false}
-                        className="text-[16px] font-regular text-white"
+                        className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-white'}`}
                         numberOfLines={1}
                         style={{ maxWidth: '60%' }}>
                         {app.label}
@@ -431,10 +433,10 @@ export default function AllAppListByCategoryScreen() {
         <TouchableWithoutFeedback onPress={closeModal}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
-              <View className="w-[85%] items-center rounded-2xl bg-white p-6 shadow-lg">
+              <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 {selectedApp && (
                   <>
-                    <Text className="mb-6 text-xl font-semibold text-slate-800">
+                    <Text className={`mb-6 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                       {selectedApp.label} Options
                     </Text>
 
@@ -493,19 +495,19 @@ export default function AllAppListByCategoryScreen() {
                       </View>
                     ) : showAppRenamer ? (
                       <View className="w-full">
-                        <Text className="mb-2 font-medium text-slate-600">Rename App:</Text>
+                        <Text className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
                         <TextInput
                           value={tempAppName}
                           onChangeText={setTempAppName}
-                          className="mb-4 rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-lg text-slate-700"
+                          className={`mb-4 rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
                           autoFocus
                           selectTextOnFocus
                         />
                         <View className="flex-row gap-3">
                           <TouchableOpacity
-                            className="flex-1 items-center rounded-lg bg-slate-200 py-3"
+                            className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                             onPress={() => setShowAppRenamer(false)}>
-                            <Text className="font-medium text-slate-600">Cancel</Text>
+                            <Text className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
@@ -516,14 +518,14 @@ export default function AllAppListByCategoryScreen() {
                       </View>
                     ) : (
                       <View className="h-64 w-full">
-                        <Text className="mb-2 font-medium text-slate-600">Select Category:</Text>
+                        <Text className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
                         <ScrollView className="w-full flex-1">
                           {categories.map((cat, idx) => (
                             <TouchableOpacity
                               key={idx}
-                              className="border-b border-slate-100 py-3"
+                              className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
                               onPress={() => handleMoveApp(cat.title)}>
-                              <Text className="text-lg text-slate-700">
+                              <Text className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                 {renamedCategories[cat.title] || cat.title}
                               </Text>
                             </TouchableOpacity>
@@ -531,16 +533,16 @@ export default function AllAppListByCategoryScreen() {
                           {/* Always add 'Other' as an option if not present */}
                           {!categories.find((c) => c.title === 'Other') && (
                             <TouchableOpacity
-                              className="border-b border-slate-100 py-3"
+                              className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
                               onPress={() => handleMoveApp('Other')}>
-                              <Text className="text-lg text-slate-700">Other</Text>
+                              <Text className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Other</Text>
                             </TouchableOpacity>
                           )}
                         </ScrollView>
                         <TouchableOpacity
-                          className="mt-4 items-center rounded-lg bg-slate-200 py-2"
+                          className={`mt-4 items-center rounded-lg py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                           onPress={() => setShowCategorySelector(false)}>
-                          <Text className="text-slate-600">Cancel</Text>
+                          <Text className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -561,8 +563,8 @@ export default function AllAppListByCategoryScreen() {
         <TouchableWithoutFeedback onPress={() => setCreateCategoryModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
-              <View className="w-[85%] items-center rounded-2xl bg-white p-6 shadow-lg">
-                <Text className="mb-4 text-xl font-semibold text-slate-800">
+              <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <Text className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                   Create New Category
                 </Text>
 
@@ -570,15 +572,16 @@ export default function AllAppListByCategoryScreen() {
                   value={newCategoryName}
                   onChangeText={setNewCategoryName}
                   placeholder="Category Name"
-                  className="mb-6 w-full rounded-lg border border-slate-300 bg-slate-50 px-4 py-3 text-lg text-slate-700"
+                  placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                  className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
                   autoFocus
                 />
 
                 <View className="w-full flex-row gap-3">
                   <TouchableOpacity
-                    className="flex-1 items-center rounded-lg bg-slate-200 py-3"
+                    className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                     onPress={() => setCreateCategoryModalVisible(false)}>
-                    <Text className="font-medium text-slate-600">Cancel</Text>
+                    <Text className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
