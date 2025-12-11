@@ -17,12 +17,26 @@ import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
 import { Linking } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import SignInWithGoogle from './SignInWithGoogle';
 type ColorOptionProps = {
   color: string;
   onPress: () => void;
   isPremium?: boolean;
   isSelected?: boolean;
   isDarkMode?: boolean;
+};
+// Define type for user metadata
+type UserMetadata = {
+  picture?: string;
+  full_name?: string;
+  email?: string;
+};
+// Define type for user object
+type UserObject = {
+  user?: {
+    user_metadata?: UserMetadata;
+  };
 };
 export default function SettingScreen() {
   const router = useRouter();
@@ -63,6 +77,36 @@ export default function SettingScreen() {
     timeOffset,
     setTimeOffset,
   } = useColorContext();
+   // Update state initialization
+   const [showSignOut, setShowSignOut] = useState(false);
+  const [userAuthInfo, setUserAuthInfo] = useState<UserObject>({});
+  const userData = async () => {
+    try {
+      const data = await AsyncStorage.getItem("userAuthInfo");
+      const userDetails = data && data.trim().length ? JSON.parse(data) : {};
+      setUserAuthInfo(userDetails);
+    } catch {
+      setUserAuthInfo({});
+    }
+  };
+
+  useEffect(() => {
+    userData();
+
+    if (userAuthInfo?.user?.user_metadata?.email) {
+      setShowSignOut(true);
+    }
+  }, []);
+
+  const handleSignOut = async () => {
+    try {
+      await AsyncStorage.removeItem("userAuthInfo");
+      setShowSignOut(false);
+      // navigation.navigate('SignInWithGoogle');
+    } catch (error) {
+      console.error("Error signing out:", error);
+    }
+  };
 
   // Time Picker State
   const [tempHour, setTempHour] = useState(0);
@@ -884,11 +928,62 @@ export default function SettingScreen() {
           </View>
 
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <TouchableOpacity className="py-2">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                Log in
-              </Text>
-            </TouchableOpacity>
+            {/* signout */}
+            <View className="mb-2 rounded-xl shadow">
+              {/* Header Row with Chevron */}
+              <TouchableOpacity
+                className="flex-row items-center justify-between rounded-xl p-4"
+                onPress={() => setShowSignOut(!showSignOut)} // Toggle show/hide
+              >
+                <View className="flex-row items-center">
+                  <View
+                    className={`mr-3 h-9 w-9 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1F1F1F]' : 'bg-[#F1F5FF]'}`}>
+                    <Image
+                      source={require('../assets/images/11.png')}
+                      className="h-6 w-6 rounded-sm"
+                      resizeMode="contain"
+                    />
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-base ${isDarkMode ? 'text-[#EBF2F0]' : 'text-[#2B2D42]'}`}>
+                    Sign Out
+                  </Text>
+                </View>
+
+                <Ionicons
+                  name={showSignOut ? 'chevron-up' : 'chevron-down'}
+                  size={20}
+                  color={isDarkMode ? '#AAB2B0' : '#DFDFDF'}
+                />
+              </TouchableOpacity>
+
+              {/* Conditional Section: Sign Out or Sign In */}
+              {showSignOut &&
+                (userAuthInfo?.user?.user_metadata?.email ? (
+                  // User is logged in → show Sign Out button
+                  <TouchableOpacity
+                    onPress={handleSignOut}
+                    className={`mx-8 mt-4 items-center justify-center rounded-full py-3 shadow-lg ${isDarkMode ? 'bg-[#637E99]' : 'bg-white'}`}
+                    style={{
+                      shadowColor: '#4A90E2',
+                      shadowOffset: { width: 0, height: 5 },
+                      shadowOpacity: 0.15,
+                      shadowRadius: 20,
+                      elevation: 10,
+                    }}>
+                    <Text
+                      allowFontScaling={false}
+                      className="text-base font-medium text-gray-700"
+                      style={{ lineHeight: 20 }}>
+                      Sign Out
+                    </Text>
+                  </TouchableOpacity>
+                ) : (
+                  // User is not logged in → show Sign In with Google
+                  <SignInWithGoogle />
+                ))}
+            </View>
 
             <View className="flex-row items-center justify-between py-2">
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
