@@ -1,9 +1,22 @@
 import React, { useContext, useState, useRef, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Switch, Image, TextInput, Modal, FlatList, NativeSyntheticEvent, NativeScrollEvent } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  ScrollView,
+  Switch,
+  Image,
+  TextInput,
+  Modal,
+  FlatList,
+  NativeSyntheticEvent,
+  NativeScrollEvent,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
+import { Linking } from 'react-native';
 type ColorOptionProps = {
   color: string;
   onPress: () => void;
@@ -22,15 +35,34 @@ export default function SettingScreen() {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [infoModalType, setInfoModalType] = useState<'privacy' | 'goal'>('privacy');
   const [modalVisible, setModalVisible] = useState(false);
-  
+
   const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
   const [contactOption, setContactOption] = useState('issue'); // issue, suggestion
-   const context = useContext(ColorContext);
+  const context = useContext(ColorContext);
 
   if (!context) {
-    throw new Error("ColorContext is not available");
+    throw new Error('ColorContext is not available');
   }
-  const { isDarkMode, toggleDarkMode, wallpaper, setWallpaper ,selectedColor, setSelectedColor, isPremium, showPhoneDialer, setShowPhoneDialer, showCameraIcon, setShowCameraIcon, timeFormat, setTimeFormat, toggleTimeFormat, dateFormat, setDateFormat, timeOffset, setTimeOffset } = useColorContext();
+  const {
+    isDarkMode,
+    toggleDarkMode,
+    wallpaper,
+    setWallpaper,
+    selectedColor,
+    setSelectedColor,
+    isPremium,
+    showPhoneDialer,
+    setShowPhoneDialer,
+    showCameraIcon,
+    setShowCameraIcon,
+    timeFormat,
+    setTimeFormat,
+    toggleTimeFormat,
+    dateFormat,
+    setDateFormat,
+    timeOffset,
+    setTimeOffset,
+  } = useColorContext();
 
   // Time Picker State
   const [tempHour, setTempHour] = useState(0);
@@ -44,7 +76,7 @@ export default function SettingScreen() {
       const now = new Date(Date.now() + (timeOffset || 0));
       let h = now.getHours();
       const m = now.getMinutes();
-      
+
       if (timeFormat === '12h') {
         setTempAmPm(h >= 12 ? 'PM' : 'AM');
         h = h % 12;
@@ -67,17 +99,17 @@ export default function SettingScreen() {
     const currentYear = now.getFullYear();
     const currentMonth = now.getMonth();
     const currentDay = now.getDate();
-    
+
     let targetHour = tempHour;
-    
+
     if (timeFormat === '12h') {
-       if (tempAmPm === 'PM' && targetHour < 12) targetHour += 12;
-       if (tempAmPm === 'AM' && targetHour === 12) targetHour = 0;
+      if (tempAmPm === 'PM' && targetHour < 12) targetHour += 12;
+      if (tempAmPm === 'AM' && targetHour === 12) targetHour = 0;
     }
-    
+
     const targetTime = new Date(currentYear, currentMonth, currentDay, targetHour, tempMinute);
     const offset = targetTime.getTime() - now.getTime();
-    
+
     setTimeOffset(offset);
     setTimeFormatModalVisible(false);
   };
@@ -85,7 +117,7 @@ export default function SettingScreen() {
   const handleDateSave = () => {
     const now = new Date();
     const currentVirtualTime = new Date(now.getTime() + (timeOffset || 0));
-    
+
     const targetDate = new Date(
       tempDate.getFullYear(),
       tempDate.getMonth(),
@@ -94,15 +126,37 @@ export default function SettingScreen() {
       currentVirtualTime.getMinutes(),
       currentVirtualTime.getSeconds()
     );
-    
+
     const newOffset = targetDate.getTime() - now.getTime();
     setTimeOffset(newOffset);
     setDateModalVisible(false);
   };
+  // app issue
+  const [selectedOption, setSelectedOption] = useState<'App Issue' | 'Suggestion'>('App Issue');
+  // Mailto handler function
+  const handleEmailPress = () => {
+    const email = 'info@expandtimes.com';
+    const subject = 'MinimalLife: ' + selectedOption;
+    const body = 'Hello, I wanted to discuss...';
+
+    const url = `mailto:${email}?subject=${encodeURIComponent(
+      subject
+    )}&body=${encodeURIComponent(body)}`;
+
+    Linking.openURL(url).catch((err) => console.error('Failed to open email client:', err));
+  };
 
   const ITEM_HEIGHT = 50;
-  
-  const WheelPicker = ({ data, selectedValue, onValueChange }: { data: (string | number)[], selectedValue: string | number, onValueChange: (val: any) => void }) => {
+
+  const WheelPicker = ({
+    data,
+    selectedValue,
+    onValueChange,
+  }: {
+    data: (string | number)[];
+    selectedValue: string | number;
+    onValueChange: (val: any) => void;
+  }) => {
     const flatListRef = useRef<FlatList>(null);
 
     // Scroll to selection when modal becomes visible or value changes externally (though value changes mostly come from scroll)
@@ -110,10 +164,10 @@ export default function SettingScreen() {
       if (timeFormatModalVisible && flatListRef.current) {
         const index = data.indexOf(selectedValue);
         if (index !== -1) {
-           // Small delay to ensure layout
-           setTimeout(() => {
-             flatListRef.current?.scrollToIndex({ index, animated: false });
-           }, 100);
+          // Small delay to ensure layout
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({ index, animated: false });
+          }, 100);
         }
       }
     }, [timeFormatModalVisible]);
@@ -129,9 +183,9 @@ export default function SettingScreen() {
     return (
       <View style={{ height: ITEM_HEIGHT * 3, width: 80, overflow: 'hidden' }}>
         {/* Selection Highlight */}
-        <View 
-          pointerEvents="none" 
-          className={`absolute top-[50px] w-full h-[50px] border-t border-b ${isDarkMode ? 'border-slate-600' : 'border-slate-200'} bg-slate-500/10`} 
+        <View
+          pointerEvents="none"
+          className={`absolute top-[50px] h-[50px] w-full border-b border-t ${isDarkMode ? 'border-slate-600' : 'border-slate-200'} bg-slate-500/10`}
         />
         <FlatList
           ref={flatListRef}
@@ -139,7 +193,8 @@ export default function SettingScreen() {
           keyExtractor={(item, index) => index.toString()}
           renderItem={({ item }) => (
             <View style={{ height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center' }}>
-              <Text className={`text-2xl font-bold ${item === selectedValue ? (isDarkMode ? 'text-white' : 'text-slate-800') : (isDarkMode ? 'text-slate-600' : 'text-slate-300')}`}>
+              <Text
+                className={`text-2xl font-bold ${item === selectedValue ? (isDarkMode ? 'text-white' : 'text-slate-800') : isDarkMode ? 'text-slate-600' : 'text-slate-300'}`}>
                 {typeof item === 'number' ? item.toString().padStart(2, '0') : item}
               </Text>
             </View>
@@ -150,37 +205,60 @@ export default function SettingScreen() {
           contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
           onMomentumScrollEnd={handleScrollEnd}
           onScrollEndDrag={handleScrollEnd}
-          getItemLayout={(_, index) => ({ length: ITEM_HEIGHT, offset: ITEM_HEIGHT * index, index })}
+          getItemLayout={(_, index) => ({
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+            index,
+          })}
           initialScrollIndex={data.indexOf(selectedValue) !== -1 ? data.indexOf(selectedValue) : 0}
         />
       </View>
     );
   };
 
-  const CalendarPicker = ({ selectedDate, onDateChange }: { selectedDate: Date, onDateChange: (date: Date) => void }) => {
+  const CalendarPicker = ({
+    selectedDate,
+    onDateChange,
+  }: {
+    selectedDate: Date;
+    onDateChange: (date: Date) => void;
+  }) => {
     const [viewDate, setViewDate] = useState(new Date(selectedDate));
-    
+
     useEffect(() => {
-        setViewDate(new Date(selectedDate));
-    }, []); 
-    
+      setViewDate(new Date(selectedDate));
+    }, []);
+
     const year = viewDate.getFullYear();
     const month = viewDate.getMonth();
-    
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-    
+
+    const monthNames = [
+      'January',
+      'February',
+      'March',
+      'April',
+      'May',
+      'June',
+      'July',
+      'August',
+      'September',
+      'October',
+      'November',
+      'December',
+    ];
+    const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+
     const days: (number | null)[] = [];
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
-    
+
     for (let i = 0; i < firstDay; i++) {
       days.push(null);
     }
     for (let i = 1; i <= daysInMonth; i++) {
       days.push(i);
     }
-    
+
     const changeMonth = (increment: number) => {
       const newDate = new Date(year, month + increment, 1);
       setViewDate(newDate);
@@ -188,46 +266,63 @@ export default function SettingScreen() {
 
     return (
       <View className="w-full">
-        <View className="flex-row justify-between items-center mb-6 px-2">
-           <TouchableOpacity onPress={() => changeMonth(-1)} className="p-2">
-             <MaterialCommunityIcons name="chevron-left" size={28} color={isDarkMode ? '#E2E8F0' : '#475569'} />
-           </TouchableOpacity>
-           <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-             {monthNames[month]} {year}
-           </Text>
-           <TouchableOpacity onPress={() => changeMonth(1)} className="p-2">
-             <MaterialCommunityIcons name="chevron-right" size={28} color={isDarkMode ? '#E2E8F0' : '#475569'} />
-           </TouchableOpacity>
+        <View className="mb-6 flex-row items-center justify-between px-2">
+          <TouchableOpacity onPress={() => changeMonth(-1)} className="p-2">
+            <MaterialCommunityIcons
+              name="chevron-left"
+              size={28}
+              color={isDarkMode ? '#E2E8F0' : '#475569'}
+            />
+          </TouchableOpacity>
+          <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+            {monthNames[month]} {year}
+          </Text>
+          <TouchableOpacity onPress={() => changeMonth(1)} className="p-2">
+            <MaterialCommunityIcons
+              name="chevron-right"
+              size={28}
+              color={isDarkMode ? '#E2E8F0' : '#475569'}
+            />
+          </TouchableOpacity>
         </View>
-        
-        <View className="flex-row justify-between mb-4">
-          {weekDays.map(day => (
-            <Text key={day} className={`w-[14%] text-center text-xs font-bold tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
+
+        <View className="mb-4 flex-row justify-between">
+          {weekDays.map((day) => (
+            <Text
+              key={day}
+              className={`w-[14%] text-center text-xs font-bold tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
               {day}
             </Text>
           ))}
         </View>
-        
+
         <View className="flex-row flex-wrap">
           {days.map((day, index) => {
             if (day === null) {
-              return <View key={`empty-${index}`} className="w-[14%] aspect-square" />;
+              return <View key={`empty-${index}`} className="aspect-square w-[14%]" />;
             }
-            
-            const isSelected = selectedDate.getDate() === day && selectedDate.getMonth() === month && selectedDate.getFullYear() === year;
-            const isToday = new Date().getDate() === day && new Date().getMonth() === month && new Date().getFullYear() === year;
+
+            const isSelected =
+              selectedDate.getDate() === day &&
+              selectedDate.getMonth() === month &&
+              selectedDate.getFullYear() === year;
+            const isToday =
+              new Date().getDate() === day &&
+              new Date().getMonth() === month &&
+              new Date().getFullYear() === year;
 
             return (
-              <TouchableOpacity 
-                key={day} 
-                className="w-[14%] aspect-square justify-center items-center mb-2"
+              <TouchableOpacity
+                key={day}
+                className="mb-2 aspect-square w-[14%] items-center justify-center"
                 onPress={() => {
                   const newDate = new Date(year, month, day);
                   onDateChange(newDate);
-                }}
-              >
-                <View className={`w-9 h-9 justify-center items-center rounded-full ${isSelected ? 'bg-[#7EA6E0]' : (isToday ? 'border border-[#7EA6E0]' : '')}`}>
-                  <Text className={`text-base font-medium ${isSelected ? 'text-white' : (isDarkMode ? 'text-slate-200' : 'text-slate-700')}`}>
+                }}>
+                <View
+                  className={`h-9 w-9 items-center justify-center rounded-full ${isSelected ? 'bg-[#7EA6E0]' : isToday ? 'border border-[#7EA6E0]' : ''}`}>
+                  <Text
+                    className={`text-base font-medium ${isSelected ? 'text-white' : isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
                     {day}
                   </Text>
                 </View>
@@ -239,14 +334,13 @@ export default function SettingScreen() {
     );
   };
 
-
   const cycleDateFormat = () => {
     const formats = [
       'weekday, day month year',
       'day month year',
       'day/month/year',
       'month/day/year',
-      'year-month-day'
+      'year-month-day',
     ];
     const currentIndex = formats.indexOf(dateFormat);
     const nextIndex = (currentIndex + 1) % formats.length;
@@ -257,13 +351,26 @@ export default function SettingScreen() {
     const now = date || new Date(Date.now() + (timeOffset || 0));
     switch (format) {
       case 'weekday, day month year':
-        return now.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+        return now.toLocaleDateString('en-GB', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+        });
       case 'day month year':
         return now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
       case 'day/month/year':
-        return now.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return now.toLocaleDateString('en-GB', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
       case 'month/day/year':
-        return now.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+        return now.toLocaleDateString('en-US', {
+          day: '2-digit',
+          month: '2-digit',
+          year: 'numeric',
+        });
       case 'year-month-day':
         return now.toISOString().split('T')[0];
       default:
@@ -271,9 +378,9 @@ export default function SettingScreen() {
     }
   };
 
-   // Define theme colors
-  const freeColors = ["#3580FF", "#27282A", "#20BAD9"];
-  const premiumColors = ["#F2247A", "#29CC5F", "#F2C66D", "#7441D9", "#E58439"];
+  // Define theme colors
+  const freeColors = ['#3580FF', '#27282A', '#20BAD9'];
+  const premiumColors = ['#F2247A', '#29CC5F', '#F2C66D', '#7441D9', '#E58439'];
   const handleThemeSelect = (color: string) => {
     if (freeColors.includes(color) || isPremium) {
       setSelectedColor(color);
@@ -289,7 +396,6 @@ export default function SettingScreen() {
     }
     return now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
-
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
@@ -319,77 +425,87 @@ export default function SettingScreen() {
         className="flex-1 px-4"
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}>
-        
         {/* Time Settings Modal */}
         <Modal
           animationType="fade"
           transparent={true}
           visible={timeFormatModalVisible}
-          onRequestClose={() => setTimeFormatModalVisible(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/80">
-            <View className={`w-[90%] rounded-3xl p-6 shadow-2xl relative ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-              <Text className={`text-xl font-bold mb-6 text-center ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+          onRequestClose={() => setTimeFormatModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/80">
+            <View
+              className={`relative w-[90%] rounded-3xl p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <Text
+                className={`mb-6 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                 Set Time
               </Text>
-              
+
               {/* Format Toggle */}
-              <View className="flex-row justify-center mb-8 bg-slate-200/20 rounded-full p-1 self-center">
-                 <TouchableOpacity 
-                   onPress={() => setTimeFormat('12h')}
-                   className={`px-6 py-2 rounded-full ${timeFormat === '12h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}
-                 >
-                   <Text className={`font-medium ${timeFormat === '12h' ? 'text-white' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>12h</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity 
-                   onPress={() => setTimeFormat('24h')}
-                   className={`px-6 py-2 rounded-full ${timeFormat === '24h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}
-                 >
-                   <Text className={`font-medium ${timeFormat === '24h' ? 'text-white' : (isDarkMode ? 'text-slate-400' : 'text-slate-500')}`}>24h</Text>
-                 </TouchableOpacity>
+              <View className="mb-8 flex-row justify-center self-center rounded-full bg-slate-200/20 p-1">
+                <TouchableOpacity
+                  onPress={() => setTimeFormat('12h')}
+                  className={`rounded-full px-6 py-2 ${timeFormat === '12h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}>
+                  <Text
+                    className={`font-medium ${timeFormat === '12h' ? 'text-white' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    12h
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setTimeFormat('24h')}
+                  className={`rounded-full px-6 py-2 ${timeFormat === '24h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}>
+                  <Text
+                    className={`font-medium ${timeFormat === '24h' ? 'text-white' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    24h
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Time Picker */}
-              <View className="flex-row justify-center items-center gap-4 mb-8 h-[150px]">
-                 <WheelPicker 
-                   data={timeFormat === '12h' ? Array.from({length: 12}, (_, i) => i + 1) : Array.from({length: 24}, (_, i) => i)} 
-                   selectedValue={tempHour} 
-                   onValueChange={setTempHour}
-                 />
-                 <Text className={`text-3xl font-bold ${isDarkMode ? 'text-slate-600' : 'text-slate-300'}`}>:</Text>
-                 <WheelPicker 
-                   data={Array.from({length: 60}, (_, i) => i)} 
-                   selectedValue={tempMinute} 
-                   onValueChange={setTempMinute}
-                 />
-                 {timeFormat === '12h' && (
-                   <>
-                     <View className="w-2" />
-                     <WheelPicker 
-                       data={['AM', 'PM']} 
-                       selectedValue={tempAmPm} 
-                       onValueChange={setTempAmPm} 
-                     />
-                   </>
-                 )}
+              <View className="mb-8 h-[150px] flex-row items-center justify-center gap-4">
+                <WheelPicker
+                  data={
+                    timeFormat === '12h'
+                      ? Array.from({ length: 12 }, (_, i) => i + 1)
+                      : Array.from({ length: 24 }, (_, i) => i)
+                  }
+                  selectedValue={tempHour}
+                  onValueChange={setTempHour}
+                />
+                <Text
+                  className={`text-3xl font-bold ${isDarkMode ? 'text-slate-600' : 'text-slate-300'}`}>
+                  :
+                </Text>
+                <WheelPicker
+                  data={Array.from({ length: 60 }, (_, i) => i)}
+                  selectedValue={tempMinute}
+                  onValueChange={setTempMinute}
+                />
+                {timeFormat === '12h' && (
+                  <>
+                    <View className="w-2" />
+                    <WheelPicker
+                      data={['AM', 'PM']}
+                      selectedValue={tempAmPm}
+                      onValueChange={setTempAmPm}
+                    />
+                  </>
+                )}
               </View>
 
               {/* Footer Actions */}
               <View className="flex-row gap-4">
-                 <TouchableOpacity 
-                    className={`flex-1 py-3 rounded-xl items-center ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
-                    onPress={() => setTimeFormatModalVisible(false)}
-                 >
-                    <Text className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>Cancel</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity 
-                    className="flex-1 py-3 rounded-xl items-center bg-[#7EA6E0]"
-                    onPress={handleTimeSave}
-                 >
-                    <Text className="font-semibold text-white">Done</Text>
-                 </TouchableOpacity>
+                <TouchableOpacity
+                  className={`flex-1 items-center rounded-xl py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
+                  onPress={() => setTimeFormatModalVisible(false)}>
+                  <Text className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 items-center rounded-xl bg-[#7EA6E0] py-3"
+                  onPress={handleTimeSave}>
+                  <Text className="font-semibold text-white">Done</Text>
+                </TouchableOpacity>
               </View>
-
             </View>
           </View>
         </Modal>
@@ -399,42 +515,40 @@ export default function SettingScreen() {
           animationType="fade"
           transparent={true}
           visible={dateModalVisible}
-          onRequestClose={() => setDateModalVisible(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/80">
-            <View className={`w-[90%] rounded-3xl p-6 shadow-2xl relative ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-              
-              <CalendarPicker 
-                selectedDate={tempDate} 
-                onDateChange={setTempDate}
-              />
+          onRequestClose={() => setDateModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/80">
+            <View
+              className={`relative w-[90%] rounded-3xl p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <CalendarPicker selectedDate={tempDate} onDateChange={setTempDate} />
 
               {/* Format Selector */}
-               <View className="mt-6 flex-row items-center justify-between bg-slate-500/10 p-3 rounded-xl">
-                 <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Format</Text>
-                 <TouchableOpacity onPress={cycleDateFormat}>
-                    <Text className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
-                      {getDateFormatPreview(dateFormat, tempDate)}
-                    </Text>
-                  </TouchableOpacity>
-               </View>
-
-              {/* Footer Actions */}
-              <View className="flex-row gap-4 mt-6">
-                 <TouchableOpacity 
-                    className={`flex-1 py-3 rounded-xl items-center ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
-                    onPress={() => setDateModalVisible(false)}
-                 >
-                    <Text className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>Cancel</Text>
-                 </TouchableOpacity>
-                 <TouchableOpacity 
-                    className="flex-1 py-3 rounded-xl items-center bg-[#7EA6E0]"
-                    onPress={handleDateSave}
-                 >
-                    <Text className="font-semibold text-white">Done</Text>
-                 </TouchableOpacity>
+              <View className="mt-6 flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3">
+                <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Format
+                </Text>
+                <TouchableOpacity onPress={cycleDateFormat}>
+                  <Text
+                    className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
+                    {getDateFormatPreview(dateFormat, tempDate)}
+                  </Text>
+                </TouchableOpacity>
               </View>
 
+              {/* Footer Actions */}
+              <View className="mt-6 flex-row gap-4">
+                <TouchableOpacity
+                  className={`flex-1 items-center rounded-xl py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
+                  onPress={() => setDateModalVisible(false)}>
+                  <Text className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="flex-1 items-center rounded-xl bg-[#7EA6E0] py-3"
+                  onPress={handleDateSave}>
+                  <Text className="font-semibold text-white">Done</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </Modal>
@@ -444,42 +558,55 @@ export default function SettingScreen() {
           animationType="fade"
           transparent={true}
           visible={infoModalVisible}
-          onRequestClose={() => setInfoModalVisible(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/80">
-            <View className={`w-[90%] max-h-[80%] rounded-3xl p-6 shadow-2xl relative ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-              <Text className={`text-xl font-bold mb-4 text-center ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+          onRequestClose={() => setInfoModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/80">
+            <View
+              className={`relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <Text
+                className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
                 {infoModalType === 'privacy' ? 'Privacy Policy' : 'Our Goal'}
               </Text>
-              
+
               <ScrollView className="mb-6" showsVerticalScrollIndicator={false}>
-                <Text className={`text-base leading-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                <Text
+                  className={`text-base leading-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                   {infoModalType === 'privacy' ? (
                     <>
-                      Your privacy is important to us. It is Minimal Life's policy to respect your privacy regarding any information we may collect from you across our application.
+                      Your privacy is important to us. It is Minimal Life's policy to respect your
+                      privacy regarding any information we may collect from you across our
+                      application.
                       {'\n\n'}
-                      We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent.
+                      We only ask for personal information when we truly need it to provide a
+                      service to you. We collect it by fair and lawful means, with your knowledge
+                      and consent.
                       {'\n\n'}
-                      We don't share any personally identifying information publicly or with third-parties, except when required to by law.
+                      We don't share any personally identifying information publicly or with
+                      third-parties, except when required to by law.
                       {'\n\n'}
-                      Our app may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies.
+                      Our app may link to external sites that are not operated by us. Please be
+                      aware that we have no control over the content and practices of these sites,
+                      and cannot accept responsibility or liability for their respective privacy
+                      policies.
                     </>
                   ) : (
                     <>
-                      Our goal is to help you reduce digital distractions and focus on what truly matters in your life. 
+                      Our goal is to help you reduce digital distractions and focus on what truly
+                      matters in your life.
                       {'\n\n'}
-                      We believe that technology should serve us, not the other way around. By providing a clean, minimal interface, we hope to encourage mindfulness and intentionality in your daily smartphone usage.
+                      We believe that technology should serve us, not the other way around. By
+                      providing a clean, minimal interface, we hope to encourage mindfulness and
+                      intentionality in your daily smartphone usage.
                       {'\n\n'}
-                      Thank you for being a part of our journey towards a simpler, more focused life.
+                      Thank you for being a part of our journey towards a simpler, more focused
+                      life.
                     </>
                   )}
                 </Text>
               </ScrollView>
 
-              <TouchableOpacity 
-                className="w-full py-3 rounded-xl items-center bg-[#7EA6E0]"
-                onPress={() => setInfoModalVisible(false)}
-              >
+              <TouchableOpacity
+                className="w-full items-center rounded-xl bg-[#7EA6E0] py-3"
+                onPress={() => setInfoModalVisible(false)}>
                 <Text className="font-semibold text-white">Close</Text>
               </TouchableOpacity>
             </View>
@@ -491,48 +618,39 @@ export default function SettingScreen() {
           animationType="fade"
           transparent={true}
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}
-        >
-          <View className="flex-1 justify-center items-center bg-black/50">
-            <View className="w-[85%] bg-[#0EA5E9] rounded-3xl p-6 items-center shadow-lg relative overflow-hidden">
-              
+          onRequestClose={() => setModalVisible(false)}>
+          <View className="flex-1 items-center justify-center bg-black/50">
+            <View className="relative w-[85%] items-center overflow-hidden rounded-3xl bg-[#0EA5E9] p-6 shadow-lg">
               {/* Badge Icon */}
-              <View className="items-center mb-2">
-                 <MaterialCommunityIcons name="certificate-outline" size={50} color="white" />
+              <View className="mb-2 items-center">
+                <MaterialCommunityIcons name="certificate-outline" size={50} color="white" />
               </View>
 
               {/* Title */}
-              <Text className="text-white text-2xl font-bold mb-1">
-                Premium Feature!
-              </Text>
+              <Text className="mb-1 text-2xl font-bold text-white">Premium Feature!</Text>
 
               {/* Subtitle */}
-              <Text className="text-white/90 text-sm mb-6 font-medium">
+              <Text className="mb-6 text-sm font-medium text-white/90">
                 Only premium user can use this feature
               </Text>
 
               {/* Discover Button */}
-              <TouchableOpacity 
+              <TouchableOpacity
                 activeOpacity={0.8}
                 onPress={() => {
                   setModalVisible(false);
                   router.push('/PremiumPackageScreen');
                 }}
-                className="bg-white px-8 py-3 rounded-xl shadow-sm"
-              >
-                <Text className="text-[#0EA5E9] font-bold text-base">
-                  Discover
-                </Text>
-              </TouchableOpacity>
-              
-              {/* Close Button (Optional UX improvement) */}
-               <TouchableOpacity 
-                className="absolute top-4 right-4"
-                onPress={() => setModalVisible(false)}
-              >
-                <Ionicons name="close" size={24} color="white" />
+                className="rounded-xl bg-white px-8 py-3 shadow-sm">
+                <Text className="text-base font-bold text-[#0EA5E9]">Discover</Text>
               </TouchableOpacity>
 
+              {/* Close Button (Optional UX improvement) */}
+              <TouchableOpacity
+                className="absolute right-4 top-4"
+                onPress={() => setModalVisible(false)}>
+                <Ionicons name="close" size={24} color="white" />
+              </TouchableOpacity>
             </View>
           </View>
         </Modal>
@@ -588,12 +706,13 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Time Format
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="rounded-full bg-[#7EA6E0] px-3 py-1"
-                onPress={() => setTimeFormatModalVisible(true)}
-              >
+                onPress={() => setTimeFormatModalVisible(true)}>
                 <Text className="text-sm text-white">
-                  {timeFormat === '12h' ? `12h (${getCurrentDisplayTime()})` : `24h (${getCurrentDisplayTime()})`}
+                  {timeFormat === '12h'
+                    ? `12h (${getCurrentDisplayTime()})`
+                    : `24h (${getCurrentDisplayTime()})`}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -603,10 +722,9 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Date Format
               </Text>
-              <TouchableOpacity 
+              <TouchableOpacity
                 className="rounded-full bg-[#7EA6E0] px-3 py-1"
-                onPress={() => setDateModalVisible(true)}
-              >
+                onPress={() => setDateModalVisible(true)}>
                 <Text className="text-sm text-white">{getDateFormatPreview(dateFormat)}</Text>
               </TouchableOpacity>
             </View>
@@ -801,24 +919,22 @@ export default function SettingScreen() {
 
           <View
             className={`flex-row items-center justify-center rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-1 items-center border-r border-slate-200"
               onPress={() => {
                 setInfoModalType('privacy');
                 setInfoModalVisible(true);
-              }}
-            >
+              }}>
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Privacy Policy
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity 
+            <TouchableOpacity
               className="flex-1 items-center"
               onPress={() => {
                 setInfoModalType('goal');
                 setInfoModalVisible(true);
-              }}
-            >
+              }}>
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Our Goal
               </Text>
@@ -826,46 +942,48 @@ export default function SettingScreen() {
           </View>
         </View>
 
-        {/* Contact/Feedback Card */}
+        {/* Support Section */}
         <View
-          className={`mt-6 items-center rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-          <View className="mb-4 flex-row gap-8">
-            <TouchableOpacity
-              className="flex-row items-center"
-              onPress={() => setContactOption('issue')}>
-              <MaterialCommunityIcons
-                name={contactOption === 'issue' ? 'radiobox-marked' : 'radiobox-blank'}
-                size={20}
-                color="#7EA6E0"
-              />
-              <Text
-                className={`ml-2 font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                Issue
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              className="flex-row items-center"
-              onPress={() => setContactOption('suggestion')}>
-              <MaterialCommunityIcons
-                name={contactOption === 'suggestion' ? 'radiobox-marked' : 'radiobox-blank'}
-                size={20}
-                color="#7EA6E0"
-              />
-              <Text
-                className={`ml-2 font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                Suggestion
-              </Text>
-            </TouchableOpacity>
+          className={`mt-4 rounded-lg p-4 shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#E3E8F1]'}`}>
+          <View
+            className={`flex-row justify-around border-b pb-3 ${isDarkMode ? 'border-[#121212]' : 'border-[#FFFFFF]'}`}>
+            {['App Issue', 'Suggestion'].map((option) => {
+              const value = option === 'App Issue' ? 'issue' : 'suggestion';
+              const isSelected = contactOption === value;
+              return (
+                <TouchableOpacity
+                  key={option}
+                  onPress={() => setContactOption(value)}
+                  className="flex-row items-center">
+                  <MaterialCommunityIcons
+                    name={isSelected ? 'radiobox-marked' : 'radiobox-blank'}
+                    size={18}
+                    color={isSelected ? (isDarkMode ? '#637E99' : selectedColor) : '#8D99AE'}
+                  />
+                  <Text
+                    className={`ml-2 text-sm ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#2B2D42]'}`}>
+                    {option}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
 
-          <TouchableOpacity className="mb-3 w-1/2 items-center rounded-lg bg-[#7EA6E0] py-2.5">
-            <Text className="text-base font-medium text-white">Contact Us</Text>
+          {/* Contact Us button centered */}
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={handleEmailPress}
+            className={`mx-8 mt-12 items-center justify-center rounded-full py-3 shadow-lg ${isDarkMode ? 'bg-[#637E99]' : ''}`}
+            style={!isDarkMode ? { backgroundColor: selectedColor } : {}}>
+            <Text className={`text-sm font-medium ${isDarkMode ? 'text-black' : 'text-white'}`}>
+              Contact Us
+            </Text>
           </TouchableOpacity>
 
-          <Text className="px-4 text-center text-xs leading-5 text-slate-400">
-            Please let us know any issue or suggestion.{'\n'}
-            Our dedicated developers are ready to fix your issue ASAP.
+          <Text
+            className={`mt-3 text-center text-xs ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#8D99AE]'}`}>
+            Please let us know any issue or suggestion.
+            {'\n'}Our dedicated developers are ready to fix your issue ASAP.
           </Text>
         </View>
 
@@ -900,18 +1018,19 @@ const ColorOption = ({
 }: ColorOptionProps) => (
   <TouchableOpacity onPress={onPress} className="m-0.5">
     <View
-      className={`rounded-full border-2 relative w-[30px] h-[30px]`}
-      style={{ 
-        backgroundColor: color, 
-        borderColor: isSelected 
-          ? (isDarkMode ? "gray" : "#3B82F6") 
-          : (isDarkMode ? "#FFFFFF" : "#3B82F6")
-      }}
-    >
+      className={`relative h-[30px] w-[30px] rounded-full border-2`}
+      style={{
+        backgroundColor: color,
+        borderColor: isSelected
+          ? isDarkMode
+            ? 'gray'
+            : '#3B82F6'
+          : isDarkMode
+            ? '#FFFFFF'
+            : '#3B82F6',
+      }}>
       {isPremium && (
-        <View
-          className="absolute -top-1 -right-1 bg-amber-500 rounded-full w-4 h-4 items-center justify-center"
-        >
+        <View className="absolute -right-1 -top-1 h-4 w-4 items-center justify-center rounded-full bg-amber-500">
           <Ionicons name="lock-closed" size={10} color="white" />
         </View>
       )}
