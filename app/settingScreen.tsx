@@ -19,6 +19,8 @@ export default function SettingScreen() {
   const [homeWallpaper, setHomeWallpaper] = useState(true);
   const [timeFormatModalVisible, setTimeFormatModalVisible] = useState(false);
   const [dateModalVisible, setDateModalVisible] = useState(false);
+  const [infoModalVisible, setInfoModalVisible] = useState(false);
+  const [infoModalType, setInfoModalType] = useState<'privacy' | 'goal'>('privacy');
   const [modalVisible, setModalVisible] = useState(false);
   
   const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
@@ -437,6 +439,53 @@ export default function SettingScreen() {
           </View>
         </Modal>
 
+        {/* Info Modal (Privacy / Goal) */}
+        <Modal
+          animationType="fade"
+          transparent={true}
+          visible={infoModalVisible}
+          onRequestClose={() => setInfoModalVisible(false)}
+        >
+          <View className="flex-1 justify-center items-center bg-black/80">
+            <View className={`w-[90%] max-h-[80%] rounded-3xl p-6 shadow-2xl relative ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <Text className={`text-xl font-bold mb-4 text-center ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                {infoModalType === 'privacy' ? 'Privacy Policy' : 'Our Goal'}
+              </Text>
+              
+              <ScrollView className="mb-6" showsVerticalScrollIndicator={false}>
+                <Text className={`text-base leading-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  {infoModalType === 'privacy' ? (
+                    <>
+                      Your privacy is important to us. It is Minimal Life's policy to respect your privacy regarding any information we may collect from you across our application.
+                      {'\n\n'}
+                      We only ask for personal information when we truly need it to provide a service to you. We collect it by fair and lawful means, with your knowledge and consent.
+                      {'\n\n'}
+                      We don't share any personally identifying information publicly or with third-parties, except when required to by law.
+                      {'\n\n'}
+                      Our app may link to external sites that are not operated by us. Please be aware that we have no control over the content and practices of these sites, and cannot accept responsibility or liability for their respective privacy policies.
+                    </>
+                  ) : (
+                    <>
+                      Our goal is to help you reduce digital distractions and focus on what truly matters in your life. 
+                      {'\n\n'}
+                      We believe that technology should serve us, not the other way around. By providing a clean, minimal interface, we hope to encourage mindfulness and intentionality in your daily smartphone usage.
+                      {'\n\n'}
+                      Thank you for being a part of our journey towards a simpler, more focused life.
+                    </>
+                  )}
+                </Text>
+              </ScrollView>
+
+              <TouchableOpacity 
+                className="w-full py-3 rounded-xl items-center bg-[#7EA6E0]"
+                onPress={() => setInfoModalVisible(false)}
+              >
+                <Text className="font-semibold text-white">Close</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+
         {/* Premium Modal */}
         <Modal
           animationType="fade"
@@ -752,12 +801,24 @@ export default function SettingScreen() {
 
           <View
             className={`flex-row items-center justify-center rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <TouchableOpacity className="flex-1 items-center border-r border-slate-200">
+            <TouchableOpacity 
+              className="flex-1 items-center border-r border-slate-200"
+              onPress={() => {
+                setInfoModalType('privacy');
+                setInfoModalVisible(true);
+              }}
+            >
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Privacy Policy
               </Text>
             </TouchableOpacity>
-            <TouchableOpacity className="flex-1 items-center">
+            <TouchableOpacity 
+              className="flex-1 items-center"
+              onPress={() => {
+                setInfoModalType('goal');
+                setInfoModalVisible(true);
+              }}
+            >
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Our Goal
               </Text>
