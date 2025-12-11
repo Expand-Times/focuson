@@ -19,6 +19,7 @@ import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/C
 import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignInWithGoogle from './SignInWithGoogle';
+import { openPlayStoreForRating } from './lib/rateApp';
 type ColorOptionProps = {
   color: string;
   onPress: () => void;
@@ -121,7 +122,7 @@ export default function SettingScreen() {
       let h = now.getHours();
       const m = now.getMinutes();
 
-      if (timeFormat === '12h') {
+      if (is12HourFormat(timeFormat)) {
         setTempAmPm(h >= 12 ? 'PM' : 'AM');
         h = h % 12;
         h = h ? h : 12; // 0 should be 12
@@ -146,7 +147,7 @@ export default function SettingScreen() {
 
     let targetHour = tempHour;
 
-    if (timeFormat === '12h') {
+    if (is12HourFormat(timeFormat)) {
       if (tempAmPm === 'PM' && targetHour < 12) targetHour += 12;
       if (tempAmPm === 'AM' && targetHour === 12) targetHour = 0;
     }
@@ -378,13 +379,30 @@ export default function SettingScreen() {
     );
   };
 
+  const cycleTimeFormat = () => {
+    const formats = ['HH:MM', 'HH:MM PM', 'HH:MM:SS', 'HH:MM:SS PM'];
+    // Normalize current format if it's legacy
+    let current = timeFormat;
+    if (timeFormat === '12h') current = 'HH:MM PM';
+    if (timeFormat === '24h') current = 'HH:MM';
+    
+    const currentIndex = formats.indexOf(current);
+    const nextIndex = (currentIndex + 1) % formats.length;
+    setTimeFormat(formats[nextIndex]);
+  };
+
+  const is12HourFormat = (format: string) => {
+    return format === '12h' || format.includes('PM');
+  };
+
   const cycleDateFormat = () => {
     const formats = [
-      'weekday, day month year',
-      'day month year',
-      'day/month/year',
-      'month/day/year',
-      'year-month-day',
+      'DD:MM:YYYY',
+      'DD:MM:YY',
+      'MM:DD:YYYY',
+      'MM:DD:YY',
+      'DD:Mon:YYYY',
+      'Mon:DD:YYYY',
     ];
     const currentIndex = formats.indexOf(dateFormat);
     const nextIndex = (currentIndex + 1) % formats.length;
@@ -393,7 +411,22 @@ export default function SettingScreen() {
 
   const getDateFormatPreview = (format: string, date?: Date) => {
     const now = date || new Date(Date.now() + (timeOffset || 0));
+    const d = now.getDate();
+    const m = now.getMonth() + 1;
+    const y = now.getFullYear();
+    const yy = y.toString().slice(-2);
+    const mon = now.toLocaleString('en-US', { month: 'short' });
+    
+    const z = (n: number) => n.toString().padStart(2, '0');
+
     switch (format) {
+      case 'DD:MM:YYYY': return `${z(d)}:${z(m)}:${y}`;
+      case 'DD:MM:YY': return `${z(d)}:${z(m)}:${yy}`;
+      case 'MM:DD:YYYY': return `${z(m)}:${z(d)}:${y}`;
+      case 'MM:DD:YY': return `${z(m)}:${z(d)}:${yy}`;
+      case 'DD:Mon:YYYY': return `${z(d)} ${mon} ${y}`;
+      case 'Mon:DD:YYYY': return `${mon} ${z(d)}, ${y}`;
+      // Legacy support
       case 'weekday, day month year':
         return now.toLocaleDateString('en-GB', {
           weekday: 'long',
@@ -435,9 +468,36 @@ export default function SettingScreen() {
 
   const getCurrentDisplayTime = () => {
     const now = new Date(Date.now() + (timeOffset || 0));
-    if (timeFormat === '12h') {
-      return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    const h = now.getHours();
+    const m = now.getMinutes();
+    const s = now.getSeconds();
+    
+    const z = (n: number) => n.toString().padStart(2, '0');
+    
+    // Normalize legacy formats
+    let currentFormat = timeFormat;
+    if (timeFormat === '12h') currentFormat = 'HH:MM PM';
+    if (timeFormat === '24h') currentFormat = 'HH:MM';
+
+    if (currentFormat === 'HH:MM') {
+      return `${z(h)}:${z(m)}`;
     }
+    if (currentFormat === 'HH:MM PM') {
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${z(h12)}:${z(m)} ${ampm}`;
+    }
+    if (currentFormat === 'HH:MM:SS') {
+      return `${z(h)}:${z(m)}:${z(s)}`;
+    }
+    if (currentFormat === 'HH:MM:SS PM') {
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const h12 = h % 12 || 12;
+      return `${z(h12)}:${z(m)}:${z(s)} ${ampm}`;
+    }
+
+    // Fallback
+    if (timeFormat === '12h') return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     return now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
@@ -483,22 +543,15 @@ export default function SettingScreen() {
                 Set Time
               </Text>
 
-              {/* Format Toggle */}
-              <View className="mb-8 flex-row justify-center self-center rounded-full bg-slate-200/20 p-1">
-                <TouchableOpacity
-                  onPress={() => setTimeFormat('12h')}
-                  className={`rounded-full px-6 py-2 ${timeFormat === '12h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}>
+              {/* Format Selector */}
+              <View className="mb-8 flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3 w-full">
+                <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Format
+                </Text>
+                <TouchableOpacity onPress={cycleTimeFormat}>
                   <Text
-                    className={`font-medium ${timeFormat === '12h' ? 'text-white' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    12h
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setTimeFormat('24h')}
-                  className={`rounded-full px-6 py-2 ${timeFormat === '24h' ? 'bg-[#7EA6E0]' : 'bg-transparent'}`}>
-                  <Text
-                    className={`font-medium ${timeFormat === '24h' ? 'text-white' : isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    24h
+                    className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
+                    {timeFormat === '12h' ? 'HH:MM PM' : timeFormat === '24h' ? 'HH:MM' : timeFormat}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -507,7 +560,7 @@ export default function SettingScreen() {
               <View className="mb-8 h-[150px] flex-row items-center justify-center gap-4">
                 <WheelPicker
                   data={
-                    timeFormat === '12h'
+                    is12HourFormat(timeFormat)
                       ? Array.from({ length: 12 }, (_, i) => i + 1)
                       : Array.from({ length: 24 }, (_, i) => i)
                   }
@@ -523,7 +576,7 @@ export default function SettingScreen() {
                   selectedValue={tempMinute}
                   onValueChange={setTempMinute}
                 />
-                {timeFormat === '12h' && (
+                {is12HourFormat(timeFormat) && (
                   <>
                     <View className="w-2" />
                     <WheelPicker
@@ -711,12 +764,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Phone dialer icon
               </Text>
-              <Switch
-                value={showPhoneDialer}
-                onValueChange={setShowPhoneDialer}
-                trackColor={{ false: '#E2E8F0', true: '#7EA6E0' }}
-                thumbColor={'white'}
-              />
+              <TouchableOpacity 
+                activeOpacity={0.8} 
+                onPress={() => setShowPhoneDialer(!showPhoneDialer)}
+                className="justify-center rounded-full px-[2px]"
+                style={{ 
+                  width: 45, 
+                  height: 25, 
+                  backgroundColor: showPhoneDialer 
+                    ? selectedColor || "#4CAF50" 
+                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
+                }} 
+              > 
+                <View 
+                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
+                  style={{ 
+                    alignSelf: showPhoneDialer ? "flex-end" : "flex-start", 
+                  }} 
+                /> 
+              </TouchableOpacity>
             </View>
 
             {/* Camera Icon */}
@@ -724,12 +790,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Camera icon
               </Text>
-              <Switch
-                value={showCameraIcon}
-                onValueChange={setShowCameraIcon}
-                trackColor={{ false: '#E2E8F0', true: '#7EA6E0' }}
-                thumbColor={'white'}
-              />
+              <TouchableOpacity 
+                activeOpacity={0.8} 
+                onPress={() => setShowCameraIcon(!showCameraIcon)}
+                className="justify-center rounded-full px-[2px]"
+                style={{ 
+                  width: 45, 
+                  height: 25, 
+                  backgroundColor: showCameraIcon 
+                    ? selectedColor || "#4CAF50" 
+                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
+                }} 
+              > 
+                <View 
+                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
+                  style={{ 
+                    alignSelf: showCameraIcon ? "flex-end" : "flex-start", 
+                  }} 
+                /> 
+              </TouchableOpacity>
             </View>
 
             {/* Alarm Clock */}
@@ -737,12 +816,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Alarm Clock icon
               </Text>
-              <Switch
-                value={alarmClock}
-                onValueChange={setAlarmClock}
-                trackColor={{ false: '#E2E8F0', true: '#7EA6E0' }}
-                thumbColor={'white'}
-              />
+              <TouchableOpacity 
+                activeOpacity={0.8} 
+                onPress={() => setAlarmClock(!alarmClock)}
+                className="justify-center rounded-full px-[2px]"
+                style={{ 
+                  width: 45, 
+                  height: 25, 
+                  backgroundColor: alarmClock 
+                    ? selectedColor || "#4CAF50" 
+                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
+                }} 
+              > 
+                <View 
+                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
+                  style={{ 
+                    alignSelf: alarmClock ? "flex-end" : "flex-start", 
+                  }} 
+                /> 
+              </TouchableOpacity>
             </View>
 
             {/* Time Format */}
@@ -754,9 +846,7 @@ export default function SettingScreen() {
                 className="rounded-full bg-[#7EA6E0] px-3 py-1"
                 onPress={() => setTimeFormatModalVisible(true)}>
                 <Text className="text-sm text-white">
-                  {timeFormat === '12h'
-                    ? `12h (${getCurrentDisplayTime()})`
-                    : `24h (${getCurrentDisplayTime()})`}
+                  {getCurrentDisplayTime()}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -803,32 +893,49 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Home Wallpaper
               </Text>
-              <Switch
-                value={homeWallpaper}
-                onValueChange={setHomeWallpaper}
-                trackColor={{ false: '#E2E8F0', true: '#7EA6E0' }}
-                thumbColor={'white'}
-              />
+              <TouchableOpacity 
+                activeOpacity={0.8} 
+                onPress={() => setHomeWallpaper(!homeWallpaper)}
+                className="justify-center rounded-full px-[2px]"
+                style={{ 
+                  width: 45, 
+                  height: 25, 
+                  backgroundColor: homeWallpaper 
+                    ? selectedColor || "#4CAF50" 
+                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
+                }} 
+              > 
+                <View 
+                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
+                  style={{ 
+                    alignSelf: homeWallpaper ? "flex-end" : "flex-start", 
+                  }} 
+                /> 
+              </TouchableOpacity>
             </View>
 
             {/* Select Wallpaper */}
-            <Text className={`mb-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-              Select
-            </Text>
-            <View className="mb-4 flex-row gap-2">
-              {AVAILABLE_WALLPAPERS.map((item, idx) => (
-                <TouchableOpacity
-                  key={idx}
-                  className={`h-10 w-10 overflow-hidden rounded-md border ${wallpaper === item ? 'border-2 border-[#7EA6E0]' : 'border-slate-200'}`}
-                  onPress={() => setWallpaper(item)}>
-                  {typeof item === 'string' ? (
-                    <View style={{ backgroundColor: item, width: '100%', height: '100%' }} />
-                  ) : (
-                    <Image source={item} className="h-full w-full" resizeMode="cover" />
-                  )}
-                </TouchableOpacity>
-              ))}
-            </View>
+            {homeWallpaper && (
+              <>
+                <Text className={`mb-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Select
+                </Text>
+                <View className="mb-4 flex-row gap-2">
+                  {AVAILABLE_WALLPAPERS.map((item, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      className={`h-10 w-10 overflow-hidden rounded-md border ${wallpaper === item ? 'border-2 border-[#7EA6E0]' : 'border-slate-200'}`}
+                      onPress={() => setWallpaper(item)}>
+                      {typeof item === 'string' ? (
+                        <View style={{ backgroundColor: item, width: '100%', height: '100%' }} />
+                      ) : (
+                        <Image source={item} className="h-full w-full" resizeMode="cover" />
+                      )}
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </>
+            )}
 
             {/* Color Scheme */}
             <View className="mb-2 flex-row items-center justify-between">
@@ -1083,7 +1190,7 @@ export default function SettingScreen() {
         </View>
 
         {/* Rate on Google Play */}
-        <TouchableOpacity className="mb-6 mt-6 w-full items-center rounded-xl bg-[#7EA6E0] py-3.5 shadow-sm">
+        <TouchableOpacity  onPress={openPlayStoreForRating} className="mb-6 mt-6 w-full items-center rounded-xl bg-[#7EA6E0] py-3.5 shadow-sm">
           <Text className="text-lg font-semibold text-white">Rate on Google Play</Text>
         </TouchableOpacity>
 

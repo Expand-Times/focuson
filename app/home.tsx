@@ -254,6 +254,61 @@ export default function Home() {
 
   const composedGestures = Gesture.Simultaneous(leftSwipeGesture, rightSwipeGesture);
 
+  const getFormattedTime = (date: Date) => {
+    const h = date.getHours();
+    const m = date.getMinutes();
+    const s = date.getSeconds();
+    const z = (n: number) => n.toString().padStart(2, '0');
+    
+    let format = timeFormat;
+    if (format === '12h') format = 'HH:MM PM';
+    if (format === '24h') format = 'HH:MM';
+
+    if (format === 'HH:MM') return { main: `${z(h)}:${z(m)}` };
+    if (format === 'HH:MM PM') {
+      const h12 = h % 12 || 12;
+      return { main: `${h12}:${z(m)}`, suffix: h >= 12 ? 'PM' : 'AM' };
+    }
+    if (format === 'HH:MM:SS') return { main: `${z(h)}:${z(m)}:${z(s)}` };
+    if (format === 'HH:MM:SS PM') {
+      const h12 = h % 12 || 12;
+      return { main: `${h12}:${z(m)}:${z(s)}`, suffix: h >= 12 ? 'PM' : 'AM' };
+    }
+    return { main: `${z(h)}:${z(m)}` };
+  };
+
+  const getFormattedDate = (date: Date) => {
+    const d = date.getDate();
+    const m = date.getMonth() + 1;
+    const y = date.getFullYear();
+    const yy = y.toString().slice(-2);
+    const mon = date.toLocaleString('en-US', { month: 'short' });
+    const z = (n: number) => n.toString().padStart(2, '0');
+
+    switch (dateFormat) {
+      case 'DD:MM:YYYY': return `${z(d)}:${z(m)}:${y}`;
+      case 'DD:MM:YY': return `${z(d)}:${z(m)}:${yy}`;
+      case 'MM:DD:YYYY': return `${z(m)}:${z(d)}:${y}`;
+      case 'MM:DD:YY': return `${z(m)}:${z(d)}:${yy}`;
+      case 'DD:Mon:YYYY': return `${z(d)} ${mon} ${y}`;
+      case 'Mon:DD:YYYY': return `${mon} ${z(d)}, ${y}`;
+      // Legacy
+      case 'weekday, day month year':
+        return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
+      case 'day month year':
+        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
+      case 'day/month/year':
+        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      case 'month/day/year':
+        return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      case 'year-month-day':
+        return date.toISOString().split('T')[0];
+      default: return dateFormat;
+    }
+  };
+
+  const timeDisplay = getFormattedTime(currentTime);
+
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <StatusBar 
@@ -280,46 +335,17 @@ export default function Home() {
           {/* Header: Time, Date, Battery */}
           <View className="mt-10 items-center">
             <View className="flex-row items-baseline">
-              {timeFormat === '12h' ? (
-                <>
-                  <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
-                    {currentTime.getHours() % 12 || 12}:
-                    {currentTime.getMinutes().toString().padStart(2, '0')}
-                  </Text>
-                  <Text allowFontScaling={false} className={`ml-1 text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-[#2E3A4C]'}`}>
-                    {currentTime.getHours() >= 12 ? 'PM' : 'AM'}
-                  </Text>
-                </>
-              ) : (
                 <Text allowFontScaling={false} className={`font-regular text-[32px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
-                  {currentTime.getHours().toString().padStart(2, '0')}:
-                  {currentTime.getMinutes().toString().padStart(2, '0')}
+                  {timeDisplay.main}
                 </Text>
-              )}
+                {timeDisplay.suffix && (
+                  <Text allowFontScaling={false} className={`ml-1 text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-[#2E3A4C]'}`}>
+                    {timeDisplay.suffix}
+                  </Text>
+                )}
             </View>
             <Text allowFontScaling={false} className={`font-regular mt-1 text-[14px] ${isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
-              {dateFormat === 'weekday, day month year' && currentTime.toLocaleDateString('en-GB', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-              {dateFormat === 'day month year' && currentTime.toLocaleDateString('en-GB', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric',
-              })}
-              {dateFormat === 'day/month/year' && currentTime.toLocaleDateString('en-GB', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })}
-              {dateFormat === 'month/day/year' && currentTime.toLocaleDateString('en-US', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              })}
-              {dateFormat === 'year-month-day' && currentTime.toISOString().split('T')[0]}
+              {getFormattedDate(currentTime)}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
               <Ionicons name={getBatteryIcon()} size={24} color={isDarkMode ? "#64748B" : "#5B8BDF"} />

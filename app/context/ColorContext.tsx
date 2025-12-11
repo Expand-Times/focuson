@@ -30,8 +30,8 @@ interface ColorContextType {
   setShowPhoneDialer: (show: boolean) => void;
   showCameraIcon: boolean;
   setShowCameraIcon: (show: boolean) => void;
-  timeFormat: '12h' | '24h';
-  setTimeFormat: (format: '12h' | '24h') => void;
+  timeFormat: string;
+  setTimeFormat: (format: string) => void;
   toggleTimeFormat: () => void;
   dateFormat: string;
   setDateFormat: (format: string) => void;
@@ -58,7 +58,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
   const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
   const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
-  const [timeFormat, setTimeFormatState] = useState<'12h' | '24h'>('12h');
+  const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
   const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
   const [timeOffset, setTimeOffsetState] = useState<number>(0);
 
@@ -86,7 +86,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
       if (savedPremium) setIsPremium(savedPremium === 'true');
       if (savedPhoneDialer) setShowPhoneDialerState(savedPhoneDialer === 'true');
       if (savedCameraIcon) setShowCameraIconState(savedCameraIcon === 'true');
-      if (savedTimeFormat) setTimeFormatState(savedTimeFormat as '12h' | '24h');
+      if (savedTimeFormat) setTimeFormatState(savedTimeFormat);
       if (savedDateFormat) setDateFormatState(savedDateFormat);
       if (savedTimeOffset) setTimeOffsetState(parseInt(savedTimeOffset, 10));
       if (savedWallpaperIndex !== null) {
@@ -178,7 +178,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
     }
   };
 
-  const setTimeFormat = async (format: '12h' | '24h') => {
+  const setTimeFormat = async (format: string) => {
     try {
       setTimeFormatState(format);
       await AsyncStorage.setItem('timeFormat', format);
