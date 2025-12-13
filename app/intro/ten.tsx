@@ -60,8 +60,7 @@ export default function IntroTen() {
                 <View className=" flex-row items-end justify-between px-2  relative">
                     {/* Horizontal Grid Lines */}
                     <View className="absolute top-0 left-0 right-0 bottom-0 z-0">
-                        {Array.from({ length: Math.floor(MAX_SCALE_HOURS / 0.5) + 1 }).map((_, i) => {
-                            const h = i * 0.5;
+                        {[0, assumedHours, actualHours, 2.5, 1.5].map((h, i) => {
                             return (
                                 <View 
                                     key={i} 
