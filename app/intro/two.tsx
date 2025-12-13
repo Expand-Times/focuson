@@ -16,7 +16,7 @@ export default function IntroTwo() {
 
   return (
     <SafeAreaView className="flex-1 bg-[#EBF1F7]">
-      <StatusBar />
+      <StatusBar/>
       <View className="flex-1 items-center justify-between px-6 py-12">
         {/* Header Section */}
         <View className="mt-8 items-center">

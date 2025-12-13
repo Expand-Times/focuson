@@ -10,7 +10,7 @@ export default function IntroSix() {
   const router = useRouter();
 
   return (
-    <SafeAreaView className="flex-1 bg-[#EEF2F6]">
+    <SafeAreaView className="flex-1 bg-[#EBF1F7]">
       <View className="flex-1 px-6 pt-8">
         {/* Main Content Area */}
         <View className="flex-1 items-center justify-center">

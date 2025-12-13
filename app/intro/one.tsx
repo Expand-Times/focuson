@@ -7,13 +7,13 @@ import { useRouter } from 'expo-router';
 export default function IntroOne() {
   const router = useRouter();
 
-  // useEffect(() => {
-  //   const timer = setTimeout(() => {
-  //     router.push('/intro/two');
-  //   }, 500);
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push('/intro/two');
+    }, 500);
 
-  //   return () => clearTimeout(timer);
-  // }, []);
+    return () => clearTimeout(timer);
+  }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-[#E1EAF5]">
