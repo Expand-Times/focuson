@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, Image } from 'react-native';
-import { MaterialCommunityIcons, Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { View, Text, TouchableOpacity, ScrollView, SafeAreaView, } from 'react-native';
+import { MaterialCommunityIcons, } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
-import { LinearGradient } from 'expo-linear-gradient';
+
 
 export default function PremiumPackageScreen() {
   const router = useRouter();

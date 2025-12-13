@@ -7,17 +7,17 @@ import { useRouter } from 'expo-router';
 export default function IntroOne() {
   const router = useRouter();
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      router.push('/intro/two');
-    }, 500);
+  // useEffect(() => {
+  //   const timer = setTimeout(() => {
+  //     router.push('/intro/two');
+  //   }, 500);
 
-    return () => clearTimeout(timer);
-  }, []);
+  //   return () => clearTimeout(timer);
+  // }, []);
 
   return (
     <SafeAreaView className="flex-1 bg-[#E1EAF5]">
-      <StatusBar backgroundColor="#EEF2F6" barStyle="dark-content" />
+      <StatusBar backgroundColor="#7EA9E5" barStyle="dark-content" />
       <View className="flex-1 items-center justify-center px-6">
         {/* Central White Circle */}
         <View className="">
