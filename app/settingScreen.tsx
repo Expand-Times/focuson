@@ -466,7 +466,7 @@ export default function SettingScreen() {
   };
 
   // Define theme colors
-  const freeColors = ['#3580FF', '#27282A', '#20BAD9'];
+  const freeColors = ['#7EA9E5', '#27282A', '#20BAD9'];
   const premiumColors = ['#F2247A', '#29CC5F', '#F2C66D', '#7441D9', '#E58439'];
   const handleThemeSelect = (color: string) => {
     if (freeColors.includes(color) || isPremium) {
@@ -516,26 +516,26 @@ export default function SettingScreen() {
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
       {/* Header */}
       <View
-        className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
+        className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
         <TouchableOpacity onPress={() => router.back()}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
-            color={isDarkMode ? '#E2E8F0' : '#64748B'}
+            color={isDarkMode ? '#E2E8F0' : '#8698B2'}
           />
         </TouchableOpacity>
-        <Text className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
+        <Text className={`text-[18px] font-bold ${isDarkMode ? 'text-white' : '#2E3B4D'}`}>
           Settings
         </Text>
         <TouchableOpacity>
           <MaterialCommunityIcons
             name="magnify"
             size={24}
-            color={isDarkMode ? '#94A3B8' : '#94A3B8'}
+            color={isDarkMode ? '#94A3B8' : '#8698B2'}
           />
         </TouchableOpacity>
       </View>
-
+      <View className="border-b border-[#A3B9D9] dark:border-slate-700"></View>
       <ScrollView
         className="flex-1 px-4"
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -621,7 +621,6 @@ export default function SettingScreen() {
             </View>
           </View>
         </Modal>
-
         {/* Date Settings Modal */}
         <Modal
           animationType="fade"
@@ -664,7 +663,6 @@ export default function SettingScreen() {
             </View>
           </View>
         </Modal>
-
         {/* Info Modal (Privacy / Goal) */}
         <Modal
           animationType="fade"
@@ -724,7 +722,6 @@ export default function SettingScreen() {
             </View>
           </View>
         </Modal>
-
         {/* Premium Modal */}
         <Modal
           animationType="fade"
@@ -766,17 +763,17 @@ export default function SettingScreen() {
             </View>
           </View>
         </Modal>
-
         {/* Home Screen Section */}
         <View className="mt-4">
           <Text
-            className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
             Home Screen
           </Text>
-          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+          {/* phone */}
+          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#FFFFFF]'}`}>
             {/* Phone Dialer */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Phone dialer icon
               </Text>
               <TouchableOpacity
@@ -790,7 +787,7 @@ export default function SettingScreen() {
                     ? selectedColor || '#4CAF50'
                     : isDarkMode
                       ? '#4B5563'
-                      : '#E2E8F0',
+                      : '#A3B9D9',
                 }}>
                 <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
@@ -803,7 +800,7 @@ export default function SettingScreen() {
 
             {/* Camera Icon */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Camera icon
               </Text>
               <TouchableOpacity
@@ -817,7 +814,7 @@ export default function SettingScreen() {
                     ? selectedColor || '#4CAF50'
                     : isDarkMode
                       ? '#4B5563'
-                      : '#E2E8F0',
+                      : '#A3B9D9',
                 }}>
                 <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
@@ -830,7 +827,7 @@ export default function SettingScreen() {
 
             {/* Alarm Clock */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Alarm Clock icon
               </Text>
               <TouchableOpacity
@@ -844,7 +841,7 @@ export default function SettingScreen() {
                     ? selectedColor || '#4CAF50'
                     : isDarkMode
                       ? '#4B5563'
-                      : '#E2E8F0',
+                      : '#A3B9D9',
                 }}>
                 <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
@@ -857,7 +854,7 @@ export default function SettingScreen() {
 
             {/* Time Format */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Time Format
               </Text>
               <TouchableOpacity
@@ -869,7 +866,7 @@ export default function SettingScreen() {
 
             {/* Date Format */}
             <View className="flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Date Format
               </Text>
               <TouchableOpacity
