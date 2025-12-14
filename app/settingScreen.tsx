@@ -47,6 +47,7 @@ export default function SettingScreen() {
   const router = useRouter();
   // State for toggles
   const [alarmClock, setAlarmClock] = useState(false);
+  const [showMore, setShowMore] = useState(true);
   const [showThemes, setShowThemes] = useState(false);
   const [homeWallpaper, setHomeWallpaper] = useState(true);
   const [timeFormatModalVisible, setTimeFormatModalVisible] = useState(false);
@@ -1063,85 +1064,94 @@ export default function SettingScreen() {
         <View className="mt-6">
           <View className="mb-2 flex-row items-center justify-between">
             <Text
-              className={`text-lg font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+              className={`text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
               More
             </Text>
-            <MaterialCommunityIcons name="chevron-down" size={24} color="#7EA6E0" />
-          </View>
-
-          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            {/* signout */}
-            <View className="mb-2 rounded-xl shadow">
-              {/* Header Row with Chevron */}
-              <TouchableOpacity
-                className="flex-row items-center justify-between rounded-xl p-4"
-                onPress={() => setShowSignOut(!showSignOut)} // Toggle show/hide
-              >
-                <View className="flex-row items-center">
-                  <View
-                    className={`mr-3 h-9 w-9 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1F1F1F]' : 'bg-[#F1F5FF]'}`}>
-                    <Image
-                      source={require('../assets/images/11.png')}
-                      className="h-6 w-6 rounded-sm"
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <Text
-                    allowFontScaling={false}
-                    className={`text-base ${isDarkMode ? 'text-[#EBF2F0]' : 'text-[#2B2D42]'}`}>
-                    Sign Out
-                  </Text>
-                </View>
-
-                <Ionicons
-                  name={showSignOut ? 'chevron-up' : 'chevron-down'}
-                  size={20}
-                  color={isDarkMode ? '#AAB2B0' : '#DFDFDF'}
-                />
-              </TouchableOpacity>
-
-              {/* Conditional Section: Sign Out or Sign In */}
-              {showSignOut &&
-                (userAuthInfo?.user?.user_metadata?.email ? (
-                  // User is logged in → show Sign Out button
-                  <TouchableOpacity
-                    onPress={handleSignOut}
-                    className={`mx-8 mt-4 items-center justify-center rounded-full py-3 shadow-lg ${isDarkMode ? 'bg-[#637E99]' : 'bg-white'}`}
-                    style={{
-                      shadowColor: '#4A90E2',
-                      shadowOffset: { width: 0, height: 5 },
-                      shadowOpacity: 0.15,
-                      shadowRadius: 20,
-                      elevation: 10,
-                    }}>
-                    <Text
-                      allowFontScaling={false}
-                      className="text-base font-medium text-gray-700"
-                      style={{ lineHeight: 20 }}>
-                      Sign Out
-                    </Text>
-                  </TouchableOpacity>
-                ) : (
-                  // User is not logged in → show Sign In with Google
-                  <SignInWithGoogle />
-                ))}
-            </View>
-
-            <View className="flex-row items-center justify-between py-2">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                Free Version
-              </Text>
-              <TouchableOpacity className="rounded-lg bg-[#7EA6E0] px-4 py-1.5">
-                <Text className="text-sm font-medium text-white">Check Premium</Text>
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity className="py-2">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                Recommend to F&F
-              </Text>
+            <TouchableOpacity onPress={() => setShowMore(!showMore)}>
+              <MaterialCommunityIcons
+                name={showMore ? 'chevron-up' : 'chevron-down'}
+                size={24}
+                color="#89A2CA"
+              />
             </TouchableOpacity>
           </View>
+
+          {showMore && (
+            <View
+              className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              {/* signout */}
+              <View className="mb-2 rounded-xl ">
+                {/* Header Row with Chevron */}
+                <TouchableOpacity
+                  className="flex-row items-center justify-between "
+                  onPress={() => setShowSignOut(!showSignOut)} // Toggle show/hide
+                >
+                  <View className="flex-row items-center">
+                    <View
+                      className={`mr-3 h-9 w-9 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1F1F1F]' : 'bg-[#F1F5FF]'}`}>
+                     <Ionicons
+                      name="log-out-outline"
+                      size={24}
+                      color={isDarkMode ? '#EBF2F0' : '#2B2D42'}
+                     />
+                    </View>
+                    <Text
+                      allowFontScaling={false}
+                      className={`text-[16px] font-regular ${isDarkMode ? 'text-[#EBF2F0]' : 'text-[#2B2D42]'}`}>
+                      Sign Out
+                    </Text>
+                  </View>
+
+                  <Ionicons
+                    name={showSignOut ? 'chevron-up' : 'chevron-down'}
+                    size={20}
+                    color={isDarkMode ? '#AAB2B0' : '#DFDFDF'}
+                  />
+                </TouchableOpacity>
+
+                {/* Conditional Section: Sign Out or Sign In */}
+                {showSignOut &&
+                  (userAuthInfo?.user?.user_metadata?.email ? (
+                    // User is logged in → show Sign Out button
+                    <TouchableOpacity
+                      onPress={handleSignOut}
+                      className={`mx-8 mt-4 items-center justify-center rounded-full py-3 shadow-lg ${isDarkMode ? 'bg-[#637E99]' : 'bg-white'}`}
+                      style={{
+                        shadowColor: '#4A90E2',
+                        shadowOffset: { width: 0, height: 5 },
+                        shadowOpacity: 0.15,
+                        shadowRadius: 20,
+                        elevation: 10,
+                      }}>
+                      <Text
+                        allowFontScaling={false}
+                        className="text-base font-medium text-gray-700"
+                        style={{ lineHeight: 20 }}>
+                        Sign Out
+                      </Text>
+                    </TouchableOpacity>
+                  ) : (
+                    // User is not logged in → show Sign In with Google
+                    <SignInWithGoogle />
+                  ))}
+              </View>
+
+              <View className="flex-row items-center justify-between py-2">
+                <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  Free Version
+                </Text>
+                <TouchableOpacity className="rounded-lg bg-[#7EA9E5] px-4 py-2">
+                  <Text className="text-[12px] font-regular text-white">Check Premium</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity className="py-2">
+                <Text className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  Recommend to F&F
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* About Minimal Life */}

@@ -1,36 +1,21 @@
-import React, {useState} from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  Alert
-} from 'react-native';
-import {
-  GoogleSignin,
-  statusCodes,
-} from '@react-native-google-signin/google-signin';
+import React, { useState } from 'react';
+import { Modal, View, Text, TouchableOpacity, Alert } from 'react-native';
+import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import {useNavigation} from '@react-navigation/native';
-import {StackNavigationProp} from '@react-navigation/stack';
+import { useNavigation } from '@react-navigation/native';
+import { StackNavigationProp } from '@react-navigation/stack';
 import { useColorContext } from './context/ColorContext';
 import { supabase } from './lib/supabase';
-
-
-
 
 type RootStackParamList = {
   TodaysTaskToDoScreen: undefined;
 };
 
-type SignInNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  'TodaysTaskToDoScreen'
->;
+type SignInNavigationProp = StackNavigationProp<RootStackParamList, 'TodaysTaskToDoScreen'>;
 
 export default function SignInWithGoogle() {
   const [showModal, setShowModal] = useState(false);
-  const {isDarkMode, selectedColor} = useColorContext();
+  const { isDarkMode, selectedColor } = useColorContext();
   const navigation = useNavigation<SignInNavigationProp>();
 
   GoogleSignin.configure({
@@ -43,7 +28,7 @@ export default function SignInWithGoogle() {
       const userInfo = await GoogleSignin.signIn();
 
       if (userInfo?.data?.idToken) {
-        const {data, error} = await supabase.auth.signInWithIdToken({
+        const { data, error } = await supabase.auth.signInWithIdToken({
           provider: 'google',
           token: userInfo.data.idToken,
         });
@@ -75,29 +60,27 @@ export default function SignInWithGoogle() {
 
   return (
     <>
-      <View className="overflow-hidden self-center">
+      <View className="self-center overflow-hidden">
         <TouchableOpacity
           onPress={handleSignIn}
-          className={`mt-12 items-center justify-center rounded-full border border-white px-[120px] py-3 shadow-lg ${isDarkMode ? 'border-[#637E99] bg-[#637E99]' : ''}`}
-          style={!isDarkMode ? {
-            shadowColor: 'rgba(74, 144, 226, .5)',
-            shadowOffset: {width: 0, height: 5},
-            shadowOpacity: 0.15,
-            shadowRadius: 20,
-            elevation: 10,
-            backgroundColor: selectedColor,
-          } : {
-            shadowColor: 'rgba(74, 144, 226, .5)',
-            shadowOffset: {width: 0, height: 5},
-            shadowOpacity: 0.15,
-            shadowRadius: 20,
-            elevation: 10,
-          }}>
+          className={`mt-[5%] mb-[10%] items-center justify-center rounded-full border border-white px-[120px] py-3  ${isDarkMode ? 'border-[#637E99] bg-[#637E99]' : ''}`}
+          style={
+            !isDarkMode
+              ? {
+                  backgroundColor: selectedColor,
+                }
+              : {
+                  shadowOffset: { width: 0, height: 5 },
+                  shadowOpacity: 0.15,
+                  shadowRadius: 20,
+                  elevation: 10,
+                }
+          }>
           {/* Button Text */}
           <Text
             allowFontScaling={false}
             className="text-sm font-semibold text-white"
-            style={{lineHeight: 20}}>
+            style={{ lineHeight: 20 }}>
             Sign in
           </Text>
         </TouchableOpacity>
@@ -113,13 +96,13 @@ export default function SignInWithGoogle() {
             <Text
               allowFontScaling={false}
               className="bottom-3 text-center text-[22px] font-medium text-white"
-              style={{letterSpacing: 1}}>
+              style={{ letterSpacing: 1 }}>
               Welcome!
             </Text>
             <Text
               allowFontScaling={false}
               className="bottom-2 text-center text-xs text-[#C6CEDD]"
-              style={{letterSpacing: 1}}>
+              style={{ letterSpacing: 1 }}>
               Successfully Signed In
             </Text>
 
@@ -129,7 +112,7 @@ export default function SignInWithGoogle() {
               <Text
                 allowFontScaling={false}
                 className="top-2 text-xs font-medium text-[#3580FF]"
-                style={{letterSpacing: 1}}>
+                style={{ letterSpacing: 1 }}>
                 Continue..
               </Text>
             </TouchableOpacity>
