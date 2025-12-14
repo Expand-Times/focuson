@@ -894,7 +894,7 @@ export default function SettingScreen() {
                 <TouchableOpacity onPress={toggleDarkMode}>
                   <MaterialCommunityIcons
                     name={isDarkMode ? 'weather-night' : 'theme-light-dark'}
-                    size={20}
+                    size={24}
                     color={isDarkMode ? '#E2E8F0' : '#64748B'}
                   />
                 </TouchableOpacity>
@@ -932,7 +932,7 @@ export default function SettingScreen() {
             {homeWallpaper && (
               <>
                 <Text
-                  className={`mb-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  className={`mb-2 text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                   Select
                 </Text>
                 <View className="mb-4 flex-row gap-1">
@@ -965,14 +965,14 @@ export default function SettingScreen() {
 
             {/* Color Scheme */}
             <View className="mb-2 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Color Scheme
               </Text>
               <MaterialCommunityIcons
                 onPress={() => setShowThemes(!showThemes)}
-                name="chevron-down"
-                size={24}
-                color="#94A3B8"
+                name={showThemes ? 'chevron-up' : 'chevron-down'}
+                size={25}
+                color="#89A2CA"
               />
             </View>
             {showThemes && (
@@ -1004,19 +1004,27 @@ export default function SettingScreen() {
         {/* In-app time reminder */}
         <View className="mt-6">
           <Text
-            className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             In-app time reminder
           </Text>
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             <Text
-              className={`mb-3 text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+              className={`mb-3 text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
               When time is over (Set Default)
             </Text>
 
-            <TouchableOpacity className="mb-2 flex-row items-center" disabled>
-              <MaterialCommunityIcons name="radiobox-marked" size={20} color="#94A3B8" />
-              <Text className="ml-2 text-base text-slate-400">
-                Mindful delay <Text className="text-xs">(coming soon)</Text>
+           <View className=" ml-[5%]">
+             <TouchableOpacity
+              className="mb-2 flex-row items-center"
+              onPress={() => setReminderOption('mindful')}>
+              <MaterialCommunityIcons
+                name={reminderOption === 'mindful' ? 'radiobox-marked' : 'radiobox-blank'}
+                size={25}
+                color="#5C8BCC"
+              />
+              <Text
+                className={`ml-2 text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#858E9D]'}`}>
+                Mindful delay <Text className="text-[12px]">(coming soon)</Text>
               </Text>
             </TouchableOpacity>
 
@@ -1025,11 +1033,11 @@ export default function SettingScreen() {
               onPress={() => setReminderOption('remind')}>
               <MaterialCommunityIcons
                 name={reminderOption === 'remind' ? 'radiobox-marked' : 'radiobox-blank'}
-                size={20}
-                color="#7EA6E0"
+                size={25}
+                color="#5C8BCC"
               />
               <Text
-                className={`ml-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                className={`ml-2 text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Remind Me
               </Text>
             </TouchableOpacity>
@@ -1039,14 +1047,15 @@ export default function SettingScreen() {
               onPress={() => setReminderOption('quit')}>
               <MaterialCommunityIcons
                 name={reminderOption === 'quit' ? 'radiobox-marked' : 'radiobox-blank'}
-                size={20}
-                color="#7EA6E0"
+                size={25}
+                color="#5C8BCC"
               />
               <Text
-                className={`ml-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                className={`ml-2 text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Quit
               </Text>
             </TouchableOpacity>
+           </View>
           </View>
         </View>
 
