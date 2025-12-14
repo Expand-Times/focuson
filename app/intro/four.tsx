@@ -5,7 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Image } from 'react-native';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function IntroFour() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function IntroFour() {
         {/* Main Content Area */}
         <View className="flex-1 items-center justify-center">
           {/* Header Section */}
-          <View className="mt-4 items-center">
+          <View className="mt-[10%] items-center">
             <Text allowFontScaling={false} className="mb-4 text-center text-[18px] font-bold text-[#2E3B4D]">
             No icons in Minimal Life
             </Text>
@@ -30,12 +30,16 @@ export default function IntroFour() {
           <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="relative items-center justify-center">
-              <Image source={require('@/assets/images/22.png')} className="" />
+              <Image source={require('@/assets/images/22.png')} style={{
+                  width: width * 0.9, // screen এর 90%
+                  height: height * 0.6, // screen এর 60%
+                }}
+                resizeMode="contain"/>
             </View>
           </View>
 
           {/* Description Text - Moved here */}
-          <View className=" absolute bottom-8 items-center justify-center">
+          <View className=" absolute bottom-[5%] items-center justify-center">
             <Text allowFontScaling={false} className="px-4 text-center font-light text-[12px] leading-5 text-[#8698B2]">
               The usage data push to think before you intend to{'\n'}
               open an addictive apps/games.

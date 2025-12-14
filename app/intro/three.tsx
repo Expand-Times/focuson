@@ -4,16 +4,16 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function IntroThree() {
   const router = useRouter();
 
   return (
     <SafeAreaView className="flex-1 bg-[#EBF1F7]">
-      <View className="flex-1 px-6 ">
+      <View className="flex-1 px-6 pt-8">
         {/* Main Content Area */}
-        <View className="mt-6 flex-1 items-center justify-center">
+        <View className="mt-[10%] flex-1 items-center justify-center">
           {/* Header Section */}
           <View className="items-center ">
             <Text
@@ -38,15 +38,19 @@ export default function IntroThree() {
           <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="relative items-center justify-center">
-              <Image source={require('@/assets/images/11.png')} className="" />
+              <Image source={require('@/assets/images/11.png')} style={{
+                  width: width * 0.9, // screen এর 90%
+                  height: height * 0.6, // screen এর 60%
+                }}
+                resizeMode="contain"/>
 
               {/* Description Text - Overlay on Image */}
-              <View className=" absolute bottom-0 items-center justify-center">
+              <View className=" absolute bottom-[15%] items-center justify-center">
                 <Text
                   allowFontScaling={false}
                   className="text-center text-[12px] font-light leading-5 text-[#8698B2]">
-                  Consequently, your brain learns that opening
-                  colorful icons leads to "interesting" (stimulating)
+                  Consequently, your brain learns that opening{'\n'}
+                  colorful icons leads to "interesting" (stimulating){'\n'}
                   content
                 </Text>
               </View>

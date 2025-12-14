@@ -4,7 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 
-const { width } = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 
 export default function IntroSix() {
   const router = useRouter();
@@ -15,7 +15,7 @@ export default function IntroSix() {
         {/* Main Content Area */}
         <View className="flex-1 items-center justify-center">
           {/* Header Section */}
-          <View className="mt-4 items-center">
+          <View className="mt-[10%] items-center">
             <Text allowFontScaling={false} className="mb-4 text-center text-[18px] font-bold text-[#2E3B4D]">
               In-app reminder
             </Text>
@@ -29,7 +29,11 @@ export default function IntroSix() {
           <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="relative items-center justify-center">
-              <Image source={require('@/assets/images/44.png')} className="" />
+              <Image source={require('@/assets/images/44.png')} style={{
+                  width: width * 0.9, // screen এর 90%
+                  height: height * 0.6, // screen এর 60%
+                }}
+                resizeMode="contain"/>
             </View>
           </View>
 

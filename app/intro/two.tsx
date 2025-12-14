@@ -3,6 +3,8 @@ import { View, Text, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
 
 export default function IntroTwo() {
   const router = useRouter();
@@ -42,7 +44,11 @@ export default function IntroTwo() {
           <View className="relative items-center justify-center">
             <Image
               source={require('@/assets/images/InfinityScrollBind.png')}
-              className="h-[248px] w-[248px]"
+              style={{
+                width: width * 0.6, // screen এর 90%
+                height: height * 0.6, // screen এর 60%
+              }}
+              resizeMode="contain"
             />
           </View>
         </View>

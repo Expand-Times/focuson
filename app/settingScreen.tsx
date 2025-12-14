@@ -20,6 +20,10 @@ import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignInWithGoogle from './SignInWithGoogle';
 import { openPlayStoreForRating } from './lib/rateApp';
+import { Dimensions } from 'react-native';
+const { width } = Dimensions.get('window');
+const ITEM_SIZE = width * 0.1
+const SIZE = width * 0.08;
 type ColorOptionProps = {
   color: string;
   onPress: () => void;
@@ -78,12 +82,12 @@ export default function SettingScreen() {
     timeOffset,
     setTimeOffset,
   } = useColorContext();
-   // Update state initialization
-   const [showSignOut, setShowSignOut] = useState(false);
+  // Update state initialization
+  const [showSignOut, setShowSignOut] = useState(false);
   const [userAuthInfo, setUserAuthInfo] = useState<UserObject>({});
   const userData = async () => {
     try {
-      const data = await AsyncStorage.getItem("userAuthInfo");
+      const data = await AsyncStorage.getItem('userAuthInfo');
       const userDetails = data && data.trim().length ? JSON.parse(data) : {};
       setUserAuthInfo(userDetails);
     } catch {
@@ -101,11 +105,11 @@ export default function SettingScreen() {
 
   const handleSignOut = async () => {
     try {
-      await AsyncStorage.removeItem("userAuthInfo");
+      await AsyncStorage.removeItem('userAuthInfo');
       setShowSignOut(false);
       // navigation.navigate('SignInWithGoogle');
     } catch (error) {
-      console.error("Error signing out:", error);
+      console.error('Error signing out:', error);
     }
   };
 
@@ -385,7 +389,7 @@ export default function SettingScreen() {
     let current = timeFormat;
     if (timeFormat === '12h') current = 'HH:MM PM';
     if (timeFormat === '24h') current = 'HH:MM';
-    
+
     const currentIndex = formats.indexOf(current);
     const nextIndex = (currentIndex + 1) % formats.length;
     setTimeFormat(formats[nextIndex]);
@@ -416,16 +420,22 @@ export default function SettingScreen() {
     const y = now.getFullYear();
     const yy = y.toString().slice(-2);
     const mon = now.toLocaleString('en-US', { month: 'short' });
-    
+
     const z = (n: number) => n.toString().padStart(2, '0');
 
     switch (format) {
-      case 'DD:MM:YYYY': return `${z(d)}:${z(m)}:${y}`;
-      case 'DD:MM:YY': return `${z(d)}:${z(m)}:${yy}`;
-      case 'MM:DD:YYYY': return `${z(m)}:${z(d)}:${y}`;
-      case 'MM:DD:YY': return `${z(m)}:${z(d)}:${yy}`;
-      case 'DD:Mon:YYYY': return `${z(d)} ${mon} ${y}`;
-      case 'Mon:DD:YYYY': return `${mon} ${z(d)}, ${y}`;
+      case 'DD:MM:YYYY':
+        return `${z(d)}:${z(m)}:${y}`;
+      case 'DD:MM:YY':
+        return `${z(d)}:${z(m)}:${yy}`;
+      case 'MM:DD:YYYY':
+        return `${z(m)}:${z(d)}:${y}`;
+      case 'MM:DD:YY':
+        return `${z(m)}:${z(d)}:${yy}`;
+      case 'DD:Mon:YYYY':
+        return `${z(d)} ${mon} ${y}`;
+      case 'Mon:DD:YYYY':
+        return `${mon} ${z(d)}, ${y}`;
       // Legacy support
       case 'weekday, day month year':
         return now.toLocaleDateString('en-GB', {
@@ -471,9 +481,9 @@ export default function SettingScreen() {
     const h = now.getHours();
     const m = now.getMinutes();
     const s = now.getSeconds();
-    
+
     const z = (n: number) => n.toString().padStart(2, '0');
-    
+
     // Normalize legacy formats
     let currentFormat = timeFormat;
     if (timeFormat === '12h') currentFormat = 'HH:MM PM';
@@ -497,12 +507,13 @@ export default function SettingScreen() {
     }
 
     // Fallback
-    if (timeFormat === '12h') return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    if (timeFormat === '12h')
+      return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
     return now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
   };
 
   return (
-    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
       {/* Header */}
       <View
         className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
@@ -544,14 +555,18 @@ export default function SettingScreen() {
               </Text>
 
               {/* Format Selector */}
-              <View className="mb-8 flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3 w-full">
+              <View className="mb-8 w-full flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3">
                 <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                   Format
                 </Text>
                 <TouchableOpacity onPress={cycleTimeFormat}>
                   <Text
                     className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
-                    {timeFormat === '12h' ? 'HH:MM PM' : timeFormat === '24h' ? 'HH:MM' : timeFormat}
+                    {timeFormat === '12h'
+                      ? 'HH:MM PM'
+                      : timeFormat === '24h'
+                        ? 'HH:MM'
+                        : timeFormat}
                   </Text>
                 </TouchableOpacity>
               </View>
@@ -764,24 +779,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Phone dialer icon
               </Text>
-              <TouchableOpacity 
-                activeOpacity={0.8} 
+              <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={() => setShowPhoneDialer(!showPhoneDialer)}
                 className="justify-center rounded-full px-[2px]"
-                style={{ 
-                  width: 45, 
-                  height: 25, 
-                  backgroundColor: showPhoneDialer 
-                    ? selectedColor || "#4CAF50" 
-                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
-                }} 
-              > 
-                <View 
+                style={{
+                  width: 45,
+                  height: 25,
+                  backgroundColor: showPhoneDialer
+                    ? selectedColor || '#4CAF50'
+                    : isDarkMode
+                      ? '#4B5563'
+                      : '#E2E8F0',
+                }}>
+                <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{ 
-                    alignSelf: showPhoneDialer ? "flex-end" : "flex-start", 
-                  }} 
-                /> 
+                  style={{
+                    alignSelf: showPhoneDialer ? 'flex-end' : 'flex-start',
+                  }}
+                />
               </TouchableOpacity>
             </View>
 
@@ -790,24 +806,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Camera icon
               </Text>
-              <TouchableOpacity 
-                activeOpacity={0.8} 
+              <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={() => setShowCameraIcon(!showCameraIcon)}
                 className="justify-center rounded-full px-[2px]"
-                style={{ 
-                  width: 45, 
-                  height: 25, 
-                  backgroundColor: showCameraIcon 
-                    ? selectedColor || "#4CAF50" 
-                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
-                }} 
-              > 
-                <View 
+                style={{
+                  width: 45,
+                  height: 25,
+                  backgroundColor: showCameraIcon
+                    ? selectedColor || '#4CAF50'
+                    : isDarkMode
+                      ? '#4B5563'
+                      : '#E2E8F0',
+                }}>
+                <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{ 
-                    alignSelf: showCameraIcon ? "flex-end" : "flex-start", 
-                  }} 
-                /> 
+                  style={{
+                    alignSelf: showCameraIcon ? 'flex-end' : 'flex-start',
+                  }}
+                />
               </TouchableOpacity>
             </View>
 
@@ -816,24 +833,25 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Alarm Clock icon
               </Text>
-              <TouchableOpacity 
-                activeOpacity={0.8} 
+              <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={() => setAlarmClock(!alarmClock)}
                 className="justify-center rounded-full px-[2px]"
-                style={{ 
-                  width: 45, 
-                  height: 25, 
-                  backgroundColor: alarmClock 
-                    ? selectedColor || "#4CAF50" 
-                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
-                }} 
-              > 
-                <View 
+                style={{
+                  width: 45,
+                  height: 25,
+                  backgroundColor: alarmClock
+                    ? selectedColor || '#4CAF50'
+                    : isDarkMode
+                      ? '#4B5563'
+                      : '#E2E8F0',
+                }}>
+                <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{ 
-                    alignSelf: alarmClock ? "flex-end" : "flex-start", 
-                  }} 
-                /> 
+                  style={{
+                    alignSelf: alarmClock ? 'flex-end' : 'flex-start',
+                  }}
+                />
               </TouchableOpacity>
             </View>
 
@@ -845,9 +863,7 @@ export default function SettingScreen() {
               <TouchableOpacity
                 className="rounded-full bg-[#7EA6E0] px-3 py-1"
                 onPress={() => setTimeFormatModalVisible(true)}>
-                <Text className="text-sm text-white">
-                  {getCurrentDisplayTime()}
-                </Text>
+                <Text className="text-sm text-white">{getCurrentDisplayTime()}</Text>
               </TouchableOpacity>
             </View>
 
@@ -893,43 +909,56 @@ export default function SettingScreen() {
               <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                 Home Wallpaper
               </Text>
-              <TouchableOpacity 
-                activeOpacity={0.8} 
+              <TouchableOpacity
+                activeOpacity={0.8}
                 onPress={() => setHomeWallpaper(!homeWallpaper)}
                 className="justify-center rounded-full px-[2px]"
-                style={{ 
-                  width: 45, 
-                  height: 25, 
-                  backgroundColor: homeWallpaper 
-                    ? selectedColor || "#4CAF50" 
-                    : (isDarkMode ? "#4B5563" : "#E2E8F0"), 
-                }} 
-              > 
-                <View 
+                style={{
+                  width: 45,
+                  height: 25,
+                  backgroundColor: homeWallpaper
+                    ? selectedColor || '#4CAF50'
+                    : isDarkMode
+                      ? '#4B5563'
+                      : '#E2E8F0',
+                }}>
+                <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{ 
-                    alignSelf: homeWallpaper ? "flex-end" : "flex-start", 
-                  }} 
-                /> 
+                  style={{
+                    alignSelf: homeWallpaper ? 'flex-end' : 'flex-start',
+                  }}
+                />
               </TouchableOpacity>
             </View>
 
             {/* Select Wallpaper */}
             {homeWallpaper && (
               <>
-                <Text className={`mb-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                <Text
+                  className={`mb-2 text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                   Select
                 </Text>
-                <View className="mb-4 flex-row gap-2">
+                <View className="mb-4 flex-row gap-1">
                   {AVAILABLE_WALLPAPERS.map((item, idx) => (
                     <TouchableOpacity
                       key={idx}
-                      className={`h-10 w-10 overflow-hidden rounded-md border ${wallpaper === item ? 'border-2 border-[#7EA6E0]' : 'border-slate-200'}`}
-                      onPress={() => setWallpaper(item)}>
+                      onPress={() => setWallpaper(item)}
+                      style={{
+                        width: ITEM_SIZE,
+                        height: ITEM_SIZE,
+                        borderRadius: 8,
+                        borderWidth: wallpaper === item ? 2 : 1,
+                        borderColor: wallpaper === item ? '#7EA6E0' : '#E2E8F0',
+                        overflow: 'hidden',
+                      }}>
                       {typeof item === 'string' ? (
                         <View style={{ backgroundColor: item, width: '100%', height: '100%' }} />
                       ) : (
-                        <Image source={item} className="h-full w-full" resizeMode="cover" />
+                        <Image
+                          source={item}
+                          style={{ width: '100%', height: '100%' }}
+                          resizeMode="cover"
+                        />
                       )}
                     </TouchableOpacity>
                   ))}
@@ -950,7 +979,7 @@ export default function SettingScreen() {
               />
             </View>
             {showThemes && (
-              <View className="flex-row gap-3">
+              <View className="flex-row gap-2 items-center justify-center">
                 {[
                   ...freeColors.map((color) => ({
                     color,
@@ -1190,7 +1219,9 @@ export default function SettingScreen() {
         </View>
 
         {/* Rate on Google Play */}
-        <TouchableOpacity  onPress={openPlayStoreForRating} className="mb-6 mt-6 w-full items-center rounded-xl bg-[#7EA6E0] py-3.5 shadow-sm">
+        <TouchableOpacity
+          onPress={openPlayStoreForRating}
+          className="mb-6 mt-6 w-full items-center rounded-xl bg-[#7EA6E0] py-3.5 shadow-sm">
           <Text className="text-lg font-semibold text-white">Rate on Google Play</Text>
         </TouchableOpacity>
 
@@ -1210,7 +1241,6 @@ export default function SettingScreen() {
     </SafeAreaView>
   );
 }
-// Update the ColorOption component with proper typing
 const ColorOption = ({
   color,
   onPress,
@@ -1218,24 +1248,42 @@ const ColorOption = ({
   isSelected = false,
   isDarkMode = false,
 }: ColorOptionProps) => (
-  <TouchableOpacity onPress={onPress} className="m-0.5">
+  <TouchableOpacity onPress={onPress} className="items-center justify-center">
     <View
-      className={`relative h-[30px] w-[30px] rounded-full border-2`}
       style={{
+        width: SIZE,
+        height: SIZE,
+        borderRadius: SIZE / 2,
         backgroundColor: color,
+        borderWidth: isSelected ? 2 : 1,
         borderColor: isSelected
           ? isDarkMode
             ? 'gray'
             : '#3B82F6'
           : isDarkMode
-            ? '#FFFFFF'
-            : '#3B82F6',
-      }}>
+          ? '#FFFFFF'
+          : '#3B82F6',
+        position: 'relative',
+      }}
+    >
       {isPremium && (
-        <View className="absolute -right-1 -top-1 h-4 w-4 items-center justify-center rounded-full bg-amber-500">
-          <Ionicons name="lock-closed" size={10} color="white" />
+        <View
+          style={{
+            position: 'absolute',
+            top: -4,
+            right: -4,
+            width: SIZE * 0.4,
+            height: SIZE * 0.4,
+            borderRadius: (SIZE * 0.4) / 2,
+            backgroundColor: '#F59E0B',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          <Ionicons name="lock-closed" size={SIZE * 0.22} color="white" />
         </View>
       )}
     </View>
   </TouchableOpacity>
 );
+

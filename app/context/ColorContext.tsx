@@ -7,12 +7,14 @@ export type WallpaperItem = string | ImageSourcePropType;
 
 // Define the available wallpapers
 export const AVAILABLE_WALLPAPERS: WallpaperItem[] = [
-  require('../../assets/images/wall1.png'),
-  require('../../assets/images/wall2.png'),
-  require('../../assets/images/wall3.png'),
-  '#15803D',
-  '#E2E8F0',
-  '#CBD5E1',
+  require('../../assets/images/AbstractGradient.png'),
+  require('../../assets/images/NightSky.png'),
+  require('../../assets/images/MosqueSilhouette.png'),
+  require('../../assets/images/AbstractPattern.png'),
+  require('../../assets/images/CloudSky.png'),
+  require('../../assets/images/RoundPattern.png'),
+  require('../../assets/images/SunFlower.png'),
+  '#EBF0F7',
 ];
 
 // Define the context type
@@ -55,7 +57,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [isPremium, setIsPremium] = useState<boolean>(DEFAULT_PREMIUM);
   const [isDarkMode, setIsDarkMode] = useState<boolean>(DEFAULT_DARK_MODE);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
+  const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>('#EBF0F7');
   const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
   const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');

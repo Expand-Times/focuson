@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { View, Image, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
+import { Dimensions } from 'react-native';
+const { width, height } = Dimensions.get('window');
 
 
 export default function IntroOne() {
@@ -23,7 +25,11 @@ export default function IntroOne() {
         <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="items-center justify-center relative">
-                <Image source={require('@/assets/images/Logo.png')} className="w-[176px] h-[194px]" />
+                <Image source={require('@/assets/images/Logo.png')} style={{
+                    width: width * 0.5, // screen এর 90%
+                    height: height * 0.5, // screen এর 60%
+                  }}
+                  resizeMode="contain" />
             </View>
         </View>
       </View>
