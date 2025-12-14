@@ -858,7 +858,7 @@ export default function SettingScreen() {
                 Time Format
               </Text>
               <TouchableOpacity
-                className="rounded-full bg-[#7EA6E0] px-3 py-1"
+                className="rounded-lg bg-[#7EA9E5] px-3 py-2"
                 onPress={() => setTimeFormatModalVisible(true)}>
                 <Text className="text-sm text-white">{getCurrentDisplayTime()}</Text>
               </TouchableOpacity>
@@ -870,7 +870,7 @@ export default function SettingScreen() {
                 Date Format
               </Text>
               <TouchableOpacity
-                className="rounded-full bg-[#7EA6E0] px-3 py-1"
+                className="rounded-lg bg-[#7EA9E5] px-3 py-2"
                 onPress={() => setDateModalVisible(true)}>
                 <Text className="text-sm text-white">{getDateFormatPreview(dateFormat)}</Text>
               </TouchableOpacity>
@@ -881,13 +881,13 @@ export default function SettingScreen() {
         {/* Display Section */}
         <View className="mt-6">
           <Text
-            className={`mb-2 text-lg font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             Display
           </Text>
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             {/* Dark Mood */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Dark Mood
               </Text>
               <View className="flex-row items-center gap-2">
@@ -903,7 +903,7 @@ export default function SettingScreen() {
 
             {/* Home Wallpaper */}
             <View className="mb-4 flex-row items-center justify-between">
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+              <Text className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Home Wallpaper
               </Text>
               <TouchableOpacity
@@ -917,7 +917,7 @@ export default function SettingScreen() {
                     ? selectedColor || '#4CAF50'
                     : isDarkMode
                       ? '#4B5563'
-                      : '#E2E8F0',
+                      : '#A3B9D9',
                 }}>
                 <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
