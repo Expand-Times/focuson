@@ -24,7 +24,7 @@ export default function IntroEight() {
             <Text
               allowFontScaling={false}
               className="font-regular px-2 text-center text-[12px] leading-6 text-[#8698B2]">
-              Use at least <Text className="font-medium text-[#8698B2]">7 days</Text>, You're going
+              Use at least <Text allowFontScaling={false} className="font-medium text-[#8698B2]">7 days</Text>, You're going
               to Love This App
             </Text>
           </View>

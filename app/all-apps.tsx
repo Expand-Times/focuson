@@ -296,7 +296,7 @@ export default function AllApps() {
             contentContainerStyle={{ alignItems: 'center', gap: 4 }}>
             {alphabet.map((letter) => (
               <TouchableOpacity key={letter} onPress={() => scrollToLetter(letter)}>
-                <Text className={`py-0.5 text-[10px] font-medium ${isDarkMode ? 'text-blue-400' : 'text-[#5B8BDF]'}`}>{letter}</Text>
+                <Text allowFontScaling={false} className={`py-0.5 text-[10px] font-medium ${isDarkMode ? 'text-blue-400' : 'text-[#5B8BDF]'}`}>{letter}</Text>
               </TouchableOpacity>
             ))}
           </ScrollView>
@@ -311,7 +311,7 @@ export default function AllApps() {
         <View className="flex-1 items-center justify-center bg-black/70">
           <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             <View className="mb-6 items-center">
-              <Text className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+              <Text allowFontScaling={false} className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                 Open {selectedApp?.label}
               </Text>
 
@@ -324,7 +324,7 @@ export default function AllApps() {
                 />
               )}
 
-              <Text className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+              <Text allowFontScaling={false} className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                 Select estimated use time
               </Text>
             </View>
@@ -344,7 +344,7 @@ export default function AllApps() {
               <TouchableOpacity
                 className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
                 onPress={() => setModalVisible(false)}>
-                <Text className="text-base font-medium text-white">Quit</Text>
+                <Text allowFontScaling={false} className="text-base font-medium text-white">Quit</Text>
               </TouchableOpacity>
             </View>
           </View>

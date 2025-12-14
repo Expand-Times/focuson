@@ -354,7 +354,7 @@ export default function Home() {
             <View className="mt-3 flex-row items-center gap-2">
               <Ionicons name={getBatteryIcon()} size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#E6EBF2' : (isDarkMode ? "#64748B" : "#5B8BDF")} />
               {batteryLevel !== null && (
-                <Text className={`text-sm font-medium ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]')}`}>
+                <Text allowFontScaling={false} className={`text-sm font-medium ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]')}`}>
                   {Math.round(batteryLevel * 100)}%
                 </Text>
               )}
@@ -438,7 +438,7 @@ export default function Home() {
             <View className="flex-1 items-center justify-center bg-black/70">
               <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
-                  <Text className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                  <Text allowFontScaling={false} className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                     Open {selectedApp?.label}
                   </Text>
 
@@ -450,7 +450,7 @@ export default function Home() {
                     />
                   )}
 
-                  <Text className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+                  <Text allowFontScaling={false} className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                     Select estimated use time
                   </Text>
                 </View>
@@ -461,7 +461,7 @@ export default function Home() {
                       key={mins}
                       className="mb-3 w-[48%] items-center rounded-full bg-[#7EA6E0] py-3 active:opacity-80"
                       onPress={() => handleLaunchApp(mins)}>
-                      <Text className="text-base font-medium text-white">{mins} min</Text>
+                      <Text allowFontScaling={false} className="text-base font-medium text-white">{mins} min</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -470,7 +470,7 @@ export default function Home() {
                   <TouchableOpacity
                     className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
                     onPress={() => setModalVisible(false)}>
-                    <Text className="text-base font-medium text-white">Quit</Text>
+                    <Text allowFontScaling={false} className="text-base font-medium text-white">Quit</Text>
                   </TouchableOpacity>
                 </View>
               </View>

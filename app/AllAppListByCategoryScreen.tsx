@@ -436,7 +436,7 @@ export default function AllAppListByCategoryScreen() {
               <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 {selectedApp && (
                   <>
-                    <Text className={`mb-6 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                    <Text allowFontScaling={false} className={`mb-6 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                       {selectedApp.label} Options
                     </Text>
 
@@ -455,47 +455,47 @@ export default function AllAppListByCategoryScreen() {
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={() => setShowCategorySelector(true)}>
-                          <Text className="text-base font-medium text-white">Move to</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">Move to</Text>
                         </TouchableOpacity>
 
                         {/* Copy to */}
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={() => console.log('Copy to')}>
-                          <Text className="text-base font-medium text-white">Copy to</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">Copy to</Text>
                         </TouchableOpacity>
 
                         {/* Block */}
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={() => console.log('Block')}>
-                          <Text className="text-base font-medium text-white">Block</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">Block</Text>
                         </TouchableOpacity>
 
                         {/* Rename */}
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={startAppRenaming}>
-                          <Text className="text-base font-medium text-white">Rename</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">Rename</Text>
                         </TouchableOpacity>
 
                         {/* App Info */}
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={handleAppInfo}>
-                          <Text className="text-base font-medium text-white">App Info</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">App Info</Text>
                         </TouchableOpacity>
 
                         {/* Uninstall */}
                         <TouchableOpacity
                           className="w-[48%] items-center rounded-lg bg-[#7EA6E0] py-3"
                           onPress={handleUninstall}>
-                          <Text className="text-base font-medium text-white">Uninstall</Text>
+                          <Text allowFontScaling={false} className="text-base font-medium text-white">Uninstall</Text>
                         </TouchableOpacity>
                       </View>
                     ) : showAppRenamer ? (
                       <View className="w-full">
-                        <Text className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
+                        <Text allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
                         <TextInput
                           value={tempAppName}
                           onChangeText={setTempAppName}
@@ -507,25 +507,25 @@ export default function AllAppListByCategoryScreen() {
                           <TouchableOpacity
                             className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                             onPress={() => setShowAppRenamer(false)}>
-                            <Text className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
+                            <Text allowFontScaling={false} className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
                             onPress={saveAppRename}>
-                            <Text className="font-medium text-white">Save</Text>
+                            <Text allowFontScaling={false} className="font-medium text-white">Save</Text>
                           </TouchableOpacity>
                         </View>
                       </View>
                     ) : (
                       <View className="h-64 w-full">
-                        <Text className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
+                        <Text allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
                         <ScrollView className="w-full flex-1">
                           {categories.map((cat, idx) => (
                             <TouchableOpacity
                               key={idx}
                               className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
                               onPress={() => handleMoveApp(cat.title)}>
-                              <Text className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                              <Text allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                 {renamedCategories[cat.title] || cat.title}
                               </Text>
                             </TouchableOpacity>
@@ -535,14 +535,14 @@ export default function AllAppListByCategoryScreen() {
                             <TouchableOpacity
                               className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
                               onPress={() => handleMoveApp('Other')}>
-                              <Text className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Other</Text>
+                              <Text allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Other</Text>
                             </TouchableOpacity>
                           )}
                         </ScrollView>
                         <TouchableOpacity
                           className={`mt-4 items-center rounded-lg py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                           onPress={() => setShowCategorySelector(false)}>
-                          <Text className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
+                          <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -564,7 +564,7 @@ export default function AllAppListByCategoryScreen() {
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
               <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <Text className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                <Text allowFontScaling={false} className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                   Create New Category
                 </Text>
 
@@ -581,12 +581,12 @@ export default function AllAppListByCategoryScreen() {
                   <TouchableOpacity
                     className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                     onPress={() => setCreateCategoryModalVisible(false)}>
-                    <Text className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
+                    <Text allowFontScaling={false} className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
                     className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
                     onPress={handleCreateCategory}>
-                    <Text className="font-medium text-white">Create</Text>
+                    <Text allowFontScaling={false} className="font-medium text-white">Create</Text>
                   </TouchableOpacity>
                 </View>
               </View>

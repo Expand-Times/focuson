@@ -75,7 +75,7 @@ export default function IntroNine() {
                     How many time daily unlock your {'\n'} phone?
                 </Text>
 
-                <Text className="text-[24px] font-bold text-[#2E3B4D] mb-8">{unlocks}x</Text>
+                <Text allowFontScaling={false} className="text-[24px] font-bold text-[#2E3B4D] mb-8">{unlocks}x</Text>
 
                 {/* Custom Slider Visual & Interaction */}
                 <View className="w-full px-4 mb-2">
