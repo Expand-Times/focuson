@@ -48,6 +48,7 @@ export default function SettingScreen() {
   // State for toggles
   const [alarmClock, setAlarmClock] = useState(false);
   const [showMore, setShowMore] = useState(true);
+  const [showAbout, setShowAbout] = useState(true);
   const [showThemes, setShowThemes] = useState(false);
   const [homeWallpaper, setHomeWallpaper] = useState(true);
   const [timeFormatModalVisible, setTimeFormatModalVisible] = useState(false);
@@ -1158,35 +1159,43 @@ export default function SettingScreen() {
         <View className="mt-6">
           <View className="mb-2 flex-row items-center justify-between">
             <Text
-              className={`text-lg font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-              About Minimal Life
+              className={`text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+              About <Text className="text-[18px] font-semibold text-[#2E3B4D]">Minimal Life</Text>
             </Text>
-            <MaterialCommunityIcons name="chevron-down" size={24} color="#7EA6E0" />
+            <TouchableOpacity onPress={() => setShowAbout(!showAbout)}>
+              <MaterialCommunityIcons
+                name={showAbout ? 'chevron-up' : 'chevron-down'}
+                size={24}
+                color="#7EA6E0"
+              />
+            </TouchableOpacity>
           </View>
 
-          <View
-            className={`flex-row items-center justify-center rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <TouchableOpacity
-              className="flex-1 items-center border-r border-slate-200"
-              onPress={() => {
-                setInfoModalType('privacy');
-                setInfoModalVisible(true);
-              }}>
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                Privacy Policy
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="flex-1 items-center"
-              onPress={() => {
-                setInfoModalType('goal');
-                setInfoModalVisible(true);
-              }}>
-              <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                Our Goal
-              </Text>
-            </TouchableOpacity>
-          </View>
+          {showAbout && (
+            <View
+              className={`flex-row items-center justify-center rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <TouchableOpacity
+                className="flex-1 items-center border-r border-slate-200"
+                onPress={() => {
+                  setInfoModalType('privacy');
+                  setInfoModalVisible(true);
+                }}>
+                <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Privacy Policy
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                className="flex-1 items-center"
+                onPress={() => {
+                  setInfoModalType('goal');
+                  setInfoModalVisible(true);
+                }}>
+                <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                  Our Goal
+                </Text>
+              </TouchableOpacity>
+            </View>
+          )}
         </View>
 
         {/* Support Section */}
