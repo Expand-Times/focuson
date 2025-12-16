@@ -436,12 +436,12 @@ export default function AllAppListByCategoryScreen() {
               <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 {selectedApp && (
                   <>
-                    <Text allowFontScaling={false} className={`mb-6 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                    <Text allowFontScaling={false} className={`mb-6 text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                       {selectedApp.label} Options
                     </Text>
 
                     {/* App Icon */}
-                    <View className="mb-8 rounded-full bg-[#5B8BDF] p-4">
+                    <View className="mb-8 rounded-full p-4">
                       <Image
                         source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
                         className="h-16 w-16"
