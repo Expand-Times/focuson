@@ -361,7 +361,7 @@ export default function AllAppListByCategoryScreen() {
             const isEditing = editingCategory === category.title;
 
             return (
-              <View key={index} className="mb-6">
+              <View key={index} className="">
                 {/* Category Header */}
                 {isEditing ? (
                   <View className="mb-2 flex-row items-center justify-end">
