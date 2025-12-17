@@ -289,15 +289,26 @@ class LauncherModule : Module() {
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val currentPackageName = context.packageName
         
+        // Get installed apps (launcher activities) to filter usage
+        val pm = context.packageManager
+        val intent = Intent(Intent.ACTION_MAIN, null)
+        intent.addCategory(Intent.CATEGORY_LAUNCHER)
+        val resolveInfos = pm.queryIntentActivities(intent, 0)
+        val installedPackages = resolveInfos.map { it.activityInfo.packageName }.toSet()
+        
         // Total Screen Time
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
         var totalTime = 0L
         val packageUsage = mutableMapOf<String, Long>()
 
         for ((packageName, usageStats) in usageStatsMap) {
-            totalTime += usageStats.totalTimeInForeground
-            if (usageStats.totalTimeInForeground > 0) {
-                packageUsage[packageName] = usageStats.totalTimeInForeground
+            val time = usageStats.totalTimeInForeground
+            if (time > 0) {
+                // Only count if it's an installed app AND not the current launcher
+                if (installedPackages.contains(packageName) && packageName != currentPackageName) {
+                    totalTime += time
+                }
+                packageUsage[packageName] = time
             }
         }
         

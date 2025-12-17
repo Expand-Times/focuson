@@ -1,7 +1,7 @@
 import {
   View,
   Text,
-  FlatList,
+  SectionList,
   Image,
   TouchableOpacity,
   TextInput,
@@ -15,7 +15,15 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolation,
+  SharedValue,
+} from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
@@ -25,6 +33,122 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
+
+const ITEM_HEIGHT = 20;
+
+const SidebarItem = ({
+  letter,
+  index,
+  touchY,
+  isTouching,
+  onSelect,
+  isDarkMode,
+  currentLetter,
+}: {
+  letter: string;
+  index: number;
+  touchY: SharedValue<number>;
+  isTouching: SharedValue<boolean>;
+  onSelect: (letter: string) => void;
+  isDarkMode: boolean;
+  currentLetter: string;
+}) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+    const dist = Math.abs(touchY.value - itemY);
+
+    const translateX = interpolate(
+      dist,
+      [0, 60],
+      [-40, 0],
+      Extrapolation.CLAMP
+    );
+
+    const scale = interpolate(
+      dist,
+      [0, 60],
+      [2, 1],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      transform: [
+        { translateX: withSpring(isTouching.value ? translateX : 0) },
+        { scale: withSpring(isTouching.value ? scale : 1) },
+      ],
+      zIndex: isTouching.value && dist < 30 ? 100 : 1,
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[{ height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 }, animatedStyle]}>
+      <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
+        <Text
+          allowFontScaling={false}
+          className={`text-[12px] font-medium ${
+            currentLetter === letter
+              ? isDarkMode
+                ? 'font-bold text-white'
+                : 'font-extrabold text-[14px] text-[#5C8BCC]'
+              : isDarkMode
+              ? 'text-blue-400'
+              : 'text-[#5B8BDF]'
+          }`}>
+          {letter}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+const BubbleCursor = ({
+  touchY,
+  isTouching,
+  letter,
+  isDarkMode,
+}: {
+  touchY: SharedValue<number>;
+  isTouching: SharedValue<boolean>;
+  letter: string;
+  isDarkMode: boolean;
+}) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateY: touchY.value - 25 }, // Center vertically (50/2)
+        { scale: withSpring(isTouching.value ? 1 : 0) },
+        { translateX: withSpring(isTouching.value ? -50 : 0) },
+      ],
+      opacity: withSpring(isTouching.value ? 1 : 0),
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          right: 30, // Position to the left of the sidebar
+          width: 50,
+          height: 50,
+          borderRadius: 25,
+          backgroundColor: isDarkMode ? '#4ADE80' : '#fff', // Green color like in screenshot
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+        },
+        animatedStyle,
+      ]}>
+      <Text className="text-xl font-bold text-black">{letter}</Text>
+    </Animated.View>
+  );
+};
 
 export default function AllApps() {
   const { isDarkMode } = useColorContext();
@@ -40,7 +164,7 @@ export default function AllApps() {
   const params = useLocalSearchParams();
   const isSelectMode = params.mode === 'select';
 
-  const flatListRef = useRef<FlatList>(null);
+  const sectionListRef = useRef<SectionList>(null);
 
   useEffect(() => {
     loadApps();
@@ -83,9 +207,41 @@ export default function AllApps() {
     }
   };
 
-  const filteredApps = useMemo(() => {
-    if (!searchQuery) return apps;
-    return apps.filter((app) => app.label.toLowerCase().includes(searchQuery.toLowerCase()));
+  const sections = useMemo(() => {
+    if (!apps.length) return [];
+    
+    // Group apps by first letter
+    const grouped = apps.reduce((acc, app) => {
+      const firstChar = app.label.charAt(0).toUpperCase();
+      const key = /^[A-Z]/.test(firstChar) ? firstChar : '#';
+      
+      if (!acc[key]) {
+        acc[key] = [];
+      }
+      acc[key].push(app);
+      return acc;
+    }, {} as Record<string, AppItem[]>);
+
+    // Convert to SectionList format and sort keys
+    const sortedKeys = Object.keys(grouped).sort((a, b) => {
+      if (a === '#') return -1;
+      if (b === '#') return 1;
+      return a.localeCompare(b);
+    });
+
+    let result = sortedKeys.map((key) => ({
+      title: key,
+      data: grouped[key],
+    }));
+
+    if (searchQuery) {
+       result = result.map(section => ({
+         ...section,
+         data: section.data.filter(app => app.label.toLowerCase().includes(searchQuery.toLowerCase()))
+       })).filter(section => section.data.length > 0);
+    }
+    
+    return result;
   }, [apps, searchQuery]);
 
   const handleAppPress = (app: AppItem) => {
@@ -144,7 +300,7 @@ export default function AllApps() {
         }
 
         // Start the overlay timer
-        const durationMs = durationMinutes * 15 * 1000;
+        const durationMs = durationMinutes * 60 * 1000;
         Launcher.startTimerOverlay(durationMs, selectedApp.packageName);
 
         // Open the app
@@ -201,14 +357,90 @@ export default function AllApps() {
     );
   };
 
-  const alphabet = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split('');
+  const sidebarChars = useMemo(() => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const hasNonAlpha = apps.some((app) => !/^[a-zA-Z]/.test(app.label));
+    if (hasNonAlpha) {
+      return ['#', ...chars];
+    }
+    return chars;
+  }, [apps]);
+
+  const [currentLetter, setCurrentLetter] = useState('');
+  
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      // Find the first section header or item
+      const firstItem = viewableItems[0];
+      if (firstItem.item && firstItem.section) {
+         // It's an item
+         const sectionTitle = firstItem.section.title;
+         setCurrentLetter(sectionTitle);
+      } else if (firstItem.title) {
+         // It's a header (though viewableItems usually returns items)
+         // Actually SectionList viewableItems includes headers if they are items? 
+         // Typically it's safer to check item.section.title
+      }
+    }
+  }).current;
+
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 10,
+  }).current;
 
   const scrollToLetter = (letter: string) => {
-    const index = apps.findIndex((app) => app.label.toUpperCase().startsWith(letter));
-    if (index !== -1 && flatListRef.current) {
-      flatListRef.current.scrollToIndex({ index, animated: true });
+    setDragLetter(letter);
+    // Optimistically update
+    setCurrentLetter(letter);
+    
+    // Find section index
+    const sectionIndex = sections.findIndex(s => s.title === letter);
+
+    if (sectionIndex !== -1 && sectionListRef.current) {
+      sectionListRef.current.scrollToLocation({
+        sectionIndex,
+        itemIndex: 0,
+        animated: false, // Smooth scrolling can be buggy with large lists during drag
+        viewOffset: 0,
+        viewPosition: 0
+      });
     }
   };
+
+  const touchY = useSharedValue(0);
+  const isTouching = useSharedValue(false);
+  const lastScrolledLetter = useRef('');
+  const [dragLetter, setDragLetter] = useState('');
+
+  const handleGestureScroll = (letter: string) => {
+    setDragLetter(letter);
+    if (lastScrolledLetter.current !== letter) {
+      lastScrolledLetter.current = letter;
+      scrollToLetter(letter);
+    }
+  };
+
+  const sidebarGesture = Gesture.Pan()
+    .onBegin((e) => {
+      isTouching.value = true;
+      touchY.value = e.y;
+      const index = Math.floor(e.y / ITEM_HEIGHT);
+      if (index >= 0 && index < sidebarChars.length) {
+        runOnJS(handleGestureScroll)(sidebarChars[index]);
+      }
+    })
+    .onUpdate((e) => {
+      touchY.value = e.y;
+      const index = Math.floor(e.y / ITEM_HEIGHT);
+      if (index >= 0 && index < sidebarChars.length) {
+        runOnJS(handleGestureScroll)(sidebarChars[index]);
+      }
+    })
+    .onFinalize(() => {
+      isTouching.value = false;
+      touchY.value = -100;
+      runOnJS(handleGestureScroll)(''); // Reset last scrolled
+    });
 
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
@@ -270,36 +502,58 @@ export default function AllApps() {
       <View className="flex-1 flex-row">
         {/* Apps List */}
         <View className="flex-1 pr-2">
-          <FlatList
-            ref={flatListRef}
-            data={filteredApps}
+          <SectionList
+            ref={sectionListRef}
+            sections={sections}
             renderItem={renderItem}
+            renderSectionHeader={({ section: { title } }) => (
+              <Text className={` text-lg font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#5C8BCC]'}`}>
+                {title}
+              </Text>
+            )}
             keyExtractor={(item) => item.packageName}
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
             initialNumToRender={15}
             maxToRenderPerBatch={20}
             windowSize={10}
+            onViewableItemsChanged={onViewableItemsChanged}
+            viewabilityConfig={viewabilityConfig}
+            stickySectionHeadersEnabled={false}
             onScrollToIndexFailed={(info) => {
+              // SectionList doesn't use onScrollToIndexFailed quite the same, but keeping basic handling
               const wait = new Promise((resolve) => setTimeout(resolve, 500));
               wait.then(() => {
-                flatListRef.current?.scrollToIndex({ index: info.index, animated: true });
+                // sectionListRef.current?.scrollToLocation(...) - difficult to retry without section info
               });
             }}
           />
         </View>
 
         {/* Alphabet Sidebar */}
-        <View className="w-6 items-center justify-center py-4">
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ alignItems: 'center', gap: 4 }}>
-            {alphabet.map((letter) => (
-              <TouchableOpacity key={letter} onPress={() => scrollToLetter(letter)}>
-                <Text allowFontScaling={false} className={`py-0.5 text-[10px] font-medium ${isDarkMode ? 'text-blue-400' : 'text-[#5B8BDF]'}`}>{letter}</Text>
-              </TouchableOpacity>
-            ))}
-          </ScrollView>
+        <View className="items-center justify-center py-4 z-50">
+          <GestureDetector gesture={sidebarGesture}>
+            <View className="items-center w-8 bg-transparent" style={{ paddingVertical: 10 }}>
+              <BubbleCursor
+                touchY={touchY}
+                isTouching={isTouching}
+                letter={dragLetter}
+                isDarkMode={isDarkMode}
+              />
+              {sidebarChars.map((letter, index) => (
+                <SidebarItem
+                  key={letter}
+                  letter={letter}
+                  index={index}
+                  touchY={touchY}
+                  isTouching={isTouching}
+                  onSelect={scrollToLetter}
+                  isDarkMode={isDarkMode}
+                  currentLetter={currentLetter}
+                />
+              ))}
+            </View>
+          </GestureDetector>
         </View>
       </View>
 
@@ -333,7 +587,7 @@ export default function AllApps() {
               {[2, 5, 10, 20].map((mins) => (
                 <TouchableOpacity
                   key={mins}
-                  className="mb-3 w-[48%] items-center rounded-full bg-[#7EA6E0] py-3 active:opacity-80"
+                  className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
                   onPress={() => handleLaunchApp(mins)}>
                   <Text className="text-base font-medium text-white">{mins} min</Text>
                 </TouchableOpacity>
@@ -342,9 +596,9 @@ export default function AllApps() {
 
             <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
               <TouchableOpacity
-                className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
+                className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
                 onPress={() => setModalVisible(false)}>
-                <Text allowFontScaling={false} className="text-base font-medium text-white">Quit</Text>
+                <Text allowFontScaling={false} className="text-[16px] font-regular text-white">Quit</Text>
               </TouchableOpacity>
             </View>
           </View>

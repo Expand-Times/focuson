@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Launcher from '../../modules/launcher';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { width } = Dimensions.get('window');
 
@@ -136,7 +137,14 @@ export default function IntroTen() {
         <View className="w-full items-center pb-8 pt-4 px-4">
             <TouchableOpacity 
                 className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-8 shadow-sm"
-                onPress={() => router.push('/intro/PermissionAccessScreen')}
+                onPress={async () => {
+                    try {
+                        await AsyncStorage.setItem('hasSeenIntro', 'true');
+                    } catch (e) {
+                        console.error('Failed to set intro flag', e);
+                    }
+                    router.push('/intro/PermissionAccessScreen');
+                }}
             >
                 <Text allowFontScaling={false} className="text-white text-[16px] font-regular">Got It!</Text>
             </TouchableOpacity>

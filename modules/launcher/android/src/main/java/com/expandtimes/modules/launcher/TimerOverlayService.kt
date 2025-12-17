@@ -235,12 +235,12 @@ class TimerOverlayService : Service() {
                 
                 val btnBg = android.graphics.drawable.GradientDrawable()
                 btnBg.setColor(Color.parseColor("#7EA6E0")) // Soft Blue
-                btnBg.cornerRadius = 100f // Pill shape
+                btnBg.cornerRadius = 16f // Pill shape
                 background = btnBg
                 
                 setOnClickListener {
                     try {
-                        val extraTime = minutes * 15 * 1000L
+                        val extraTime = minutes * 60 * 1000L
                         val currentUsage = getUsageToday(targetPackageName!!)
                         val currentDelta = currentUsage - startUsageToday
                         limitMs = currentDelta + extraTime
@@ -306,8 +306,8 @@ class TimerOverlayService : Service() {
             isAllCaps = false
             
             val btnBg = android.graphics.drawable.GradientDrawable()
-            btnBg.setColor(Color.parseColor("#4B7ABE")) // Stronger Blue
-            btnBg.cornerRadius = 100f
+            btnBg.setColor(Color.parseColor("#A3B9D8")) // Stronger Blue
+            btnBg.cornerRadius = 16f
             background = btnBg
             
             setOnClickListener {

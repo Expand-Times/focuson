@@ -81,17 +81,7 @@ export default function Home() {
       const fetchStats = () => {
         try {
           const stats = Launcher.getTodayUsageStats();
-          if (stats.packageUsage) {
-            let filteredTotal = 0;
-            Object.entries(stats.packageUsage).forEach(([pkg, time]) => {
-              if (!isBroadSystemApp(pkg) && !isLauncherPackage(pkg)) {
-                filteredTotal += (time as number);
-              }
-            });
-            setTodayStats({ ...stats, totalUsageTime: filteredTotal });
-          } else {
-            setTodayStats(stats);
-          }
+          setTodayStats(stats);
         } catch (e) {
           console.error('Failed to fetch usage stats', e);
         }
