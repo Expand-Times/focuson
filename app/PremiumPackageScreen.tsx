@@ -57,10 +57,10 @@ export default function PremiumPackageScreen() {
                 <MaterialCommunityIcons
                   name="thumb-up-outline"
                   size={20}
-                  color="#60A5FA"
+                  color="#5C8BCC"
                   style={{ marginRight: 12 }}
                 />
-                <Text className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                <Text allowFontScaling={false} className={`text-[14px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#8698B2]'}`}>
                   {feature}
                 </Text>
               </View>
@@ -68,7 +68,7 @@ export default function PremiumPackageScreen() {
           </View>
 
           {/* Trial Info */}
-          <View className=" items-center px-4">
+          <View className="mt-[10%] mb-[5%] items-center px-4">
             <Text className={`text-xs text-center ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
               * Easy Refund policy * Start with 7 days trial
             </Text>
@@ -83,13 +83,22 @@ export default function PremiumPackageScreen() {
               className={`w-[31%] items-center justify-center rounded-2xl border-2 p-3 ${
                 selectedPlan === 'monthly'
                   ? 'border-[#5B8BDF] bg-white'
-                  : 'border-transparent bg-white/50'
+                  : 'border-transparent bg-white/50 border-[#5B8BDF] shadow-xl'
               } ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}
-              style={
-                isDarkMode && selectedPlan !== 'monthly'
+              style={{
+                ...(selectedPlan === 'monthly'
+                  ? {
+                      shadowColor: '#5B8BDF',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 4.65,
+                      elevation: 8,
+                    }
+                  : {}),
+                ...(isDarkMode && selectedPlan !== 'monthly'
                   ? { backgroundColor: '#1E293B', opacity: 0.6 }
-                  : {}
-              }>
+                  : {}),
+              }}>
               <Text
                 className={`mb-1 font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                 Monthly
@@ -117,11 +126,20 @@ export default function PremiumPackageScreen() {
                   ? 'border-[#5B8BDF] bg-white'
                   : 'border-transparent bg-white/50'
               } ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}
-              style={
-                isDarkMode && selectedPlan !== 'yearly'
+              style={{
+                ...(selectedPlan === 'yearly'
+                  ? {
+                      shadowColor: '#5B8BDF',
+                      shadowOffset: { width: 0, height: 4 },
+                      shadowOpacity: 0.3,
+                      shadowRadius: 4.65,
+                      elevation: 8,
+                    }
+                  : {}),
+                ...(isDarkMode && selectedPlan !== 'yearly'
                   ? { backgroundColor: '#1E293B', opacity: 0.6 }
-                  : {}
-              }>
+                  : {}),
+              }}>
               <Text
                 className={`mb-1 font-bold ${isDarkMode ? 'text-slate-200' : 'text-slate-800'}`}>
                 Yearly
