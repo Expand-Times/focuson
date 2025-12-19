@@ -12,6 +12,7 @@ import {
   NativeSyntheticEvent,
   NativeScrollEvent,
   Pressable,
+  BackHandler,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -105,6 +106,17 @@ export default function SettingScreen() {
     if (userAuthInfo?.user?.user_metadata?.email) {
       setShowSignOut(true);
     }
+  }, []);
+
+  useEffect(() => {
+    const backAction = () => {
+      router.replace('/home');
+      return true;
+    };
+
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
+
+    return () => backHandler.remove();
   }, []);
 
   const handleSignOut = async () => {
@@ -526,7 +538,7 @@ export default function SettingScreen() {
       {/* Header */}
       <View
         className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
-        <TouchableOpacity onPress={() => router.back()}>
+        <TouchableOpacity onPress={() => router.replace('/home')}>
           <MaterialCommunityIcons
             name="arrow-left"
             size={24}
