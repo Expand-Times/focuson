@@ -440,7 +440,9 @@ export default function SettingScreen() {
     const m = now.getMonth() + 1;
     const y = now.getFullYear();
     const yy = y.toString().slice(-2);
-    const mon = now.toLocaleString('en-US', { month: 'short' });
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mon = monthNames[now.getMonth()];
 
     const z = (n: number) => n.toString().padStart(2, '0');
 

@@ -274,29 +274,36 @@ export default function Home() {
     const m = date.getMonth() + 1;
     const y = date.getFullYear();
     const yy = y.toString().slice(-2);
-    const mon = date.toLocaleString('en-US', { month: 'short' });
+    
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const mon = monthNames[date.getMonth()];
+    
+    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const dayName = weekdayNames[date.getDay()];
+
     const z = (n: number) => n.toString().padStart(2, '0');
 
+    if (dateFormat === 'weekday, day month year') {
+      return `${dayName}, ${d} ${mon} ${y}`;
+    }
+
+    let datePart = '';
     switch (dateFormat) {
-      case 'DD:MM:YYYY': return `${z(d)}:${z(m)}:${y}`;
-      case 'DD:MM:YY': return `${z(d)}:${z(m)}:${yy}`;
-      case 'MM:DD:YYYY': return `${z(m)}:${z(d)}:${y}`;
-      case 'MM:DD:YY': return `${z(m)}:${z(d)}:${yy}`;
-      case 'DD:Mon:YYYY': return `${z(d)} ${mon} ${y}`;
-      case 'Mon:DD:YYYY': return `${mon} ${z(d)}, ${y}`;
-      // Legacy
-      case 'weekday, day month year':
-        return date.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short', year: 'numeric' });
-      case 'day month year':
-        return date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
-      case 'day/month/year':
-        return date.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      case 'month/day/year':
-        return date.toLocaleDateString('en-US', { day: '2-digit', month: '2-digit', year: 'numeric' });
-      case 'year-month-day':
-        return date.toISOString().split('T')[0];
+      case 'DD:MM:YYYY': datePart = `${z(d)}:${z(m)}:${y}`; break;
+      case 'DD:MM:YY': datePart = `${z(d)}:${z(m)}:${yy}`; break;
+      case 'MM:DD:YYYY': datePart = `${z(m)}:${z(d)}:${y}`; break;
+      case 'MM:DD:YY': datePart = `${z(m)}:${z(d)}:${yy}`; break;
+      case 'DD:Mon:YYYY': datePart = `${z(d)} ${mon} ${y}`; break;
+      case 'Mon:DD:YYYY': datePart = `${mon} ${z(d)}, ${y}`; break;
+      
+      case 'day month year': datePart = `${d} ${mon} ${y}`; break;
+      case 'day/month/year': datePart = `${z(d)}/${z(m)}/${y}`; break;
+      case 'month/day/year': datePart = `${z(m)}/${z(d)}/${y}`; break;
+      case 'year-month-day': datePart = `${y}-${z(m)}-${z(d)}`; break;
       default: return dateFormat;
     }
+    
+    return `${dayName}, ${datePart}`;
   };
 
   const timeDisplay = getFormattedTime(currentTime);
