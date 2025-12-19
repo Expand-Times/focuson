@@ -339,13 +339,13 @@ export default function AllAppListByCategoryScreen() {
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
               <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-                <MaterialCommunityIcons name="plus" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+                <MaterialCommunityIcons name="plus" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
               </View>
             </TouchableOpacity>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-                  <MaterialCommunityIcons name="tune-variant" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+                  <MaterialCommunityIcons name="tune-variant" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
                 </View>
               </TouchableOpacity>
             </Link>

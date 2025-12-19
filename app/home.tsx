@@ -373,7 +373,7 @@ export default function Home() {
                  <View className={`border border-2 rounded-full p-1 ${(wallpaper && typeof wallpaper !== 'string') ? 'border-[#A3B9D9]' : (isDarkMode ? 'border-slate-600' : 'border-[#A3B9D9]')}`}>
                     <MaterialCommunityIcons name="plus" size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#A3B9D9' : (isDarkMode ? "#64748B" : "#A3B9D9")} />
                  </View>
-                 <Text allowFontScaling={false} className={`font-regular text-[12px] mt-2 ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#A3B9D9]' : (isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]')}`}>Don't add unnecessary addictive app!</Text>
+                 <Text allowFontScaling={false} className={`font-light text-[12px] mt-2 ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#A3B9D9]' : (isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]')}`}>Don't add unnecessary addictive app!</Text>
               </TouchableOpacity>
             </Link>
           </View>

@@ -48,7 +48,7 @@ export default function IntroThree() {
               <View className=" absolute bottom-[15%] items-center justify-center">
                 <Text
                   allowFontScaling={false}
-                  className="text-center text-[12px] font-light leading-5 text-[#8698B2]">
+                  className="text-center text-[13px] font-light leading-5 text-[#8698B2]">
                   Consequently, your brain learns that opening{'\n'}
                   colorful icons leads to "interesting" (stimulating){'\n'}
                   content

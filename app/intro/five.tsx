@@ -35,7 +35,7 @@ export default function IntroFive() {
 
           {/* Description Text - Moved here */}
           <View className=" absolute bottom-8 items-center justify-center">
-            <Text allowFontScaling={false} className="px-4 text-center font-light text-[12px] leading-5 text-[#8698B2]">
+            <Text allowFontScaling={false} className="px-4 text-center font-light text-[13px] leading-5 text-[#8698B2]">
             Social media platforms use AI to customize content{'\n'}
             based on your interests, with the goal of increasing the{'\n'}
             time you spend using the app.

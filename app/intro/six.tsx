@@ -39,7 +39,7 @@ export default function IntroSix() {
 
           {/* Description Text - Moved here */}
           <View className=" absolute bottom-8 items-center justify-center">
-            <Text allowFontScaling={false} className="px-4 text-center font-light text-[12px] leading-5 text-[#8698B2]">
+            <Text allowFontScaling={false} className="px-4 text-center font-light text-[13px] leading-5 text-[#8698B2]">
               Enable Reminder for games, social media, and{'\n'}
               addictive apps. And choose Remind, Delay or Quit{'\n'}
               option.

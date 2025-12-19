@@ -40,7 +40,7 @@ export default function IntroFour() {
 
           {/* Description Text - Moved here */}
           <View className=" absolute bottom-[5%] items-center justify-center">
-            <Text allowFontScaling={false} className="px-4 text-center font-light text-[12px] leading-5 text-[#8698B2]">
+            <Text allowFontScaling={false} className="px-4 text-center font-light text-[13px] leading-5 text-[#8698B2]">
               The usage data push to think before you intend to{'\n'}
               open an addictive apps/games.
             </Text>

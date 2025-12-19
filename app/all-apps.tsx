@@ -493,7 +493,7 @@ export default function AllApps() {
         <Link href="/settingScreen" asChild>
           <TouchableOpacity>
             <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-              <MaterialCommunityIcons name="tune-variant" size={24} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+              <MaterialCommunityIcons name="tune-variant" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
             </View>
           </TouchableOpacity>
         </Link>
@@ -573,7 +573,7 @@ export default function AllApps() {
               {selectedApp?.icon && (
                 <Image
                   source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                  className="mb-6 h-20 w-20"
+                  className="mb-6 h-16 w-16 rounded-xl"
                   resizeMode="contain"
                 />
               )}

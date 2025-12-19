@@ -53,8 +53,8 @@ export default function IntroSeven() {
           {/* Description Text - Moved here */}
           <Text
             allowFontScaling={false}
-            className="mb-8 px-4 text-center text-[12px] font-light leading-5 text-[#8698B2]">
-            Introducing <Text className="font-medium text-[#8698B2]">Zuhd Minimal Launcher</Text>{' '}
+            className="mb-8 px-4 text-center text-[13px] font-light leading-5 text-[#8698B2]">
+            Introducing <Text className="font-medium text-[#8698B2]">Minimal Launcher</Text>{' '}
             notification filter.{'\n'}
             You won't miss important notifications, block{'\n'}
             unnecessary, and stay focused.

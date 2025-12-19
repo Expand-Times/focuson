@@ -48,17 +48,16 @@ export default function IntroEight() {
           <View className="mb-[25%]">
             <Text
               allowFontScaling={false}
-              className=" px-4 text-center text-[12px] font-light leading-5 text-[#8698B2]">
+              className=" px-4 text-center mb-[5%] text-[13px] font-light leading-5 text-[#8698B2]">
               Give it only a week, and you'll discover why this is{'\n'}
               your must-have app.
             </Text>
 
             <Text
               allowFontScaling={false}
-              className="px-8 text-center text-[12px] font-light leading-4 text-[#8698B2]">
+              className="px-8 text-center text-[13px] font-light leading-4 text-[#8698B2]">
               Next: we need a few permissions to make{' '}
-              <Text className="font-bold text-[#8698B2]">Zuhd</Text> Minimal{'\n'}
-              Launcher work the way it's meant to
+              <Text className="font-bold text-[#8698B2]">Minimal Launcher</Text> work the way it's meant to
             </Text>
           </View>
         </View>

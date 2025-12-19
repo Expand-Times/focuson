@@ -57,10 +57,10 @@ export default function IntroTwo() {
         <View className="items-center px-4">
           <Text
             allowFontScaling={false}
-            className="mb-12 text-center text-[12px] font-light leading-5 text-[#8698B2]">
-            We are excited to help you{' '}
+            className="mb-12 text-center text-[13px] font-light leading-5 text-[#8698B2]">
+            We are excited to help you to{' '}
             <Text allowFontScaling={false} className="font-bold text-[#8698B2]">
-              be free
+            be free
             </Text>{' '}
             from
             {'\n'}digital distraction.

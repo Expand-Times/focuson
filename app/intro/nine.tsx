@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState } from 'react-native';
+import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState, TextInput } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,13 +8,37 @@ import { LinearGradient } from 'expo-linear-gradient';
 export default function IntroNine() {
   const router = useRouter();
   const [hours, setHours] = useState(3.5);
+  const [inputValue, setInputValue] = useState('3.5');
   const [unlocks, setUnlocks] = useState(25);
+  const [showKeyboard, setShowKeyboard] = useState(false);
   
   // Slider state
   const [sliderWidth, setSliderWidth] = useState(0);
   
-  const incrementHours = () => setHours(prev => Math.min(prev + 0.5, 24));
-  const decrementHours = () => setHours(prev => Math.max(prev - 0.5, 0));
+  const updateHours = (val: number) => {
+      const clamped = Math.min(Math.max(val, 0), 24);
+      setHours(clamped);
+      setInputValue(clamped.toFixed(1));
+  };
+
+  const incrementHours = () => updateHours(hours + 0.5);
+  const decrementHours = () => updateHours(hours - 0.5);
+
+  const handleTextChange = (text: string) => {
+      setInputValue(text);
+      const parsed = parseFloat(text);
+      if (!isNaN(parsed)) {
+          setHours(Math.min(Math.max(parsed, 0), 24));
+      }
+  };
+
+  const handleEndEditing = () => {
+      let parsed = parseFloat(inputValue);
+      if (isNaN(parsed)) {
+          parsed = 0;
+      }
+      updateHours(parsed);
+  };
 
   // Handle slider interaction
   const handleSlide = (evt: GestureResponderEvent) => {
@@ -60,9 +84,19 @@ export default function IntroNine() {
                         <MaterialCommunityIcons className="" name="minus-thick" size={24} color="#1E293B" />
                     </TouchableOpacity>
                     
-                    <View className="bg-[#E1EAF5] border border-[#7EA9E5] rounded-lg px-6 py-2">
-                        <Text allowFontScaling={false} className="text-[24px] font-bold text-[#2E3B4D]">{hours.toFixed(1)}<Text className="text-[24px] font-regular text-[#858E9D]">|</Text></Text>
-                    </View>
+                    <TextInput 
+                        className="bg-[#E1EAF5] border border-[#7EA9E5] rounded-lg px-6 py-2 text-[24px] font-bold text-[#2E3B4D] text-center min-w-[100px]"
+                        keyboardType="numeric"
+                        value={inputValue}
+                        onChangeText={handleTextChange}
+                        onEndEditing={handleEndEditing}
+                        maxLength={4}
+                        cursorColor="#858E9D"
+                        selectionColor="#858E9D"
+                        autoFocus={true}
+                        showSoftInputOnFocus={showKeyboard}
+                        onPressIn={() => setShowKeyboard(true)}
+                    />
 
                     <TouchableOpacity onPress={incrementHours}>
                         <MaterialCommunityIcons name="plus-thick" size={24} color="#1E293B" />
