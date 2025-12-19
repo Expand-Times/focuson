@@ -18,40 +18,7 @@ import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 
-const isBroadSystemApp = (pkg: string) => { 
-  const systemPackages = [
-    'com.android.systemui',
-    'com.android.settings',
-    'com.android.vending', // Google Play Store
-    'com.google.android.gms', // Google Play Services
-    'com.google.android.googlequicksearchbox', // Google App
-    'android',
-    'com.android.phone',
-    'com.android.providers',
-    'com.android.permissioncontroller',
-  ];
-  return systemPackages.some(sys => pkg.startsWith(sys)) || pkg.includes('.overlay') || pkg.includes('.service');
-}; 
 
-const isLauncherPackage = (pkg: string) => { 
-  const launchers = [
-    'com.expandtimes.minimallife', // This app
-    'com.sec.android.app.launcher', // Samsung
-    'com.google.android.apps.nexuslauncher', // Pixel
-    'com.miui.home', // Xiaomi
-    'com.huawei.android.launcher', // Huawei
-    'com.oppo.launcher', // Oppo
-    'com.bbk.launcher2', // Vivo
-    'com.oneplus.launcher', // OnePlus
-    'com.teslacoilsw.launcher', // Nova Launcher
-    'com.android.launcher', // Generic
-    'com.android.launcher3', // AOSP
-    'com.microsoft.launcher', // Microsoft Launcher
-    'com.actionlauncher.playstore', // Action Launcher
-  ];
-  const lowerPkg = pkg.toLowerCase();
-  return launchers.some(l => lowerPkg === l.toLowerCase()) || lowerPkg.includes('launcher') || lowerPkg.endsWith('.home');
-};
 
 export default function Home() {
   const router = useRouter();
@@ -370,7 +337,7 @@ export default function Home() {
                     setModalVisible(true);
                 }}
               >
-                <Text allowFontScaling={false} className={`text-[18px] tracking-wide font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>{app.label}</Text>
+                <Text allowFontScaling={false} className={`text-[16px] tracking-wide font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>{app.label}</Text>
               </TouchableOpacity>
             ))}
 

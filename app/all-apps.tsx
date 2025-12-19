@@ -246,13 +246,17 @@ export default function AllApps() {
 
   const handleAppPress = (app: AppItem) => {
     if (isSelectMode) {
-      setSelectedPackageNames((prev) => {
-        if (prev.includes(app.packageName)) {
-          return prev.filter((p) => p !== app.packageName);
-        } else {
-          return [...prev, app.packageName];
+      if (selectedPackageNames.includes(app.packageName)) {
+        // Deselect
+        setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
+      } else {
+        // Select
+        if (selectedPackageNames.length >= 6) {
+          Alert.alert("Limit Reached", "You cannot add more than 6 apps.");
+          return;
         }
-      });
+        setSelectedPackageNames((prev) => [...prev, app.packageName]);
+      }
     } else {
       setSelectedApp(app);
       setModalVisible(true);

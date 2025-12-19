@@ -25,9 +25,65 @@ import java.util.Calendar
 import android.app.usage.UsageStatsManager
 import android.app.usage.UsageEvents
 
+import android.content.pm.ApplicationInfo
+
 class LauncherModule : Module() {
   private val context: Context
     get() = appContext.reactContext ?: throw IllegalStateException("React Context is null")
+    
+  private fun isSystemApp(packageName: String): Boolean {
+     return try {
+         val pm = context.packageManager
+         val appInfo = pm.getApplicationInfo(packageName, 0)
+         // Consider it a system app only if it is a system app AND hasn't been updated by user
+         // This allows counting usage for pre-installed apps like YouTube/Chrome if they've been updated
+         val isSystem = (appInfo.flags and ApplicationInfo.FLAG_SYSTEM) != 0
+         val isUpdated = (appInfo.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0
+         
+         isSystem && !isUpdated
+     } catch (e: Exception) {
+         false
+     }
+   }
+
+  private val broadSystemPackages = listOf(
+    "com.android.systemui",
+    "com.android.settings",
+    "com.android.vending", // Google Play Store
+    "com.google.android.gms", // Google Play Services
+    "com.google.android.googlequicksearchbox", // Google App
+    "android",
+    "com.android.phone",
+    "com.android.providers",
+    "com.android.permissioncontroller"
+  )
+
+  private fun isBroadSystemApp(packageName: String): Boolean {
+    if (broadSystemPackages.any { packageName.startsWith(it) }) return true
+    return packageName.contains(".overlay") || packageName.contains(".service")
+  }
+
+  private val launcherPackages = listOf(
+    "com.expandtimes.minimallife", // This app
+    "com.sec.android.app.launcher", // Samsung
+    "com.google.android.apps.nexuslauncher", // Pixel
+    "com.miui.home", // Xiaomi
+    "com.huawei.android.launcher", // Huawei
+    "com.oppo.launcher", // Oppo
+    "com.bbk.launcher2", // Vivo
+    "com.oneplus.launcher", // OnePlus
+    "com.teslacoilsw.launcher", // Nova Launcher
+    "com.android.launcher", // Generic
+    "com.android.launcher3", // AOSP
+    "com.microsoft.launcher", // Microsoft Launcher
+    "com.actionlauncher.playstore" // Action Launcher
+  )
+
+  private fun isLauncherPackage(packageName: String): Boolean {
+    val lowerPkg = packageName.lowercase()
+    if (launcherPackages.any { lowerPkg == it.lowercase() }) return true
+    return lowerPkg.contains("launcher") || lowerPkg.endsWith(".home")
+  }
 
   private fun getIconBase64(drawable: Drawable): String {
       val bitmap = if (drawable is BitmapDrawable) {
@@ -284,7 +340,13 @@ class LauncherModule : Module() {
         calendar.set(Calendar.SECOND, 0)
         calendar.set(Calendar.MILLISECOND, 0)
         val startTime = calendar.timeInMillis
-        val endTime = System.currentTimeMillis()
+
+        val endCalendar = Calendar.getInstance()
+        endCalendar.set(Calendar.HOUR_OF_DAY, 23)
+        endCalendar.set(Calendar.MINUTE, 59)
+        endCalendar.set(Calendar.SECOND, 59)
+        endCalendar.set(Calendar.MILLISECOND, 999)
+        val endTime = endCalendar.timeInMillis
         
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val currentPackageName = context.packageName
@@ -295,6 +357,12 @@ class LauncherModule : Module() {
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val resolveInfos = pm.queryIntentActivities(intent, 0)
         val installedPackages = resolveInfos.map { it.activityInfo.packageName }.toSet()
+
+        // Get home apps (launchers) to exclude
+        val homeIntent = Intent(Intent.ACTION_MAIN)
+        homeIntent.addCategory(Intent.CATEGORY_HOME)
+        val homeResolveInfos = pm.queryIntentActivities(homeIntent, 0)
+        val homePackages = homeResolveInfos.map { it.activityInfo.packageName }.toSet()
         
         // Total Screen Time
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
@@ -304,8 +372,15 @@ class LauncherModule : Module() {
         for ((packageName, usageStats) in usageStatsMap) {
             val time = usageStats.totalTimeInForeground
             if (time > 0) {
-                // Only count if it's an installed app AND not the current launcher
-                if (installedPackages.contains(packageName) && packageName != currentPackageName) {
+                // Apply strict filtering based on user request
+                // We use installedPackages to ensure it has a launcher icon (user-facing)
+                // And then filter out broad system apps, launchers, and the current app itself
+                if (installedPackages.contains(packageName) && 
+                    packageName != currentPackageName && 
+                    !homePackages.contains(packageName) &&
+                    !isLauncherPackage(packageName) && 
+                    !isBroadSystemApp(packageName) &&
+                    !isSystemApp(packageName)) {
                     totalTime += time
                 }
                 packageUsage[packageName] = time
