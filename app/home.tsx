@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert, StatusBar } from 'react-native';
+import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert, StatusBar, useColorScheme } from 'react-native';
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -162,7 +162,9 @@ import { useColorContext } from './context/ColorContext';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isDarkMode, wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset } = useColorContext();
+  const { wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset } = useColorContext();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
     Battery.BatteryState.UNKNOWN

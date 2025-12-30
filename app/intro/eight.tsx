@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Image, useColorScheme, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,9 +8,15 @@ const { width, height } = Dimensions.get('window');
 
 export default function IntroEight() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   return (
-    <SafeAreaView className="flex-1 bg-[#EBF1F7]">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EBF1F7]'}`}>
+      <StatusBar
+        backgroundColor={isDarkMode ? '#0D121A' : '#EBF1F7'}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      />
       <View className="flex-1 px-6 pt-8">
         {/* Main Content Area */}
         <View className="flex-1 items-center justify-center">
@@ -69,14 +75,16 @@ export default function IntroEight() {
             {[...Array(6)].map((_, i) => (
               <View
                 key={i}
-                className={`mx-1 h-[18px] w-[18px] rounded-full border border-blue-400 ${i <= 5 ? 'bg-blue-400' : 'bg-transparent'}`}
+                className={`mx-1 h-[18px] w-[18px] rounded-full border ${
+                  isDarkMode ? 'border-[#DADFE5]' : 'border-blue-400'
+                } ${i <= 5 ? (isDarkMode ? 'bg-[#DADFE5]' : 'bg-blue-400') : 'bg-transparent'}`}
               />
             ))}
           </View>
 
           {/* Next Button */}
           <TouchableOpacity
-            className="mb-4 w-full flex-row items-center justify-center rounded-full bg-[#7EA9E5] py-4"
+            className={`mb-4 w-full flex-row items-center justify-center rounded-full ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA9E5]'} py-4`}
             onPress={() => router.push('/intro/nine')}>
             <Text allowFontScaling={false} className="mr-2 text-[16px] font-semibold text-white">
               Next

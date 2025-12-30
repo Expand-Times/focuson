@@ -8,6 +8,7 @@ import {
   Modal,
   Alert,
   ScrollView,
+  useColorScheme,
 } from 'react-native';
 import {
   Gesture,
@@ -151,7 +152,9 @@ const BubbleCursor = ({
 };
 
 export default function AllApps() {
-  const { isDarkMode } = useColorContext();
+  const { isDarkMode: contextIsDarkMode } = useColorContext();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [apps, setApps] = useState<AppItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);

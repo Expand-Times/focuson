@@ -9,13 +9,13 @@ export default function IntroTwo() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-  // useEffect(() => {
-  //     const timer = setTimeout(() => {
-  //       router.push('/intro/three');
-  //     }, 500);
+  useEffect(() => {
+      const timer = setTimeout(() => {
+        router.push('/intro/three');
+      }, 500);
 
-  //     return () => clearTimeout(timer);
-  //   }, []);
+      return () => clearTimeout(timer);
+    }, []);
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>

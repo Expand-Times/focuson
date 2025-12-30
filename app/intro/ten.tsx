@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, Dimensions } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, useColorScheme, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import Launcher from '../../modules/launcher';
@@ -10,6 +10,8 @@ const { width } = Dimensions.get('window');
 export default function IntroTen() {
   const router = useRouter();
   const params = useLocalSearchParams();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   
   // Parse params with defaults
   const assumedHours = parseFloat(params.hours as string) || 3.5;
@@ -45,9 +47,10 @@ export default function IntroTen() {
   const getHeight = (h: number) => Math.min((h / MAX_SCALE_HOURS) * MAX_HEIGHT, MAX_HEIGHT);
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-white'}`}>
+      <StatusBar backgroundColor={isDarkMode ? '#0D121A' : '#5C8BCC'} barStyle="light-content" />
       {/* Header Bar */}
-      <View className="w-full bg-[#5C8BCC] py-6 items-center justify-center">
+      <View className={`w-full py-6 items-center justify-center ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#5C8BCC]'}`}>
         <Text allowFontScaling={false} className="text-white text-[16px] font-bold">Your Screen Time</Text>
       </View>
 
@@ -65,7 +68,7 @@ export default function IntroTen() {
                             return (
                                 <View 
                                     key={i} 
-                                    className="absolute left-0 right-0 h-[1px] bg-slate-100" 
+                                    className={`absolute left-0 right-0 h-[1px] ${isDarkMode ? 'bg-slate-800' : 'bg-slate-100'}`} 
                                     style={{ bottom: 32 + getHeight(h) }} 
                                 />
                             );
@@ -81,7 +84,7 @@ export default function IntroTen() {
                             className="w-12 bg-[#9FB7E3] rounded-t-sm top-0.5" 
                             style={{ height: getHeight(assumedHours) }}
                         />
-                        <Text allowFontScaling={false} className="text-[7px] text-[#2E3B4D] font-regular text-center mt-2 h-8">Your assumption</Text>
+                        <Text allowFontScaling={false} className={`text-[7px] font-regular text-center mt-2 h-8 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>Your assumption</Text>
                     </View>
 
                     {/* Bar 2: Actual usage (Static/Benchmark) */}
@@ -95,7 +98,7 @@ export default function IntroTen() {
                             className="w-12 bg-[#D99694] rounded-t-sm top-0.5" 
                             style={{ height: getHeight(actualHours) }}
                         />
-                        <Text allowFontScaling={false} className="text-[7px] text-[#2E3B4D] font-regular text-center mt-2 h-8">Actual usage</Text>
+                        <Text allowFontScaling={false} className={`text-[7px] font-regular text-center mt-2 h-8 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>Actual usage</Text>
                     </View>
 
                     {/* Bar 3: with Zuhd */}
@@ -107,7 +110,7 @@ export default function IntroTen() {
                             className="w-12 bg-[#8CD6C3] rounded-t-sm top-0.5" 
                             style={{ height: getHeight(2.5) }}
                         />
-                        <Text allowFontScaling={false} className="text-[7px] text-[#2E3B4D] font-regular text-center mt-2 h-8">with <Text className="font-bold">Minimal Life</Text></Text>
+                        <Text allowFontScaling={false} className={`text-[7px] font-regular text-center mt-2 h-8 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>with <Text className="font-bold">Minimal Life</Text></Text>
                     </View>
 
                     {/* Bar 4: Zuhd + Iron will */}
@@ -118,15 +121,15 @@ export default function IntroTen() {
                         <View 
                             className="w-12 bg-[#93D093] rounded-t-sm top-0.5" 
                             style={{ height: getHeight(1.5) }}                        />
-                        <Text allowFontScaling={false} className="text-[7px] text-[#2E3B4D]  text-center mt-2 h-8"><Text className="font-bold">Minimal Life</Text>{'\n'}<Text className="font-regular">+Iron will</Text></Text>
+                        <Text allowFontScaling={false} className={`text-[7px] text-center mt-2 h-8 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}><Text className="font-bold">Minimal Life</Text>{'\n'}<Text className="font-regular">+Iron will</Text></Text>
                     </View>
                 </View>
             </View>
 
             {/* Stats Card */}
             <View className="w-full  mt-12">
-                <View className="bg-white rounded-3xl  items-center border-b border-slate-50">
-                    <Text allowFontScaling={false} className="text-[16px] font-bold text-[#2E3B4D] mb-4">You unlock your phone daily</Text>
+                <View className={`rounded-3xl items-center border-b ${isDarkMode ? 'bg-[#131B26] border-slate-800' : 'bg-white border-slate-50'}`}>
+                    <Text allowFontScaling={false} className={`text-[16px] font-bold mb-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>You unlock your phone daily</Text>
                     <Text allowFontScaling={false} className="text-[32px] font-bold text-[#F4BE37] mb-4">{actualUnlocks}x</Text>
                     <Text allowFontScaling={false} className="text-[#89A2CA] text-[12px]">Assumption was {assumedUnlocks} times</Text>
                 </View>
@@ -136,7 +139,7 @@ export default function IntroTen() {
         {/* Fixed Footer Section */}
         <View className="w-full items-center pb-8 pt-4 px-4">
             <TouchableOpacity 
-                className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-8 shadow-sm"
+                className={`w-full py-4 rounded-full items-center justify-center mb-8 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA6E0]'}`}
                 onPress={async () => {
                     try {
                         await AsyncStorage.setItem('hasSeenIntro', 'true');

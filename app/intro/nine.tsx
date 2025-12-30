@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState, TextInput } from 'react-native';
+import { View, Text, TouchableOpacity, PanResponder, Dimensions, GestureResponderEvent, PanResponderGestureState, TextInput, useColorScheme, StatusBar } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -7,6 +7,8 @@ import { LinearGradient } from 'expo-linear-gradient';
 
 export default function IntroNine() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [hours, setHours] = useState(3.5);
   const [inputValue, setInputValue] = useState('3.5');
   const [unlocks, setUnlocks] = useState(25);
@@ -68,24 +70,25 @@ export default function IntroNine() {
   ).current;
 
   return (
-    <SafeAreaView className="flex-1 bg-white">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-white'}`}>
+      <StatusBar backgroundColor={isDarkMode ? '#0D121A' : '#ffffff'} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <View className="flex-1 px-6 pt-12">
         
         {/* Main Content Area */}
         <View className="flex-1 items-center justify-start">
             {/* Top Section */}
             <View className="w-full items-center ">
-                <Text allowFontScaling={false} className="text-[16px] font-regular text-[#2E3B4D]  text-center mb-8 px-4">
+                <Text allowFontScaling={false} className={`text-[16px] font-regular text-center mb-8 px-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
                     How much time do you spend your {'\n'} Phone?
                 </Text>
 
                 <View className="flex-row items-center space-x-4 mb-16">
                     <TouchableOpacity onPress={decrementHours}>
-                        <MaterialCommunityIcons className="" name="minus-thick" size={24} color="#1E293B" />
+                        <MaterialCommunityIcons className="" name="minus-thick" size={24} color={isDarkMode ? '#DADFE5' : '#1E293B'} />
                     </TouchableOpacity>
                     
                     <TextInput 
-                        className="bg-[#E1EAF5] border border-[#7EA9E5] rounded-lg px-6 py-2 text-[24px] font-bold text-[#2E3B4D] text-center min-w-[100px]"
+                        className={`border rounded-lg px-6 py-2 text-[24px] font-bold text-center min-w-[100px] ${isDarkMode ? 'bg-[#131B26] border-[#DADFE5] text-[#DADFE5]' : 'bg-[#E1EAF5] border-[#7EA9E5] text-[#2E3B4D]'}`}
                         keyboardType="numeric"
                         value={inputValue}
                         onChangeText={handleTextChange}
@@ -99,29 +102,29 @@ export default function IntroNine() {
                     />
 
                     <TouchableOpacity onPress={incrementHours}>
-                        <MaterialCommunityIcons name="plus-thick" size={24} color="#1E293B" />
+                        <MaterialCommunityIcons name="plus-thick" size={24} color={isDarkMode ? '#DADFE5' : '#1E293B'} />
                     </TouchableOpacity>
                 </View>
             </View>
 
             <View className="flex-1 w-full items-center justify-center">
-                <Text allowFontScaling={false} className="text-[16px] font-regular text-[#2E3B4D] text-center mb-8 px-4">
+                <Text allowFontScaling={false} className={`text-[16px] font-regular text-center mb-8 px-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
                     How many time daily unlock your {'\n'} phone?
                 </Text>
 
-                <Text allowFontScaling={false} className="text-[24px] font-bold text-[#2E3B4D] mb-8">{unlocks}x</Text>
+                <Text allowFontScaling={false} className={`text-[24px] font-bold mb-8 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>{unlocks}x</Text>
 
                 {/* Custom Slider Visual & Interaction */}
                 <View className="w-full px-4 mb-2">
                     <View 
-                        className="h-12 bg-[#ECF0FF] rounded-full flex-row items-center relative overflow-hidden"
+                        className={`h-12 rounded-full flex-row items-center relative overflow-hidden ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#ECF0FF]'}`}
                         onLayout={(event) => setSliderWidth(event.nativeEvent.layout.width)}
                         onTouchStart={(e: GestureResponderEvent) => handleSlide(e)}
                         onTouchMove={(e: GestureResponderEvent) => handleSlide(e)}
                     >
                         {/* Progress Bar */}
                         <LinearGradient
-                            colors={['#ECF0FF', '#7EA6E0']}
+                            colors={isDarkMode ? ['#131B26', '#7EA6E0'] : ['#ECF0FF', '#7EA6E0']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 0 }}
                             className="h-full rounded-full" 
@@ -148,7 +151,7 @@ export default function IntroNine() {
         {/* Fixed Footer Section */}
         <View className="w-full items-center pb-8 pt-4">
             <TouchableOpacity 
-                className="w-full bg-[#7EA6E0] py-4 rounded-full items-center justify-center mb-4 shadow-sm"
+                className={`w-full py-4 rounded-full items-center justify-center mb-4 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA6E0]'}`}
                 onPress={() => router.push({
                     pathname: '/intro/ten',
                     params: { 
@@ -160,7 +163,7 @@ export default function IntroNine() {
                 <Text allowFontScaling={false} className="text-white text-[16px] font-regular">Submit</Text>
             </TouchableOpacity>
             
-            <Text allowFontScaling={false} className="text-[#8698B2] text-[10px] font-light text-center">
+            <Text allowFontScaling={false} className={`text-[10px] font-light text-center ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Ready to be amazed by actual data!
             </Text>
         </View>

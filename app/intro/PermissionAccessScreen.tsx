@@ -8,6 +8,8 @@ import {
   Dimensions,
   Image,
   AppState,
+  useColorScheme,
+  StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
@@ -20,6 +22,8 @@ const { width } = Dimensions.get('window');
 
 export default function PermissionAccessScreen() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [permissions, setPermissions] = useState({
     usageStats: false,
     overlay: false,
@@ -117,14 +121,14 @@ export default function PermissionAccessScreen() {
     if (hasPermission) return null;
 
     return (
-      <View className="mb-4 rounded-2xl border border-slate-50 bg-white p-6 shadow-sm">
+      <View className={`mb-4 rounded-2xl border p-6 shadow-sm ${isDarkMode ? 'bg-[#131B26] border-[#DADFE5]' : 'bg-white border-slate-50'}`}>
         <View className="mb-4 flex-row items-start ">
-          <View className="h-12 w-12 items-center justify-center rounded-xl bg-[#EBF1F7]">
+          <View className={`h-12 w-12 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#EBF1F7]'}`}>
             {icon}
           </View>
           <View className="flex-1 ml-4">
-            <Text allowFontScaling={false} className="mb-1 text-[18px] font-semibold text-[#2E3B4D]">{title}</Text>
-            <Text allowFontScaling={false} className="text-[12px] font-regular leading-5 text-[#8698B2]">{description}</Text>
+            <Text allowFontScaling={false} className={`mb-1 text-[18px] font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>{title}</Text>
+            <Text allowFontScaling={false} className={`text-[12px] font-regular leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>{description}</Text>
           </View>
         </View>
 
@@ -134,10 +138,10 @@ export default function PermissionAccessScreen() {
           </View>
         ) : (
           <TouchableOpacity
-            className="w-full items-center justify-center rounded-full bg-[#7EA9E5] py-3"
+            className={`w-full items-center justify-center rounded-full py-3 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#7EA9E5]'}`}
             onPress={onPress}
-            style={{ backgroundColor: color }}>
-            <Text allowFontScaling={false} className="font-bold text-[14px] text-white">
+            style={{ backgroundColor: isDarkMode ? '#0D121A' : color }}>
+            <Text allowFontScaling={false} className={`font-bold text-[14px] ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}>
               {title === 'Accessibility Service' ? 'Allow' : 'Grant Permission'}
             </Text>
           </TouchableOpacity>
@@ -156,7 +160,8 @@ export default function PermissionAccessScreen() {
   }, [missingCount]);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#EEF2F6]">
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EEF2F6]'}`}>
+      <StatusBar backgroundColor={isDarkMode ? '#0D121A' : '#EEF2F6'} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
       <ScrollView className="flex-1" contentContainerStyle={{ paddingBottom: 40 }}>
         {/* Header Section with Illustration */}
         <View className="items-center px-6 py-8">
@@ -170,24 +175,24 @@ export default function PermissionAccessScreen() {
             </View>
           </View>
 
-          <Text allowFontScaling={false} className="mb-2 text-[20px] font-bold text-[#2E3B4D]">
+          <Text allowFontScaling={false} className={`mb-2 text-[20px] font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
             {missingCount > 0 ? `${missingCount} Permission Missing` : 'All Set!'}
           </Text>
 
-          <Text allowFontScaling={false} className="px-2 text-center text-[10px] font-regular leading-4 text-[#8698B2]">
-            <Text allowFontScaling={false} className="font-semibold text-[#8698B2] ">Minimal Life</Text> requires permission to track your screen
+          <Text allowFontScaling={false} className={`px-2 text-center text-[10px] font-regular leading-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>Minimal Life</Text> requires permission to track your screen
             time and distraction blocking features.{'\n\n'}
             We don't collect or share your personal data. Your{' '}
-            <Text allowFontScaling={false} className="font-semibold text-[#8698B2]">data store</Text> on your{' '}
-            <Text allowFontScaling={false} className="font-semibold text-[#8698B2]">device; not</Text> in our{' '}
-            <Text allowFontScaling={false} className="font-semibold text-[#8698B2]">server</Text>. Feel free to give permission.
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>data store</Text> on your{' '}
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>device; not</Text> in our{' '}
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>server</Text>. Feel free to give permission.
           </Text>
         </View>
 
         {/* Permissions List */}
         <View className="px-4">
           <PermissionCard
-            icon={<Image source={require('@/assets/images/AppUsage.png')} style={{ width: 24, height: 26, tintColor: '#7EA9E5' }} />}
+            icon={<Image source={require('@/assets/images/AppUsage.png')} style={{ width: 24, height: 26, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
             title="Access App Usage Data"
             description="Required to block distracting app. Also use to track screen time."
             hasPermission={permissions.usageStats}
@@ -195,7 +200,7 @@ export default function PermissionAccessScreen() {
           />
 
           <PermissionCard
-            icon={<Image source={require('@/assets/images/OverApp.png')} style={{ width: 24, height: 24, tintColor: '#7EA9E5' }} />}
+            icon={<Image source={require('@/assets/images/OverApp.png')} style={{ width: 24, height: 24, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
             title="Display Over Other Apps"
             description="Required to display an overlay over blocked distracting apps."
             hasPermission={permissions.overlay}
@@ -203,7 +208,7 @@ export default function PermissionAccessScreen() {
           />
 
           <PermissionCard
-            icon={<Image source={require('@/assets/images/Accessibility.png')} style={{ width: 24, height: 28, tintColor: '#7EA9E5' }} />}
+            icon={<Image source={require('@/assets/images/Accessibility.png')} style={{ width: 24, height: 28, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
             title="Accessibility Service"
             description="Required to access web distraction usage and block harmful surfing."
             hasPermission={permissions.accessibility}
@@ -211,7 +216,7 @@ export default function PermissionAccessScreen() {
           />
 
           <PermissionCard
-            icon={<Image source={require('@/assets/images/BatteryOpt.png')} style={{ width: 32, height: 24, tintColor: '#7EA9E5' }} />}
+            icon={<Image source={require('@/assets/images/BatteryOpt.png')} style={{ width: 32, height: 24, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
             title="Ignore Battery Optimization"
             description="Required to keep you safe without being disabled."
             hasPermission={permissions.battery}

@@ -11,6 +11,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
+  useColorScheme,
 } from 'react-native';
 import {
   Gesture,
