@@ -1,35 +1,47 @@
 import React, { useEffect } from 'react';
-import { View, Text, Image } from 'react-native';
+import { View, Text, Image, StatusBar, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
 import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 export default function IntroTwo() {
   const router = useRouter();
-  useEffect(() => {
-      const timer = setTimeout(() => {
-        router.push('/intro/three');
-      }, 500);
-  
-      return () => clearTimeout(timer);
-    }, []);
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+  // useEffect(() => {
+  //     const timer = setTimeout(() => {
+  //       router.push('/intro/three');
+  //     }, 500);
+
+  //     return () => clearTimeout(timer);
+  //   }, []);
 
   return (
-    <SafeAreaView className="flex-1 bg-[#EBF1F7]">
-      <StatusBar/>
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
+      <StatusBar
+        backgroundColor={isDarkMode ? '#0D121A' : '#E1EAF5'}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+      />
       <View className="flex-1 items-center justify-between px-6 py-12">
         {/* Header Section */}
         <View className="mt-8 items-center">
-          <Text allowFontScaling={false} className="mb-6 text-[24px] font-medium text-[#2E3B4D]">
+          <Text
+            allowFontScaling={false}
+            className={`mb-6 text-[24px] font-medium ${
+              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
+            }`}>
             Welcome!
           </Text>
           <Text
             allowFontScaling={false}
-            className="px-4 text-center text-[14px] font-light leading-6 text-[#2E3B4D]">
+            className={`px-4 text-center text-[14px] font-light leading-6 ${
+              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
+            }`}>
             You are one of the{' '}
-            <Text allowFontScaling={false} className="font-medium text-[#2E3B4D]">
+            <Text allowFontScaling={false} className={`font-medium ${
+              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
+            }`}>
               aware 0.08%
             </Text>{' '}
             of the
@@ -57,10 +69,14 @@ export default function IntroTwo() {
         <View className="items-center px-4">
           <Text
             allowFontScaling={false}
-            className="mb-12 text-center text-[13px] font-light leading-5 text-[#8698B2]">
+            className={`mb-12 text-center text-[13px] font-light leading-5 ${
+              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
+            }`}>
             We are excited to help you to{' '}
-            <Text allowFontScaling={false} className="font-bold text-[#8698B2]">
-            be free
+            <Text allowFontScaling={false} className={`font-bold ${
+              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
+            }`}>
+              be free
             </Text>{' '}
             from
             {'\n'}digital distraction.
