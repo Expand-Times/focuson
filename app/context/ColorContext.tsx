@@ -1,6 +1,6 @@
 import React, {createContext, useState, ReactNode, useContext, useEffect} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ImageSourcePropType } from 'react-native';
+import { ImageSourcePropType, useColorScheme } from 'react-native';
 
 // Define the wallpaper types
 export type WallpaperItem = string | ImageSourcePropType;
@@ -24,7 +24,6 @@ interface ColorContextType {
   isPremium: boolean;
   unlockPremium: () => void;
   isDarkMode: boolean;
-  toggleDarkMode: () => void;
   isLoading: boolean;
   wallpaper: WallpaperItem | null;
   setWallpaper: (wallpaper: WallpaperItem) => void;
@@ -55,7 +54,8 @@ const DEFAULT_PREMIUM = false;
 const ColorProvider = ({children}: ColorProviderProps) => {
   const [selectedColor, setSelectedColorState] = useState<string>(DEFAULT_COLOR);
   const [isPremium, setIsPremium] = useState<boolean>(DEFAULT_PREMIUM);
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(DEFAULT_DARK_MODE);
+  const systemColorScheme = useColorScheme();
+  const isDarkMode = systemColorScheme === 'dark';
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>('#EBF0F7');
   const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
@@ -71,9 +71,8 @@ const ColorProvider = ({children}: ColorProviderProps) => {
 
   const loadPersistedData = async () => {
     try {
-      const [savedColor, savedDarkMode, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset] = await Promise.all([
+      const [savedColor, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset] = await Promise.all([
         AsyncStorage.getItem('selectedColor'),
-        AsyncStorage.getItem('isDarkMode'),
         AsyncStorage.getItem('isPremium'),
         AsyncStorage.getItem('selectedWallpaperIndex'),
         AsyncStorage.getItem('showPhoneDialer'),
@@ -84,7 +83,6 @@ const ColorProvider = ({children}: ColorProviderProps) => {
       ]);
 
       if (savedColor) setSelectedColorState(savedColor);
-      if (savedDarkMode) setIsDarkMode(savedDarkMode === 'true');
       if (savedPremium) setIsPremium(savedPremium === 'true');
       if (savedPhoneDialer) setShowPhoneDialerState(savedPhoneDialer === 'true');
       if (savedCameraIcon) setShowCameraIconState(savedCameraIcon === 'true');
@@ -138,17 +136,6 @@ const ColorProvider = ({children}: ColorProviderProps) => {
     } catch (err) {
       console.error("Failed to save premium status:", err);
       setIsPremium(false);
-    }
-  };
-
-  const toggleDarkMode = async () => {
-    try {
-      const newValue = !isDarkMode;
-      setIsDarkMode(newValue);
-      await AsyncStorage.setItem('isDarkMode', newValue.toString());
-    } catch (err) {
-      console.error("Failed to save dark mode:", err);
-      setIsDarkMode(isDarkMode);
     }
   };
 
@@ -215,7 +202,6 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         isPremium,
         unlockPremium,
         isDarkMode,
-        toggleDarkMode,
         isLoading,
         wallpaper,
         setWallpaper,

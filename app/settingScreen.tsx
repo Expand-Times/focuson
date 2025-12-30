@@ -61,6 +61,33 @@ export default function SettingScreen() {
   const [modalVisible, setModalVisible] = useState(false);
 
   const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
+
+  useEffect(() => {
+    loadReminderOption();
+  }, []);
+
+  const loadReminderOption = async () => {
+    try {
+      const stored = await AsyncStorage.getItem('reminderOption');
+      if (stored) {
+        setReminderOption(stored);
+      } else {
+        setReminderOption('remind');
+      }
+    } catch (e) {
+      console.error('Failed to load reminder option', e);
+    }
+  };
+
+  const handleSetReminderOption = async (option: string) => {
+    setReminderOption(option);
+    try {
+      await AsyncStorage.setItem('reminderOption', option);
+    } catch (e) {
+      console.error('Failed to save reminder option', e);
+    }
+  };
+
   const [contactOption, setContactOption] = useState('issue'); // issue, suggestion
   const context = useContext(ColorContext);
 
@@ -69,7 +96,6 @@ export default function SettingScreen() {
   }
   const {
     isDarkMode,
-    toggleDarkMode,
     wallpaper,
     setWallpaper,
     selectedColor,
@@ -968,24 +994,6 @@ export default function SettingScreen() {
             Display
           </Text>
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            {/* Dark Mood */}
-            <View className="mb-4 flex-row items-center justify-between">
-              <Text
-                allowFontScaling={false}
-                className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
-                Dark Mood
-              </Text>
-              <View className="flex-row items-center gap-2">
-                <TouchableOpacity onPress={toggleDarkMode}>
-                  <MaterialCommunityIcons
-                    name={isDarkMode ? 'weather-night' : 'theme-light-dark'}
-                    size={24}
-                    color={isDarkMode ? '#E2E8F0' : '#64748B'}
-                  />
-                </TouchableOpacity>
-              </View>
-            </View>
-
             {/* Home Wallpaper */}
             <View className="mb-4 flex-row items-center justify-between">
               <Text
@@ -1108,7 +1116,7 @@ export default function SettingScreen() {
             <View className=" ml-[5%]">
               <TouchableOpacity
                 className="mb-2 flex-row items-center"
-                onPress={() => setReminderOption('mindful')}>
+                onPress={() => handleSetReminderOption('mindful')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'mindful' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
@@ -1126,7 +1134,7 @@ export default function SettingScreen() {
 
               <TouchableOpacity
                 className="mb-2 flex-row items-center"
-                onPress={() => setReminderOption('remind')}>
+                onPress={() => handleSetReminderOption('remind')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'remind' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
@@ -1141,7 +1149,7 @@ export default function SettingScreen() {
 
               <TouchableOpacity
                 className="flex-row items-center"
-                onPress={() => setReminderOption('quit')}>
+                onPress={() => handleSetReminderOption('quit')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'quit' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
@@ -1185,14 +1193,14 @@ export default function SettingScreen() {
                   onPress={() => setShowSignOut(!showSignOut)} // Toggle show/hide
                 >
                   <View className="flex-row items-center">
-                    <View
+                    {/* <View
                       className={`mr-3 h-9 w-9 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1F1F1F]' : 'bg-[#F1F5FF]'}`}>
                       <Ionicons
                         name="log-out-outline"
                         size={24}
                         color={isDarkMode ? '#EBF2F0' : '#2B2D42'}
                       />
-                    </View>
+                    </View> */}
                     <Text
                       allowFontScaling={false}
                       className={`font-regular text-[16px] ${isDarkMode ? 'text-[#EBF2F0]' : 'text-[#2B2D42]'}`}>
@@ -1363,7 +1371,7 @@ export default function SettingScreen() {
         {/* Rate on Google Play */}
         <TouchableOpacity
           onPress={openPlayStoreForRating}
-          className="mx-[10%] mb-[5%] mt-[5%] items-center rounded-full bg-[#7EA9E5] py-4 shadow-sm">
+          className="mx-[10%] mb-[10%] mt-[10%] items-center rounded-full bg-[#7EA9E5] py-4 shadow-sm">
           <Text allowFontScaling={false} className="font-regular text-[14px] text-white">
             Rate on Google Play
           </Text>

@@ -32,6 +32,7 @@ class TimerOverlayService : Service() {
     
     private var limitMs: Long = 0
     private var targetPackageName: String? = null
+    private var mode: String = "remind"
     private var startUsageToday: Long = 0
     private var usageStatsManager: UsageStatsManager? = null
     
@@ -72,6 +73,7 @@ class TimerOverlayService : Service() {
 
         limitMs = intent?.getLongExtra("DURATION_MS", 0L) ?: 0L
         targetPackageName = intent?.getStringExtra("TARGET_PACKAGE")
+        mode = intent?.getStringExtra("MODE") ?: "remind"
         
         if (targetPackageName != null) {
             startUsageToday = getUsageToday(targetPackageName!!)
@@ -92,7 +94,15 @@ class TimerOverlayService : Service() {
         // If usage since start exceeds limit
         if (usageDelta >= limitMs) {
             if (overlayView == null) {
-                showTimesUpOverlay(currentUsage)
+                if (mode == "quit") {
+                    val homeIntent = Intent(Intent.ACTION_MAIN)
+                    homeIntent.addCategory(Intent.CATEGORY_HOME)
+                    homeIntent.flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    startActivity(homeIntent)
+                    stopSelf()
+                } else {
+                    showTimesUpOverlay(currentUsage)
+                }
             }
         }
     }

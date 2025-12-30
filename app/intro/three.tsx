@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, Dimensions, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Dimensions, Image, useColorScheme } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, FontAwesome5 } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,8 @@ const { width, height } = Dimensions.get('window');
 
 export default function IntroThree() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
 
   return (
     <SafeAreaView className="flex-1 bg-[#EBF1F7]">
@@ -18,7 +20,7 @@ export default function IntroThree() {
           <View className="items-center ">
             <Text
               allowFontScaling={false}
-              className="mb-4 text-center text-[18px] font-bold text-[#2E3B4D]">
+              className={`mb-4 text-center text-[18px] font-bold ${isDarkMode ? 'text-red-500' : 'text-[#2E3B4D]'}`}>
               Why Icons are so colorful?
             </Text>
             <Text

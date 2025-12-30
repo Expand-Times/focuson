@@ -288,10 +288,18 @@ class LauncherModule : Module() {
         return@Function false
     }
 
-    Function("startTimerOverlay") { durationMs: Double, targetPackageName: String? ->
+    Function("uninstallApp") { packageName: String ->
+        val intent = Intent(Intent.ACTION_DELETE)
+        intent.data = Uri.parse("package:$packageName")
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    Function("startTimerOverlay") { durationMs: Double, targetPackageName: String?, mode: String? ->
         val intent = Intent(context, TimerOverlayService::class.java)
         intent.putExtra("DURATION_MS", durationMs.toLong())
         intent.putExtra("TARGET_PACKAGE", targetPackageName)
+        intent.putExtra("MODE", mode ?: "remind")
         context.startService(intent)
     }
 

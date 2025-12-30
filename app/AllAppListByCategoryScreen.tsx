@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Modal,
   TouchableWithoutFeedback,
+  KeyboardAvoidingView,
+  Platform,
 } from 'react-native';
 import {
   Gesture,
@@ -315,6 +317,10 @@ export default function AllAppListByCategoryScreen() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GestureDetector gesture={leftSwipeGesture}>
+        <KeyboardAvoidingView 
+          style={{ flex: 1 }} 
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
         <View className={`flex-1 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
           <View className="flex-1 px-4">
         {/* Search Bar */}
@@ -595,6 +601,7 @@ export default function AllAppListByCategoryScreen() {
         </TouchableWithoutFeedback>
       </Modal>
         </View>
+        </KeyboardAvoidingView>
       </GestureDetector>
     </GestureHandlerRootView>
   );

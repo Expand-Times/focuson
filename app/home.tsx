@@ -4,15 +4,154 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import { runOnJS } from 'react-native-reanimated';
+import Animated, {
+  runOnJS,
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  interpolate,
+  Extrapolation,
+  SharedValue,
+} from 'react-native-reanimated';
+import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
+
+const { height } = Dimensions.get('window');
+const ITEM_HEIGHT = height * 0.65 / 28;
+const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
+
+const SidebarItem = ({
+  letter,
+  index,
+  touchY,
+  isTouching,
+  onSelect,
+  isDarkMode,
+  currentLetter,
+}: {
+  letter: string;
+  index: number;
+  touchY: SharedValue<number>;
+  isTouching: SharedValue<boolean>;
+  onSelect: (letter: string) => void;
+  isDarkMode: boolean;
+  currentLetter: string;
+}) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
+    const diff = itemY - touchY.value;
+    const dist = Math.abs(diff);
+    const direction = diff > 0 ? 1 : -1;
+
+    const RANGE = ITEM_HEIGHT * 5;
+    const MAX_SCALE = 2;
+
+    let spreadY = 0;
+    if (isTouching.value) {
+      if (dist < RANGE) {
+        spreadY = (MAX_SCALE - 1) * dist * (1 - dist / (2 * RANGE));
+      } else {
+        spreadY = ((MAX_SCALE - 1) * RANGE) / 2;
+      }
+    }
+    
+    const finalTranslateY = direction * spreadY;
+
+    const translateX = interpolate(dist, [0, ITEM_HEIGHT * 5], [-ITEM_HEIGHT * 6, 0], Extrapolation.CLAMP);
+
+    const scale = interpolate(dist, [0, ITEM_HEIGHT * 5], [MAX_SCALE, 1], Extrapolation.CLAMP);
+
+    return {
+      transform: [
+        { translateX: withSpring(isTouching.value ? translateX : 0) },
+        { translateY: withSpring(isTouching.value ? finalTranslateY : 0) },
+        { scale: withSpring(isTouching.value ? scale : 1) },
+      ],
+      zIndex: isTouching.value && dist < ITEM_HEIGHT * 1.5 ? 100 : 1,
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[
+        { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 },
+        animatedStyle,
+      ]}>
+      <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
+        <Text
+          allowFontScaling={false}
+          style={{ fontSize: currentLetter === letter ? ITEM_HEIGHT * 0.8 : ITEM_HEIGHT * 0.6 }}
+          className={`font-medium ${
+            currentLetter === letter
+              ? isDarkMode
+                ? 'font-bold text-white'
+                : 'font-extrabold text-[#5C8BCC]'
+              : isDarkMode
+                ? 'text-blue-400'
+                : 'text-[#5B8BDF]'
+          }`}>
+          {letter}
+        </Text>
+      </TouchableOpacity>
+    </Animated.View>
+  );
+};
+
+const BubbleCursor = ({
+  touchY,
+  isTouching,
+  letter,
+  isDarkMode,
+}: {
+  touchY: SharedValue<number>;
+  isTouching: SharedValue<boolean>;
+  letter: string;
+  isDarkMode: boolean;
+}) => {
+  const animatedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [
+        { translateY: touchY.value - CURSOR_SIZE / 2 },
+        { scale: withSpring(isTouching.value ? 1 : 0) },
+        { translateX: withSpring(isTouching.value ? -ITEM_HEIGHT * 6 : 0) },
+      ],
+      opacity: withSpring(isTouching.value ? 1 : 0),
+    };
+  });
+
+  return (
+    <Animated.View
+      style={[
+        {
+          position: 'absolute',
+          right: ITEM_HEIGHT * 1.5,
+          width: CURSOR_SIZE,
+          height: CURSOR_SIZE,
+          borderRadius: CURSOR_SIZE / 2,
+          backgroundColor: isDarkMode ? '#4ADE80' : '#fff',
+          justifyContent: 'center',
+          alignItems: 'center',
+          zIndex: 100,
+          elevation: 5,
+          shadowColor: '#000',
+          shadowOffset: { width: 0, height: 2 },
+          shadowOpacity: 0.25,
+          shadowRadius: 3.84,
+        },
+        animatedStyle,
+      ]}>
+      <Text style={{ fontSize: CURSOR_SIZE * 0.4 }} className="font-bold text-black">{letter}</Text>
+    </Animated.View>
+  );
+};
+
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
@@ -31,10 +170,48 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
 
+  // Sidebar Logic
+  const sidebarChars = useMemo(() => ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')], []);
+  const touchY = useSharedValue(0);
+  const isTouching = useSharedValue(false);
+  const [dragLetter, setDragLetter] = useState('');
+
+  const navigateToAllAppsWithLetter = (letter: string) => {
+    setDragLetter(letter);
+    router.push({ pathname: '/all-apps', params: { initialLetter: letter } });
+  };
+
+  const sidebarGesture = Gesture.Pan()
+    .onBegin((e) => {
+      isTouching.value = true;
+      touchY.value = e.y;
+      const index = Math.floor(e.y / ITEM_HEIGHT);
+      if (index >= 0 && index < sidebarChars.length) {
+        runOnJS(navigateToAllAppsWithLetter)(sidebarChars[index]);
+      }
+    })
+    .onUpdate((e) => {
+      touchY.value = e.y;
+      const index = Math.floor(e.y / ITEM_HEIGHT);
+      if (index >= 0 && index < sidebarChars.length) {
+         runOnJS(navigateToAllAppsWithLetter)(sidebarChars[index]);
+      }
+    })
+    .onFinalize(() => {
+      isTouching.value = false;
+      runOnJS(setDragLetter)('');
+    });
+
   // Home Apps State
   const [homeApps, setHomeApps] = useState<AppItem[]>([]);
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [appRenames, setAppRenames] = useState<Record<string, string>>({});
+
+  // Time Over Settings State
+  const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
+  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('remind');
+  const [secondWarning, setSecondWarning] = useState(true);
 
   useEffect(() => {
     // Update time immediately when timeOffset changes
@@ -65,8 +242,32 @@ export default function Home() {
         }
       };
 
+      const loadRenamedApps = async () => {
+        try {
+          const stored = await AsyncStorage.getItem('appRenames');
+          if (stored) {
+            setAppRenames(JSON.parse(stored));
+          }
+        } catch (e) {
+          console.error('Failed to load app renames', e);
+        }
+      };
+
+      const loadTimeOverSettings = async () => {
+        try {
+          const stored = await AsyncStorage.getItem('reminderOption');
+          if (stored) {
+            setTimeOverAction(stored as any);
+          }
+        } catch (e) {
+          console.error('Failed to load time over settings', e);
+        }
+      };
+
       fetchStats();
       loadHomeApps();
+      loadRenamedApps();
+      loadTimeOverSettings();
       // Update stats every minute while focused
       const interval = setInterval(fetchStats, 60000);
       return () => clearInterval(interval);
@@ -146,8 +347,8 @@ export default function Home() {
         }
 
         // Start the overlay timer
-        const durationMs = durationMinutes * 15 * 1000;
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName);
+        const durationMs = durationMinutes * 60 * 1000;
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, timeOverAction);
 
         // Open the app
         openApplication(selectedApp.packageName);
@@ -337,7 +538,7 @@ export default function Home() {
                     setModalVisible(true);
                 }}
               >
-                <Text allowFontScaling={false} className={`text-[16px] tracking-wide font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>{app.label}</Text>
+                <Text allowFontScaling={false} className={`text-[16px] tracking-wide font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>{appRenames[app.packageName] || app.label}</Text>
               </TouchableOpacity>
             ))}
 
@@ -394,6 +595,32 @@ export default function Home() {
             </View>
           </View>
 
+          {/* Sidebar Overlay */}
+          <View style={{ position: 'absolute', right: 0, top: 0, bottom: 0, justifyContent: 'center', zIndex: 100 }}>
+            <GestureDetector gesture={sidebarGesture}>
+              <Animated.View style={{ paddingHorizontal: 4 }}>
+                {sidebarChars.map((letter, index) => (
+                  <SidebarItem
+                    key={index}
+                    letter={letter}
+                    index={index}
+                    touchY={touchY}
+                    isTouching={isTouching}
+                    onSelect={(l) => navigateToAllAppsWithLetter(l)}
+                    isDarkMode={isDarkMode}
+                    currentLetter={dragLetter}
+                  />
+                ))}
+                <BubbleCursor
+                  touchY={touchY}
+                  isTouching={isTouching}
+                  letter={dragLetter}
+                  isDarkMode={isDarkMode}
+                />
+              </Animated.View>
+            </GestureDetector>
+          </View>
+
           <Modal
             animationType="fade"
             transparent={true}
@@ -403,7 +630,7 @@ export default function Home() {
               <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
                   <Text allowFontScaling={false} className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                    Open {selectedApp?.label}
+                    Open {selectedApp ? (appRenames[selectedApp.packageName] || selectedApp.label) : ''}
                   </Text>
 
                   {selectedApp?.icon && (
@@ -418,6 +645,7 @@ export default function Home() {
                     Select estimated use time
                   </Text>
                 </View>
+              
 
                 <View className="mb-6 flex-row flex-wrap justify-between">
                   {[2, 5, 10, 20].map((mins) => (
@@ -429,7 +657,69 @@ export default function Home() {
                     </TouchableOpacity>
                   ))}
                 </View>
+                 {/* Toggle Icon */}
+                <TouchableOpacity 
+                  onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
+                  className="self-center p-2 mb-2"
+                >
+                   <Ionicons name={showTimeOverSettings ? "chevron-up" : "chevron-down"} size={24} color={isDarkMode ? "#94A3B8" : "#64748B"} />
+                </TouchableOpacity>
 
+                {showTimeOverSettings && (
+                  <View className="mb-4 w-full">
+                    <Text allowFontScaling={false} className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                      When time is over
+                    </Text>
+                    
+                    {/* Mindful Delay */}
+                    <TouchableOpacity 
+                      className="mb-3 flex-row items-center" 
+                      onPress={() => setTimeOverAction('mindful')}
+                    >
+                      <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'mindful' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                      </View>
+                      <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Mindful Delay</Text>
+                    </TouchableOpacity>
+
+                    {/* Remind Me */}
+                    <View className="mb-3 flex-row items-center justify-between">
+                       <TouchableOpacity 
+                        className="flex-row items-center"
+                        onPress={() => setTimeOverAction('remind')}
+                      >
+                        <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {timeOverAction === 'remind' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                        </View>
+                        <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Remind Me</Text>
+                      </TouchableOpacity>
+
+                      {/* 2nd Warning Checkbox */}
+                       <TouchableOpacity 
+                        className="flex-row items-center"
+                        onPress={() => setSecondWarning(!secondWarning)}
+                        disabled={timeOverAction !== 'remind'}
+                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}
+                      >
+                         <View className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? 'bg-[#5B8BDF] border-[#5B8BDF]' : 'border-gray-400'}`}>
+                           {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
+                         </View>
+                         <Text allowFontScaling={false} className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>2nd Warning</Text>
+                       </TouchableOpacity>
+                    </View>
+
+                    {/* Quit */}
+                    <TouchableOpacity 
+                      className="mb-3 flex-row items-center"
+                      onPress={() => setTimeOverAction('quit')}
+                    >
+                      <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'quit' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                      </View>
+                      <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Quit</Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
                     className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
