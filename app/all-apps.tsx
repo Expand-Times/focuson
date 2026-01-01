@@ -510,17 +510,17 @@ export default function AllApps() {
           <View className="mb-4 flex-row items-center justify-between px-1">
             <Text
               allowFontScaling={false}
-              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
+              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-[#DADFE5] decoration-[#DADFE5]' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
               All Apps
             </Text>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
-                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-[#728099]' : 'border-[#858E9D]'}`}>
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={isDarkMode ? '#94A3B8' : '#858E9D'}
+                    color={isDarkMode ? '#728099' : '#858E9D'}
                   />
                 </View>
               </TouchableOpacity>
