@@ -324,10 +324,10 @@ export default function AllAppListByCategoryScreen() {
           style={{ flex: 1 }} 
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         >
-        <View className={`flex-1 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
+        <View className={`flex-1 pt-12 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EEF2F6]'}`}>
           <View className="flex-1 px-4">
         {/* Search Bar */}
-        <View className={`mb-6 flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B] border-[#212D41]' : 'bg-white border-slate-100'}`}>
+        <View className={`mb-6 flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#131B27] border-[#212D41]' : 'bg-white border-slate-100'}`}>
           <MaterialCommunityIcons name="magnify" size={20} color={isDarkMode ? "#434C59" : "#5C8BCC"} />
           <TextInput
             className={`ml-3 flex-1 text-[16px] ${isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'}`}
@@ -394,11 +394,11 @@ export default function AllAppListByCategoryScreen() {
                   </View>
                 ) : (
                   <View className="mb-2 flex-row items-center justify-end">
-                    <Text allowFontScaling={false} className={`mr-2 text-[16px] ${isDarkMode ? 'text-slate-400' : 'text-[#858E9D]'}`}>{displayTitle}</Text>
+                    <Text allowFontScaling={false} className={`mr-2 text-[16px] ${isDarkMode ? 'text-[#728099]' : 'text-[#858E9D]'}`}>{displayTitle}</Text>
                     <TouchableOpacity 
                       className={`border-b ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}
                       onPress={() => handleStartEditing(category.title, displayTitle)}>
-                      <MaterialCommunityIcons name="pencil-outline" size={16} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+                      <MaterialCommunityIcons name="pencil-outline" size={16} color={isDarkMode ? "#728099" : "#858E9D"} />
                     </TouchableOpacity>
                   </View>
                 )}
@@ -408,17 +408,17 @@ export default function AllAppListByCategoryScreen() {
                   {category.data.map((app) => (
                     <TouchableOpacity
                       key={app.packageName}
-                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#7FA8E5]'}`}
+                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-[#7FA8E5]'}`}
                       onPress={() => handleLaunchApp(app.packageName)}
                       onLongPress={() => handleLongPress(app)}>
                       <Text allowFontScaling={false}
-                        className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-white'}`}
+                        className={`text-[16px] font-regular ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}
                         numberOfLines={1}
                         style={{ maxWidth: '60%' }}>
                         {app.label}
                       </Text>
                       <View className="flex-row items-center">
-                        <Text allowFontScaling={false} className="text-[12px] text-white font-regular opacity-90">
+                        <Text allowFontScaling={false} className={`text-[12px] font-regular opacity-90 ${isDarkMode ? 'text-[#728099]' : 'text-white'}`}>
                           TO: {app.launchCount || 0} Times || DU: {formatUsageTime(app.usageTime)}
                         </Text>
                       </View>
