@@ -335,7 +335,7 @@ export default function AllAppListByCategoryScreen() {
             placeholderTextColor={isDarkMode ? "#64748B" : "#A3B9D9"}
             value={searchQuery}
             onChangeText={setSearchQuery}
-            cursorColor={isDarkMode ? "#fff" : "#000000"} 
+            cursorColor={isDarkMode ? "#434C59" : "#A3B9D9"} 
             autoFocus={true}
             showSoftInputOnFocus={isKeyboardEnabled}
             onTouchStart={() => setIsKeyboardEnabled(true)}
@@ -346,19 +346,19 @@ export default function AllAppListByCategoryScreen() {
         <View className="mb-4 flex-row items-center justify-between">
           <Text
             allowFontScaling={false}
-            className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
+            className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-[#DBDFE4] decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
             App Category
           </Text>
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
-              <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-                <MaterialCommunityIcons name="plus" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+              <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-[#858E9D]' : 'border-[#858E9D]'}`}>
+                <MaterialCommunityIcons name="plus" size={22} color={isDarkMode ? "#728099" : "#858E9D"} />
               </View>
             </TouchableOpacity>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
-                <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-                  <MaterialCommunityIcons name="tune-variant" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
+                <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-[#858E9D]' : 'border-[#858E9D]'}`}>
+                  <MaterialCommunityIcons name="tune-variant" size={22} color={isDarkMode ? "#728099" : "#858E9D"} />
                 </View>
               </TouchableOpacity>
             </Link>
