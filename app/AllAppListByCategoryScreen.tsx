@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   Platform,
   useColorScheme,
+  Keyboard,
 } from 'react-native';
 import {
   Gesture,
@@ -38,6 +39,7 @@ export default function AllAppListByCategoryScreen() {
   const router = useRouter();
   const { isDarkMode } = useColorContext();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [renamedCategories, setRenamedCategories] = useState<{ [key: string]: string }>({});
@@ -325,14 +327,18 @@ export default function AllAppListByCategoryScreen() {
         <View className={`flex-1 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EEF2F6]'}`}>
           <View className="flex-1 px-4">
         {/* Search Bar */}
-        <View className={`mb-6 flex-row items-center rounded-full border px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-100'}`}>
-          <MaterialCommunityIcons name="magnify" size={20} color={isDarkMode ? "#94A3B8" : "#5C8BCC"} />
+        <View className={`mb-6 flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B] border-[#212D41]' : 'bg-white border-slate-100'}`}>
+          <MaterialCommunityIcons name="magnify" size={20} color={isDarkMode ? "#434C59" : "#5C8BCC"} />
           <TextInput
-            className={`ml-3 flex-1 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#A3B9D9]'}`}
-            placeholder="Search app here|"
+            className={`ml-3 flex-1 text-[16px] ${isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'}`}
+            placeholder="Search app here"
             placeholderTextColor={isDarkMode ? "#64748B" : "#A3B9D9"}
             value={searchQuery}
             onChangeText={setSearchQuery}
+            cursorColor={isDarkMode ? "#fff" : "#000000"} 
+            autoFocus={true}
+            showSoftInputOnFocus={isKeyboardEnabled}
+            onTouchStart={() => setIsKeyboardEnabled(true)}
           />
         </View>
 

@@ -1,7 +1,18 @@
-import { View, Text, TouchableOpacity, Linking, Platform, Modal, Image, Alert, StatusBar, useColorScheme } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  Linking,
+  Platform,
+  Modal,
+  Image,
+  Alert,
+  StatusBar,
+  useColorScheme,
+} from 'react-native';
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useEffect, useState, useCallback, useMemo } from 'react';
@@ -24,7 +35,7 @@ import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
 
 const { height } = Dimensions.get('window');
-const ITEM_HEIGHT = height * 0.65 / 28;
+const ITEM_HEIGHT = (height * 0.65) / 28;
 const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
 
 const SidebarItem = ({
@@ -61,10 +72,15 @@ const SidebarItem = ({
         spreadY = ((MAX_SCALE - 1) * RANGE) / 2;
       }
     }
-    
+
     const finalTranslateY = direction * spreadY;
 
-    const translateX = interpolate(dist, [0, ITEM_HEIGHT * 5], [-ITEM_HEIGHT * 6, 0], Extrapolation.CLAMP);
+    const translateX = interpolate(
+      dist,
+      [0, ITEM_HEIGHT * 5],
+      [-ITEM_HEIGHT * 6, 0],
+      Extrapolation.CLAMP
+    );
 
     const scale = interpolate(dist, [0, ITEM_HEIGHT * 5], [MAX_SCALE, 1], Extrapolation.CLAMP);
 
@@ -147,7 +163,9 @@ const BubbleCursor = ({
         },
         animatedStyle,
       ]}>
-      <Text style={{ fontSize: CURSOR_SIZE * 0.4 }} className="font-bold text-black">{letter}</Text>
+      <Text style={{ fontSize: CURSOR_SIZE * 0.4 }} className="font-bold text-black">
+        {letter}
+      </Text>
     </Animated.View>
   );
 };
@@ -157,14 +175,11 @@ import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 
-
-
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset } = useColorContext();
-  const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
+  const { wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset, isDarkMode } =
+    useColorContext();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
     Battery.BatteryState.UNKNOWN
@@ -183,25 +198,44 @@ export default function Home() {
     router.push({ pathname: '/all-apps', params: { initialLetter: letter } });
   };
 
+  const updateDragLetterState = (index: number) => {
+    if (index >= 0 && index < sidebarChars.length) {
+      setDragLetter(sidebarChars[index]);
+    }
+  };
+
+  const performNavigation = (index: number) => {
+    if (index >= 0 && index < sidebarChars.length) {
+      const letter = sidebarChars[index];
+      // Reset drag letter before navigating to avoid stuck state
+      setDragLetter('');
+      router.push({ pathname: '/all-apps', params: { initialLetter: letter } });
+    }
+  };
+
+  const clearDragLetterState = () => {
+    setDragLetter('');
+  };
+
   const sidebarGesture = Gesture.Pan()
     .onBegin((e) => {
       isTouching.value = true;
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length) {
-        runOnJS(navigateToAllAppsWithLetter)(sidebarChars[index]);
-      }
+      runOnJS(updateDragLetterState)(index);
     })
     .onUpdate((e) => {
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length) {
-         runOnJS(navigateToAllAppsWithLetter)(sidebarChars[index]);
-      }
+      runOnJS(updateDragLetterState)(index);
+    })
+    .onEnd(() => {
+      const index = Math.floor(touchY.value / ITEM_HEIGHT);
+      runOnJS(performNavigation)(index);
     })
     .onFinalize(() => {
       isTouching.value = false;
-      runOnJS(setDragLetter)('');
+      runOnJS(clearDragLetterState)();
     });
 
   // Home Apps State
@@ -421,7 +455,7 @@ export default function Home() {
     const m = date.getMinutes();
     const s = date.getSeconds();
     const z = (n: number) => n.toString().padStart(2, '0');
-    
+
     let format = timeFormat;
     if (format === '12h') format = 'HH:MM PM';
     if (format === '24h') format = 'HH:MM';
@@ -444,11 +478,32 @@ export default function Home() {
     const m = date.getMonth() + 1;
     const y = date.getFullYear();
     const yy = y.toString().slice(-2);
-    
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     const mon = monthNames[date.getMonth()];
-    
-    const weekdayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+    const weekdayNames = [
+      'Sunday',
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+    ];
     const dayName = weekdayNames[date.getDay()];
 
     const z = (n: number) => n.toString().padStart(2, '0');
@@ -459,69 +514,110 @@ export default function Home() {
 
     let datePart = '';
     switch (dateFormat) {
-      case 'DD:MM:YYYY': datePart = `${z(d)}:${z(m)}:${y}`; break;
-      case 'DD:MM:YY': datePart = `${z(d)}:${z(m)}:${yy}`; break;
-      case 'MM:DD:YYYY': datePart = `${z(m)}:${z(d)}:${y}`; break;
-      case 'MM:DD:YY': datePart = `${z(m)}:${z(d)}:${yy}`; break;
-      case 'DD:Mon:YYYY': datePart = `${z(d)} ${mon} ${y}`; break;
-      case 'Mon:DD:YYYY': datePart = `${mon} ${z(d)}, ${y}`; break;
-      
-      case 'day month year': datePart = `${d} ${mon} ${y}`; break;
-      case 'day/month/year': datePart = `${z(d)}/${z(m)}/${y}`; break;
-      case 'month/day/year': datePart = `${z(m)}/${z(d)}/${y}`; break;
-      case 'year-month-day': datePart = `${y}-${z(m)}-${z(d)}`; break;
-      default: return dateFormat;
+      case 'DD:MM:YYYY':
+        datePart = `${z(d)}:${z(m)}:${y}`;
+        break;
+      case 'DD:MM:YY':
+        datePart = `${z(d)}:${z(m)}:${yy}`;
+        break;
+      case 'MM:DD:YYYY':
+        datePart = `${z(m)}:${z(d)}:${y}`;
+        break;
+      case 'MM:DD:YY':
+        datePart = `${z(m)}:${z(d)}:${yy}`;
+        break;
+      case 'DD:Mon:YYYY':
+        datePart = `${z(d)} ${mon} ${y}`;
+        break;
+      case 'Mon:DD:YYYY':
+        datePart = `${mon} ${z(d)}, ${y}`;
+        break;
+
+      case 'day month year':
+        datePart = `${d} ${mon} ${y}`;
+        break;
+      case 'day/month/year':
+        datePart = `${z(d)}/${z(m)}/${y}`;
+        break;
+      case 'month/day/year':
+        datePart = `${z(m)}/${z(d)}/${y}`;
+        break;
+      case 'year-month-day':
+        datePart = `${y}-${z(m)}-${z(d)}`;
+        break;
+      default:
+        return dateFormat;
     }
-    
+
     return `${dayName}, ${datePart}`;
   };
 
   const timeDisplay = getFormattedTime(currentTime);
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <StatusBar 
-        backgroundColor={wallpaper ? 'transparent' : (isDarkMode ? '#0F172A' : '#EBF0F7')} 
-        barStyle={isDarkMode ? "light-content" : "dark-content"} 
-        translucent={!!wallpaper}
+    <GestureHandlerRootView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
+      <StatusBar
+        backgroundColor={isDarkMode ? '#0D121A' : '#E1EAF5'}
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
       />
-      
+
       {wallpaper && typeof wallpaper !== 'string' && (
-        <Image source={wallpaper} className="absolute w-full h-full" resizeMode="cover" />
+        <Image source={wallpaper} className="absolute h-full w-full" resizeMode="cover" />
       )}
 
       <GestureDetector gesture={composedGestures}>
-        <View 
+        <View
           className="flex-1 justify-between px-6"
           style={{
             paddingTop: 48,
             paddingBottom: 48 + insets.bottom,
-            backgroundColor: wallpaper 
-              ? (typeof wallpaper === 'string' ? wallpaper : 'transparent')
-              : (isDarkMode ? '#0F172A' : '#EFF6FC')
-          }}
-        >
+            backgroundColor: wallpaper
+              ? typeof wallpaper === 'string'
+                ? wallpaper
+                : 'transparent'
+              : isDarkMode
+                ? '#0D121A'
+                : '#E1EAF5',
+          }}>
           <Stack.Screen options={{ headerShown: false }} />
 
           {/* Header: Time, Date, Battery */}
           <View className="mt-10 items-center">
             <View className="flex-row items-baseline">
-                <Text allowFontScaling={false} className={`font-regular text-[32px] ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>
-                  {timeDisplay.main}
+              <Text
+                allowFontScaling={false}
+                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                {timeDisplay.main}
+              </Text>
+              {timeDisplay.suffix && (
+                <Text
+                  allowFontScaling={false}
+                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
+                  {timeDisplay.suffix}
                 </Text>
-                {timeDisplay.suffix && (
-                  <Text allowFontScaling={false} className={`ml-1 text-[14px] ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#8698B2]')}`}>
-                    {timeDisplay.suffix}
-                  </Text>
-                )}
+              )}
             </View>
-            <Text allowFontScaling={false} className={`font-regular mt-1 text-[14px] ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#FFFFFF]' : (isDarkMode ? 'text-slate-500' : 'text-[#8698B2]')}`}>
+            <Text
+              allowFontScaling={false}
+              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
               {getFormattedDate(currentTime)}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
-              <Ionicons name={getBatteryIcon()} size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#E6EBF2' : (isDarkMode ? "#64748B" : "#5B8BDF")} />
+              <Ionicons
+                name={getBatteryIcon()}
+                size={24}
+                color={
+                  wallpaper && typeof wallpaper !== 'string'
+                    ? '#E6EBF2'
+                    : isDarkMode
+                      ? '#64748B'
+                      : '#5B8BDF'
+                }
+              />
               {batteryLevel !== null && (
-                <Text allowFontScaling={false} className={`text-sm font-medium ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]')}`}>
+                <Text
+                  allowFontScaling={false}
+                  className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]'}`}>
                   {Math.round(batteryLevel * 100)}%
                 </Text>
               )}
@@ -532,25 +628,43 @@ export default function Home() {
           <View className="w-full items-center px-4">
             {/* Render Home Apps */}
             {homeApps.map((app) => (
-              <TouchableOpacity 
+              <TouchableOpacity
                 key={app.packageName}
-                className={`w-full py-3 rounded-full items-center border  mb-4 ${(wallpaper && typeof wallpaper !== 'string') ? 'bg-[#7EA9E51A] backdrop-blur-2xl border border-t-[#C2DEF20D] border-b-[#C2DEF2] border-l-[#EADADA] border-r-[#EADADA]' : (isDarkMode ? 'bg-[#1E293B] border-[#334155]' : 'bg-[#DAE4F280] border-[#C2DEF240] border-[#C2DEF2]')}`}
+                className={`mb-4 w-full items-center rounded-full border  py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-b-[#C2DEF2] border-l-[#EADADA] border-r-[#EADADA] border-t-[#C2DEF20D] bg-[#7EA9E51A] backdrop-blur-2xl' : isDarkMode ? 'border-[#334155] bg-[#1E293B]' : 'border-[#C2DEF240] border-[#C2DEF2] bg-[#DAE4F280]'}`}
                 onPress={() => {
-                    setSelectedApp(app);
-                    setModalVisible(true);
-                }}
-              >
-                <Text allowFontScaling={false} className={`text-[16px] tracking-wide font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>{appRenames[app.packageName] || app.label}</Text>
+                  setSelectedApp(app);
+                  setModalVisible(true);
+                }}>
+                <Text
+                  allowFontScaling={false}
+                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                  {appRenames[app.packageName] || app.label}
+                </Text>
               </TouchableOpacity>
             ))}
 
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
               <TouchableOpacity className="mt-4 items-center">
-                 <View className={`border border-2 rounded-full p-1 ${(wallpaper && typeof wallpaper !== 'string') ? 'border-[#A3B9D9]' : (isDarkMode ? 'border-slate-600' : 'border-[#A3B9D9]')}`}>
-                    <MaterialCommunityIcons name="plus" size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#A3B9D9' : (isDarkMode ? "#64748B" : "#A3B9D9")} />
-                 </View>
-                 <Text allowFontScaling={false} className={`font-light text-[12px] mt-2 ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#A3B9D9]' : (isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]')}`}>Don't add unnecessary addictive app!</Text>
+                <View
+                  className={`rounded-full border border-2 p-1 ${wallpaper && typeof wallpaper !== 'string' ? 'border-[#A3B9D9]' : isDarkMode ? 'border-slate-600' : 'border-[#A3B9D9]'}`}>
+                  <MaterialCommunityIcons
+                    name="plus"
+                    size={24}
+                    color={
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? '#A3B9D9'
+                        : isDarkMode
+                          ? '#64748B'
+                          : '#A3B9D9'
+                    }
+                  />
+                </View>
+                <Text
+                  allowFontScaling={false}
+                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]'}`}>
+                  Don't add unnecessary addictive app!
+                </Text>
               </TouchableOpacity>
             </Link>
           </View>
@@ -558,19 +672,35 @@ export default function Home() {
           {/* Footer Info */}
           <View className="w-full items-center">
             <View className="mb-2 flex-row items-center gap-4">
-              <Text allowFontScaling={false} className={`text-[14px] font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-500' : 'text-[#8698B2]')}`}>
+              <Text
+                allowFontScaling={false}
+                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
                 Today Unlock:{' '}
-                <Text allowFontScaling={false} className={`font-bold ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#8698B2]')}`}>{todayStats.unlockCount}</Text>
+                <Text
+                  allowFontScaling={false}
+                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
+                  {todayStats.unlockCount}
+                </Text>
               </Text>
-              <Text allowFontScaling={false} className={`font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-500' : 'text-[#8698B2]')}`}>||</Text>
-              <Text allowFontScaling={false} className={`text-[14px] font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-500' : 'text-[#8698B2]')}`}>
+              <Text
+                allowFontScaling={false}
+                className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
+                ||
+              </Text>
+              <Text
+                allowFontScaling={false}
+                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
                 Today Use:{' '}
-                <Text allowFontScaling={false} className={`font-bold ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-400' : 'text-[#8698B2]')}`}>
+                <Text
+                  allowFontScaling={false}
+                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
                   {formatUsageTime(todayStats.totalUsageTime)}
                 </Text>
               </Text>
             </View>
-            <Text allowFontScaling={false} className={`mb-10 text-[12px] font-light ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#A3B9D9]' : (isDarkMode ? 'text-slate-600' : 'text-[#A3B9D9]')}`}>
+            <Text
+              allowFontScaling={false}
+              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-slate-600' : 'text-[#A3B9D9]'}`}>
               Leave it! Do something mindful in real world.
             </Text>
 
@@ -578,27 +708,63 @@ export default function Home() {
             <View className="w-full flex-row gap-1">
               <TouchableOpacity
                 onPress={openDialer}
-                className={`flex-1 items-center justify-center rounded-r-[30px] rounded-full py-3 ${(wallpaper && typeof wallpaper !== 'string') ? 'bg-[#7EA9E51A] border border-[#C2DEF2]' : (isDarkMode ? 'bg-[#1E293B] border-slate-700' : 'bg-[#DAE4F2] border-white')}`}>
+                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'border-slate-700 bg-[#1E293B]' : 'border-white bg-[#DAE4F2]'}`}>
                 {showPhoneDialer ? (
-                   <Ionicons name="call-outline" size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#E6EBF2' : (isDarkMode ? "#CBD5E1" : "#2E3A4C")} />
+                  <Ionicons
+                    name="call-outline"
+                    size={24}
+                    color={
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? '#E6EBF2'
+                        : isDarkMode
+                          ? '#CBD5E1'
+                          : '#2E3A4C'
+                    }
+                  />
                 ) : (
-                  <Text allowFontScaling={false} className={`text-[18px] font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>Dialer</Text>
+                  <Text
+                    allowFontScaling={false}
+                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                    Dialer
+                  </Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={openCamera}
-                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${(wallpaper && typeof wallpaper !== 'string') ? 'bg-[#7EA9E51A] border border-[#C2DEF2]' : (isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]')}`}>
+                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]'}`}>
                 {showCameraIcon ? (
-                  <Ionicons name="camera-outline" size={24} color={(wallpaper && typeof wallpaper !== 'string') ? '#E6EBF2' : (isDarkMode ? "#CBD5E1" : "#2E3A4C")} />  
+                  <Ionicons
+                    name="camera-outline"
+                    size={24}
+                    color={
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? '#E6EBF2'
+                        : isDarkMode
+                          ? '#CBD5E1'
+                          : '#2E3A4C'
+                    }
+                  />
                 ) : (
-                  <Text allowFontScaling={false} className={`text-[18px] font-regular ${(wallpaper && typeof wallpaper !== 'string') ? 'text-[#E6EBF2]' : (isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]')}`}>Camera</Text>
+                  <Text
+                    allowFontScaling={false}
+                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                    Camera
+                  </Text>
                 )}
               </TouchableOpacity>
             </View>
           </View>
 
           {/* Sidebar Overlay */}
-          <View style={{ position: 'absolute', right: 0, top: 0, bottom: 0, justifyContent: 'center', zIndex: 100 }}>
+          <View
+            style={{
+              position: 'absolute',
+              right: 0,
+              top: 0,
+              bottom: 0,
+              justifyContent: 'center',
+              zIndex: 100,
+            }}>
             <GestureDetector gesture={sidebarGesture}>
               <Animated.View style={{ paddingHorizontal: 4 }}>
                 {sidebarChars.map((letter, index) => (
@@ -629,10 +795,14 @@ export default function Home() {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
-              <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <View
+                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
-                  <Text allowFontScaling={false} className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                    Open {selectedApp ? (appRenames[selectedApp.packageName] || selectedApp.label) : ''}
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    Open{' '}
+                    {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
                   </Text>
 
                   {selectedApp?.icon && (
@@ -643,11 +813,12 @@ export default function Home() {
                     />
                   )}
 
-                  <Text allowFontScaling={false} className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                     Select estimated use time
                   </Text>
                 </View>
-              
 
                 <View className="mb-6 flex-row flex-wrap justify-between">
                   {[2, 5, 10, 20].map((mins) => (
@@ -655,78 +826,110 @@ export default function Home() {
                       key={mins}
                       className="mb-3 w-[48%] items-center rounded-full bg-[#7EA6E0] py-3 active:opacity-80"
                       onPress={() => handleLaunchApp(mins)}>
-                      <Text allowFontScaling={false} className="text-base font-medium text-white">{mins} min</Text>
+                      <Text allowFontScaling={false} className="text-base font-medium text-white">
+                        {mins} min
+                      </Text>
                     </TouchableOpacity>
                   ))}
                 </View>
-                 {/* Toggle Icon */}
-                <TouchableOpacity 
+                {/* Toggle Icon */}
+                <TouchableOpacity
                   onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
-                  className="self-center p-2 mb-2"
-                >
-                   <Ionicons name={showTimeOverSettings ? "chevron-up" : "chevron-down"} size={24} color={isDarkMode ? "#94A3B8" : "#64748B"} />
+                  className="mb-2 self-center p-2">
+                  <Ionicons
+                    name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
+                    size={24}
+                    color={isDarkMode ? '#94A3B8' : '#64748B'}
+                  />
                 </TouchableOpacity>
 
                 {showTimeOverSettings && (
                   <View className="mb-4 w-full">
-                    <Text allowFontScaling={false} className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
                       When time is over
                     </Text>
-                    
+
                     {/* Mindful Delay */}
-                    <TouchableOpacity 
-                      className="mb-3 flex-row items-center" 
-                      onPress={() => setTimeOverAction('mindful')}
-                    >
-                      <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                        {timeOverAction === 'mindful' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                    <TouchableOpacity
+                      className="mb-3 flex-row items-center"
+                      onPress={() => setTimeOverAction('mindful')}>
+                      <View
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'mindful' && (
+                          <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                        )}
                       </View>
-                      <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Mindful Delay</Text>
+                      <Text
+                        allowFontScaling={false}
+                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                        Mindful Delay
+                      </Text>
                     </TouchableOpacity>
 
                     {/* Remind Me */}
                     <View className="mb-3 flex-row items-center justify-between">
-                       <TouchableOpacity 
+                      <TouchableOpacity
                         className="flex-row items-center"
-                        onPress={() => setTimeOverAction('remind')}
-                      >
-                        <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                          {timeOverAction === 'remind' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                        onPress={() => setTimeOverAction('remind')}>
+                        <View
+                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {timeOverAction === 'remind' && (
+                            <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                          )}
                         </View>
-                        <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Remind Me</Text>
+                        <Text
+                          allowFontScaling={false}
+                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                          Remind Me
+                        </Text>
                       </TouchableOpacity>
 
                       {/* 2nd Warning Checkbox */}
-                       <TouchableOpacity 
+                      <TouchableOpacity
                         className="flex-row items-center"
                         onPress={() => setSecondWarning(!secondWarning)}
                         disabled={timeOverAction !== 'remind'}
-                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}
-                      >
-                         <View className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? 'bg-[#5B8BDF] border-[#5B8BDF]' : 'border-gray-400'}`}>
-                           {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
-                         </View>
-                         <Text allowFontScaling={false} className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>2nd Warning</Text>
-                       </TouchableOpacity>
+                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
+                        <View
+                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? 'border-[#5B8BDF] bg-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
+                        </View>
+                        <Text
+                          allowFontScaling={false}
+                          className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                          2nd Warning
+                        </Text>
+                      </TouchableOpacity>
                     </View>
 
                     {/* Quit */}
-                    <TouchableOpacity 
+                    <TouchableOpacity
                       className="mb-3 flex-row items-center"
-                      onPress={() => setTimeOverAction('quit')}
-                    >
-                      <View className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                        {timeOverAction === 'quit' && <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />}
+                      onPress={() => setTimeOverAction('quit')}>
+                      <View
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'quit' && (
+                          <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                        )}
                       </View>
-                      <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>Quit</Text>
+                      <Text
+                        allowFontScaling={false}
+                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                        Quit
+                      </Text>
                     </TouchableOpacity>
                   </View>
                 )}
-                <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                <View
+                  className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
                     className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
                     onPress={() => setModalVisible(false)}>
-                    <Text allowFontScaling={false} className="text-base font-medium text-white">Quit</Text>
+                    <Text allowFontScaling={false} className="text-base font-medium text-white">
+                      Quit
+                    </Text>
                   </TouchableOpacity>
                 </View>
               </View>

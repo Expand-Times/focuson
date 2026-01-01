@@ -1044,8 +1044,13 @@ export default function SettingScreen() {
                         borderWidth: wallpaper === item ? 2 : 1,
                         borderColor: wallpaper === item ? '#7EA6E0' : '#E2E8F0',
                         overflow: 'hidden',
+                        backgroundColor: item === null ? (isDarkMode ? '#0D121A' : '#E1EAF5') : undefined,
+                        alignItems: 'center',
+                        justifyContent: 'center',
                       }}>
-                      {typeof item === 'string' ? (
+                      {item === null ? (
+                         <Text allowFontScaling={false} style={{fontSize: 10, color: isDarkMode ? '#fff' : '#000'}}>Default</Text>
+                      ) : typeof item === 'string' ? (
                         <View style={{ backgroundColor: item, width: '100%', height: '100%' }} />
                       ) : (
                         <Image

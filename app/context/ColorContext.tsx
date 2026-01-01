@@ -14,6 +14,7 @@ export const AVAILABLE_WALLPAPERS: WallpaperItem[] = [
   require('../../assets/images/CloudSky.png'),
   require('../../assets/images/RoundPattern.png'),
   require('../../assets/images/SunFlower.png'),
+  '#0D121A',
   '#EBF0F7',
 ];
 
@@ -55,9 +56,15 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [selectedColor, setSelectedColorState] = useState<string>(DEFAULT_COLOR);
   const [isPremium, setIsPremium] = useState<boolean>(DEFAULT_PREMIUM);
   const systemColorScheme = useColorScheme();
-  const isDarkMode = systemColorScheme === 'dark';
+  const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === 'dark');
+
+  useEffect(() => {
+    if (systemColorScheme) {
+       setIsDarkMode(systemColorScheme === 'dark');
+    }
+  }, [systemColorScheme]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>('#EBF0F7');
+  const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
   const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
   const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
@@ -117,6 +124,11 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const setWallpaper = async (newWallpaper: WallpaperItem) => {
     try {
       setWallpaperState(newWallpaper);
+      if (newWallpaper === '#0D121A') {
+        setIsDarkMode(true);
+      } else if (newWallpaper === '#EBF0F7') {
+        setIsDarkMode(false);
+      }
       const index = AVAILABLE_WALLPAPERS.indexOf(newWallpaper);
       if (index !== -1) {
         await AsyncStorage.setItem('selectedWallpaperIndex', index.toString());

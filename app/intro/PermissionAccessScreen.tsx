@@ -121,14 +121,14 @@ export default function PermissionAccessScreen() {
     if (hasPermission) return null;
 
     return (
-      <View className={`mb-4 rounded-2xl border p-6 shadow-sm ${isDarkMode ? 'bg-[#131B26] border-[#DADFE5]' : 'bg-white border-slate-50'}`}>
+      <View className={`mb-4 rounded-2xl border p-6 shadow-sm ${isDarkMode ? 'bg-[#131B26] ' : 'bg-white border-slate-50'}`}>
         <View className="mb-4 flex-row items-start ">
-          <View className={`h-12 w-12 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#EBF1F7]'}`}>
+          <View className={`h-12 w-12 items-center justify-center rounded-xl ${isDarkMode ? 'bg-[#1F2630]' : 'bg-[#EBF1F7]'}`}>
             {icon}
           </View>
           <View className="flex-1 ml-4">
             <Text allowFontScaling={false} className={`mb-1 text-[18px] font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>{title}</Text>
-            <Text allowFontScaling={false} className={`text-[12px] font-regular leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>{description}</Text>
+            <Text allowFontScaling={false} className={`text-[12px] font-regular leading-5 ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>{description}</Text>
           </View>
         </View>
 
@@ -138,9 +138,9 @@ export default function PermissionAccessScreen() {
           </View>
         ) : (
           <TouchableOpacity
-            className={`w-full items-center justify-center rounded-full py-3 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#7EA9E5]'}`}
+            className={`w-full items-center justify-center rounded-full py-3 ${isDarkMode ? 'bg-[#202D40]' : 'bg-[#7EA9E5]'}`}
             onPress={onPress}
-            style={{ backgroundColor: isDarkMode ? '#0D121A' : color }}>
+            style={{ backgroundColor: isDarkMode ? '#202D40' : '#7EA9E5' }}>
             <Text allowFontScaling={false} className={`font-bold text-[14px] ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}>
               {title === 'Accessibility Service' ? 'Allow' : 'Grant Permission'}
             </Text>
@@ -179,13 +179,13 @@ export default function PermissionAccessScreen() {
             {missingCount > 0 ? `${missingCount} Permission Missing` : 'All Set!'}
           </Text>
 
-          <Text allowFontScaling={false} className={`px-2 text-center text-[10px] font-regular leading-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>Minimal Life</Text> requires permission to track your screen
+          <Text allowFontScaling={false} className={`px-2 text-center text-[10px] font-regular leading-4 ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>Minimal Life</Text> requires permission to track your screen
             time and distraction blocking features.{'\n\n'}
             We don't collect or share your personal data. Your{' '}
-            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>data store</Text> on your{' '}
-            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>device; not</Text> in our{' '}
-            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>server</Text>. Feel free to give permission.
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>data store</Text> on your{' '}
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>device; not</Text> in our{' '}
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>server</Text>. Feel free to give permission.
           </Text>
         </View>
 

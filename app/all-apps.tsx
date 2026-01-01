@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
   useColorScheme,
+  Keyboard,
 } from 'react-native';
 import {
   Gesture,
@@ -152,11 +153,11 @@ const BubbleCursor = ({
 };
 
 export default function AllApps() {
-  const { isDarkMode: contextIsDarkMode } = useColorContext();
+  const { isDarkMode } = useColorContext();
   const colorScheme = useColorScheme();
-  const isDarkMode = colorScheme === 'dark';
   const [apps, setApps] = useState<AppItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -472,12 +473,15 @@ export default function AllApps() {
           <Ionicons name="search" size={20} color={isDarkMode ? "#94A3B8" : "#5C8BCC"} className="mr-2" />
           <TextInput
             className={`ml-2 flex-1 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#A3B9D9]'}`}
-            placeholder="Search app here|"
+            placeholder="Search app here"
             placeholderTextColor={isDarkMode ? "#64748B" : "#94A3B8"}
             value={searchQuery}
             onChangeText={setSearchQuery}
             autoCapitalize="none"
             autoCorrect={false}
+            autoFocus={true}
+            showSoftInputOnFocus={isKeyboardEnabled}
+            onTouchStart={() => setIsKeyboardEnabled(true)}
           />
         </View>
 
