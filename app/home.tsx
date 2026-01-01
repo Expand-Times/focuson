@@ -110,7 +110,7 @@ const SidebarItem = ({
                 ? 'font-bold text-white'
                 : 'font-extrabold text-[#5C8BCC]'
               : isDarkMode
-                ? 'text-blue-400'
+                ? 'text-[#738099]'
                 : 'text-[#5B8BDF]'
           }`}>
           {letter}
@@ -178,8 +178,15 @@ import { useColorContext } from './context/ColorContext';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { wallpaper, showPhoneDialer, showCameraIcon, timeFormat, dateFormat, timeOffset, isDarkMode } =
-    useColorContext();
+  const {
+    wallpaper,
+    showPhoneDialer,
+    showCameraIcon,
+    timeFormat,
+    dateFormat,
+    timeOffset,
+    isDarkMode,
+  } = useColorContext();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
     Battery.BatteryState.UNKNOWN
@@ -610,7 +617,7 @@ export default function Home() {
                   wallpaper && typeof wallpaper !== 'string'
                     ? '#E6EBF2'
                     : isDarkMode
-                      ? '#64748B'
+                      ? '#7FA8E5'
                       : '#5B8BDF'
                 }
               />
@@ -630,14 +637,14 @@ export default function Home() {
             {homeApps.map((app) => (
               <TouchableOpacity
                 key={app.packageName}
-                className={`mb-4 w-full items-center rounded-full border  py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-b-[#C2DEF2] border-l-[#EADADA] border-r-[#EADADA] border-t-[#C2DEF20D] bg-[#7EA9E51A] backdrop-blur-2xl' : isDarkMode ? 'border-[#334155] bg-[#1E293B]' : 'border-[#C2DEF240] border-[#C2DEF2] bg-[#DAE4F280]'}`}
+                className={`mb-4 w-full items-center py-2 `}
                 onPress={() => {
                   setSelectedApp(app);
                   setModalVisible(true);
                 }}>
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                   {appRenames[app.packageName] || app.label}
                 </Text>
               </TouchableOpacity>
@@ -647,22 +654,22 @@ export default function Home() {
             <Link href="/all-apps?mode=select" asChild>
               <TouchableOpacity className="mt-4 items-center">
                 <View
-                  className={`rounded-full border border-2 p-1 ${wallpaper && typeof wallpaper !== 'string' ? 'border-[#A3B9D9]' : isDarkMode ? 'border-slate-600' : 'border-[#A3B9D9]'}`}>
+                  className={`rounded-full border border-2 p-1 ${wallpaper && typeof wallpaper !== 'string' ? 'border-[#A3B9D9]' : isDarkMode ? 'border-[#738099]' : 'border-[#A3B9D9]'}`}>
                   <MaterialCommunityIcons
                     name="plus"
-                    size={24}
+                    size={20}
                     color={
                       wallpaper && typeof wallpaper !== 'string'
                         ? '#A3B9D9'
                         : isDarkMode
-                          ? '#64748B'
+                          ? '#738099'
                           : '#A3B9D9'
                     }
                   />
                 </View>
                 <Text
                   allowFontScaling={false}
-                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-slate-500' : 'text-[#A3B9D9]'}`}>
+                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
                   Don't add unnecessary addictive app!
                 </Text>
               </TouchableOpacity>
@@ -674,33 +681,33 @@ export default function Home() {
             <View className="mb-2 flex-row items-center gap-4">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
+                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Today Unlock:{' '}
                 <Text
                   allowFontScaling={false}
-                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
+                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {todayStats.unlockCount}
                 </Text>
               </Text>
               <Text
                 allowFontScaling={false}
-                className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
+                className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 ||
               </Text>
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
+                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Today Use:{' '}
                 <Text
                   allowFontScaling={false}
-                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
+                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {formatUsageTime(todayStats.totalUsageTime)}
                 </Text>
               </Text>
             </View>
             <Text
               allowFontScaling={false}
-              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-slate-600' : 'text-[#A3B9D9]'}`}>
+              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#A3B9D9]'}`}>
               Leave it! Do something mindful in real world.
             </Text>
 
@@ -708,7 +715,7 @@ export default function Home() {
             <View className="w-full flex-row gap-1">
               <TouchableOpacity
                 onPress={openDialer}
-                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'border-slate-700 bg-[#1E293B]' : 'border-white bg-[#DAE4F2]'}`}>
+                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'border-[#131B26] bg-[#131B26]' : 'border-white bg-[#DAE4F2]'}`}>
                 {showPhoneDialer ? (
                   <Ionicons
                     name="call-outline"
@@ -724,14 +731,14 @@ export default function Home() {
                 ) : (
                   <Text
                     allowFontScaling={false}
-                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Dialer
                   </Text>
                 )}
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={openCamera}
-                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'bg-[#1E293B]' : 'bg-[#DAE4F2]'}`}>
+                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#DAE4F2]'}`}>
                 {showCameraIcon ? (
                   <Ionicons
                     name="camera-outline"
@@ -747,7 +754,7 @@ export default function Home() {
                 ) : (
                   <Text
                     allowFontScaling={false}
-                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Camera
                   </Text>
                 )}
@@ -796,11 +803,11 @@ export default function Home() {
             onRequestClose={() => setModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
               <View
-                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
                   <Text
                     allowFontScaling={false}
-                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'}`}>
                     Open{' '}
                     {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
                   </Text>
@@ -808,14 +815,14 @@ export default function Home() {
                   {selectedApp?.icon && (
                     <Image
                       source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                      className="mb-6 h-20 w-20"
+                      className="mb-6 h-16 w-16"
                       resizeMode="contain"
                     />
                   )}
 
                   <Text
                     allowFontScaling={false}
-                    className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+                    className={`text-center text-base font-medium ${isDarkMode ? 'text-[#728099]' : 'text-gray-800'}`}>
                     Select estimated use time
                   </Text>
                 </View>
@@ -824,9 +831,11 @@ export default function Home() {
                   {[2, 5, 10, 20].map((mins) => (
                     <TouchableOpacity
                       key={mins}
-                      className="mb-3 w-[48%] items-center rounded-full bg-[#7EA6E0] py-3 active:opacity-80"
+                      className={`mb-3 w-[48%] items-center rounded-xl ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#5B8BDF]'} py-3 active:opacity-80`}
                       onPress={() => handleLaunchApp(mins)}>
-                      <Text allowFontScaling={false} className="text-base font-medium text-white">
+                      <Text
+                        allowFontScaling={false}
+                        className={`text-base font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}>
                         {mins} min
                       </Text>
                     </TouchableOpacity>
@@ -925,7 +934,9 @@ export default function Home() {
                 <View
                   className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
-                    className="w-full items-center rounded-full bg-[#4B7ABE] py-3 active:opacity-80"
+                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
+                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                    }`}
                     onPress={() => setModalVisible(false)}>
                     <Text allowFontScaling={false} className="text-base font-medium text-white">
                       Quit
