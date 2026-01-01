@@ -586,20 +586,20 @@ export default function Home() {
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-300' : 'text-[#2E3A4C]'}`}>
+                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                 {timeDisplay.main}
               </Text>
               {timeDisplay.suffix && (
                 <Text
                   allowFontScaling={false}
-                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8698B2]'}`}>
+                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {timeDisplay.suffix}
                 </Text>
               )}
             </View>
             <Text
               allowFontScaling={false}
-              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-slate-500' : 'text-[#8698B2]'}`}>
+              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#8698B2]'}`}>
               {getFormattedDate(currentTime)}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
