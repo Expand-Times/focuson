@@ -59,19 +59,9 @@ const SidebarItem = ({
     const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
     const dist = Math.abs(touchY.value - itemY);
 
-    const translateX = interpolate(
-      dist,
-      [0, 60],
-      [-40, 0],
-      Extrapolation.CLAMP
-    );
+    const translateX = interpolate(dist, [0, 60], [-40, 0], Extrapolation.CLAMP);
 
-    const scale = interpolate(
-      dist,
-      [0, 60],
-      [2, 1],
-      Extrapolation.CLAMP
-    );
+    const scale = interpolate(dist, [0, 60], [2, 1], Extrapolation.CLAMP);
 
     return {
       transform: [
@@ -84,7 +74,10 @@ const SidebarItem = ({
 
   return (
     <Animated.View
-      style={[{ height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 }, animatedStyle]}>
+      style={[
+        { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 },
+        animatedStyle,
+      ]}>
       <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
         <Text
           allowFontScaling={false}
@@ -92,10 +85,10 @@ const SidebarItem = ({
             currentLetter === letter
               ? isDarkMode
                 ? 'font-bold text-white'
-                : 'font-extrabold text-[14px] text-[#5C8BCC]'
+                : 'text-[14px] font-extrabold text-[#5C8BCC]'
               : isDarkMode
-              ? 'text-blue-400'
-              : 'text-[#5B8BDF]'
+                ? 'text-blue-400'
+                : 'text-[#5B8BDF]'
           }`}>
           {letter}
         </Text>
@@ -213,18 +206,21 @@ export default function AllApps() {
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
-    
+
     // Group apps by first letter
-    const grouped = apps.reduce((acc, app) => {
-      const firstChar = app.label.charAt(0).toUpperCase();
-      const key = /^[A-Z]/.test(firstChar) ? firstChar : '#';
-      
-      if (!acc[key]) {
-        acc[key] = [];
-      }
-      acc[key].push(app);
-      return acc;
-    }, {} as Record<string, AppItem[]>);
+    const grouped = apps.reduce(
+      (acc, app) => {
+        const firstChar = app.label.charAt(0).toUpperCase();
+        const key = /^[A-Z]/.test(firstChar) ? firstChar : '#';
+
+        if (!acc[key]) {
+          acc[key] = [];
+        }
+        acc[key].push(app);
+        return acc;
+      },
+      {} as Record<string, AppItem[]>
+    );
 
     // Convert to SectionList format and sort keys
     const sortedKeys = Object.keys(grouped).sort((a, b) => {
@@ -239,12 +235,16 @@ export default function AllApps() {
     }));
 
     if (searchQuery) {
-       result = result.map(section => ({
-         ...section,
-         data: section.data.filter(app => app.label.toLowerCase().includes(searchQuery.toLowerCase()))
-       })).filter(section => section.data.length > 0);
+      result = result
+        .map((section) => ({
+          ...section,
+          data: section.data.filter((app) =>
+            app.label.toLowerCase().includes(searchQuery.toLowerCase())
+          ),
+        }))
+        .filter((section) => section.data.length > 0);
     }
-    
+
     return result;
   }, [apps, searchQuery]);
 
@@ -256,7 +256,7 @@ export default function AllApps() {
       } else {
         // Select
         if (selectedPackageNames.length >= 6) {
-          Alert.alert("Limit Reached", "You cannot add more than 6 apps.");
+          Alert.alert('Limit Reached', 'You cannot add more than 6 apps.');
           return;
         }
         setSelectedPackageNames((prev) => [...prev, app.packageName]);
@@ -351,13 +351,18 @@ export default function AllApps() {
               style={{ marginRight: 8 }}
             />
           )}
-          <Text allowFontScaling={false} className={`text-[16px] font-regular ${isDarkMode ? 'text-slate-300' : 'text-white'}`} numberOfLines={1}>
+          <Text
+            allowFontScaling={false}
+            className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-white'}`}
+            numberOfLines={1}>
             {item.label}
           </Text>
         </View>
 
         <View className="flex-row items-center">
-          <Text allowFontScaling={false} className={`text-[10px] font-light ${isDarkMode ? 'text-slate-400' : 'text-white'} opacity-90`}>
+          <Text
+            allowFontScaling={false}
+            className={`text-[10px] font-light ${isDarkMode ? 'text-slate-400' : 'text-white'} opacity-90`}>
             TO: {item.launchCount || 0} times || DU: {usageText}
           </Text>
         </View>
@@ -375,19 +380,19 @@ export default function AllApps() {
   }, [apps]);
 
   const [currentLetter, setCurrentLetter] = useState('');
-  
+
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
       // Find the first section header or item
       const firstItem = viewableItems[0];
       if (firstItem.item && firstItem.section) {
-         // It's an item
-         const sectionTitle = firstItem.section.title;
-         setCurrentLetter(sectionTitle);
+        // It's an item
+        const sectionTitle = firstItem.section.title;
+        setCurrentLetter(sectionTitle);
       } else if (firstItem.title) {
-         // It's a header (though viewableItems usually returns items)
-         // Actually SectionList viewableItems includes headers if they are items? 
-         // Typically it's safer to check item.section.title
+        // It's a header (though viewableItems usually returns items)
+        // Actually SectionList viewableItems includes headers if they are items?
+        // Typically it's safer to check item.section.title
       }
     }
   }).current;
@@ -400,9 +405,9 @@ export default function AllApps() {
     setDragLetter(letter);
     // Optimistically update
     setCurrentLetter(letter);
-    
+
     // Find section index
-    const sectionIndex = sections.findIndex(s => s.title === letter);
+    const sectionIndex = sections.findIndex((s) => s.title === letter);
 
     if (sectionIndex !== -1 && sectionListRef.current) {
       sectionListRef.current.scrollToLocation({
@@ -410,7 +415,7 @@ export default function AllApps() {
         itemIndex: 0,
         animated: false, // Smooth scrolling can be buggy with large lists during drag
         viewOffset: 0,
-        viewPosition: 0
+        viewPosition: 0,
       });
     }
   };
@@ -459,162 +464,183 @@ export default function AllApps() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <GestureDetector gesture={rightSwipeGesture}>
-        <View className={`flex-1 px-4 pt-12 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EFF6FC]'}`}>
+        <View className={`flex-1 px-4 pt-12 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EFF6FC]'}`}>
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center gap-3">
-        {/* Back Button (small) */}
-        {/* <TouchableOpacity
+            {/* Back Button (small) */}
+            {/* <TouchableOpacity
           onPress={() => router.back()}
           className="rounded-full bg-white p-2 shadow-sm">
           <Ionicons name="arrow-back" size={20} color="#94A3B8" />
         </TouchableOpacity> */}
 
-        <View className={`flex-1 flex-row items-center rounded-full px-4 py-1 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-          <Ionicons name="search" size={20} color={isDarkMode ? "#94A3B8" : "#5C8BCC"} className="mr-2" />
-          <TextInput
-            className={`ml-2 flex-1 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#A3B9D9]'}`}
-            placeholder="Search app here"
-            placeholderTextColor={isDarkMode ? "#64748B" : "#94A3B8"}
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            autoCapitalize="none"
-            autoCorrect={false}
-            autoFocus={true}
-            showSoftInputOnFocus={isKeyboardEnabled}
-            onTouchStart={() => setIsKeyboardEnabled(true)}
-          />
-        </View>
-
-        {isSelectMode && (
-          <TouchableOpacity
-            onPress={handleSaveSelection}
-            className={`rounded-full p-2 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
-          </TouchableOpacity>
-        )}
-      </View>
-
-      {/* Header */}
-      <View className="mb-4 flex-row items-center justify-between px-1">
-        <Text
-          allowFontScaling={false}
-          className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
-          All Apps
-        </Text>
-        <Link href="/settingScreen" asChild>
-          <TouchableOpacity>
-            <View className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
-              <MaterialCommunityIcons name="tune-variant" size={22} color={isDarkMode ? "#94A3B8" : "#858E9D"} />
-            </View>
-          </TouchableOpacity>
-        </Link>
-      </View>
-
-      <View className="flex-1 flex-row">
-        {/* Apps List */}
-        <View className="flex-1 pr-2">
-          <SectionList
-            ref={sectionListRef}
-            sections={sections}
-            renderItem={renderItem}
-            renderSectionHeader={({ section: { title } }) => (
-              <Text className={` text-lg font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#5C8BCC]'}`}>
-                {title}
-              </Text>
-            )}
-            keyExtractor={(item) => item.packageName}
-            contentContainerStyle={{ paddingBottom: 20 }}
-            showsVerticalScrollIndicator={false}
-            initialNumToRender={15}
-            maxToRenderPerBatch={20}
-            windowSize={10}
-            onViewableItemsChanged={onViewableItemsChanged}
-            viewabilityConfig={viewabilityConfig}
-            stickySectionHeadersEnabled={false}
-            onScrollToIndexFailed={(info) => {
-              // SectionList doesn't use onScrollToIndexFailed quite the same, but keeping basic handling
-              const wait = new Promise((resolve) => setTimeout(resolve, 500));
-              wait.then(() => {
-                // sectionListRef.current?.scrollToLocation(...) - difficult to retry without section info
-              });
-            }}
-          />
-        </View>
-
-        {/* Alphabet Sidebar */}
-        <View className="items-center justify-center py-4 z-50">
-          <GestureDetector gesture={sidebarGesture}>
-            <View className="items-center w-8 bg-transparent" style={{ paddingVertical: 10 }}>
-              <BubbleCursor
-                touchY={touchY}
-                isTouching={isTouching}
-                letter={dragLetter}
-                isDarkMode={isDarkMode}
+            <View
+              className={` flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${isDarkMode ? 'border-[#212D41] bg-[#131B27]' : 'border-slate-100 bg-white'}`}>
+              <Ionicons
+                name="search"
+                size={20}
+                color={isDarkMode ? '#434C59' : '#5C8BCC'}
+                className="mr-2"
               />
-              {sidebarChars.map((letter, index) => (
-                <SidebarItem
-                  key={letter}
-                  letter={letter}
-                  index={index}
-                  touchY={touchY}
-                  isTouching={isTouching}
-                  onSelect={scrollToLetter}
-                  isDarkMode={isDarkMode}
-                  currentLetter={currentLetter}
-                />
-              ))}
-            </View>
-          </GestureDetector>
-        </View>
-      </View>
-
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={() => setModalVisible(false)}>
-        <View className="flex-1 items-center justify-center bg-black/70">
-          <View className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            <View className="mb-6 items-center">
-              <Text allowFontScaling={false} className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                Open {selectedApp?.label}
-              </Text>
-
-              {/* Note: Icon removed from list but can still show in modal */}
-              {selectedApp?.icon && (
-                <Image
-                  source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                  className="mb-6 h-16 w-16 rounded-xl"
-                  resizeMode="contain"
-                />
-              )}
-
-              <Text allowFontScaling={false} className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
-                Select estimated use time
-              </Text>
+              <TextInput
+                className={`ml-2 flex-1 text-[16px] ${isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'}`}
+                placeholder="Search app here"
+                placeholderTextColor={isDarkMode ? '#64748B' : '#A3B9D9'}
+                value={searchQuery}
+                onChangeText={setSearchQuery}
+                autoCapitalize="none"
+                cursorColor={isDarkMode ? '#434C59' : '#A3B9D9'}
+                autoCorrect={false}
+                autoFocus={true}
+                showSoftInputOnFocus={isKeyboardEnabled}
+                onTouchStart={() => setIsKeyboardEnabled(true)}
+              />
             </View>
 
-            <View className="mb-6 flex-row flex-wrap justify-between">
-              {[2, 5, 10, 20].map((mins) => (
-                <TouchableOpacity
-                  key={mins}
-                  className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
-                  onPress={() => handleLaunchApp(mins)}>
-                  <Text className="text-base font-medium text-white">{mins} min</Text>
-                </TouchableOpacity>
-              ))}
-            </View>
-
-            <View className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+            {isSelectMode && (
               <TouchableOpacity
-                className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
-                onPress={() => setModalVisible(false)}>
-                <Text allowFontScaling={false} className="text-[16px] font-regular text-white">Quit</Text>
+                onPress={handleSaveSelection}
+                className={`rounded-full p-2 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
               </TouchableOpacity>
+            )}
+          </View>
+
+          {/* Header */}
+          <View className="mb-4 flex-row items-center justify-between px-1">
+            <Text
+              allowFontScaling={false}
+              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-slate-400 decoration-slate-400' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
+              All Apps
+            </Text>
+            <Link href="/settingScreen" asChild>
+              <TouchableOpacity>
+                <View
+                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+                  <MaterialCommunityIcons
+                    name="tune-variant"
+                    size={22}
+                    color={isDarkMode ? '#94A3B8' : '#858E9D'}
+                  />
+                </View>
+              </TouchableOpacity>
+            </Link>
+          </View>
+
+          <View className="flex-1 flex-row">
+            {/* Apps List */}
+            <View className="flex-1 pr-2">
+              <SectionList
+                ref={sectionListRef}
+                sections={sections}
+                renderItem={renderItem}
+                renderSectionHeader={({ section: { title } }) => (
+                  <Text
+                    className={` text-lg font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#5C8BCC]'}`}>
+                    {title}
+                  </Text>
+                )}
+                keyExtractor={(item) => item.packageName}
+                contentContainerStyle={{ paddingBottom: 20 }}
+                showsVerticalScrollIndicator={false}
+                initialNumToRender={15}
+                maxToRenderPerBatch={20}
+                windowSize={10}
+                onViewableItemsChanged={onViewableItemsChanged}
+                viewabilityConfig={viewabilityConfig}
+                stickySectionHeadersEnabled={false}
+                onScrollToIndexFailed={(info) => {
+                  // SectionList doesn't use onScrollToIndexFailed quite the same, but keeping basic handling
+                  const wait = new Promise((resolve) => setTimeout(resolve, 500));
+                  wait.then(() => {
+                    // sectionListRef.current?.scrollToLocation(...) - difficult to retry without section info
+                  });
+                }}
+              />
+            </View>
+
+            {/* Alphabet Sidebar */}
+            <View className="z-50 items-center justify-center py-4">
+              <GestureDetector gesture={sidebarGesture}>
+                <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 10 }}>
+                  <BubbleCursor
+                    touchY={touchY}
+                    isTouching={isTouching}
+                    letter={dragLetter}
+                    isDarkMode={isDarkMode}
+                  />
+                  {sidebarChars.map((letter, index) => (
+                    <SidebarItem
+                      key={letter}
+                      letter={letter}
+                      index={index}
+                      touchY={touchY}
+                      isTouching={isTouching}
+                      onSelect={scrollToLetter}
+                      isDarkMode={isDarkMode}
+                      currentLetter={currentLetter}
+                    />
+                  ))}
+                </View>
+              </GestureDetector>
             </View>
           </View>
-        </View>
-      </Modal>
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={modalVisible}
+            onRequestClose={() => setModalVisible(false)}>
+            <View className="flex-1 items-center justify-center bg-black/70">
+              <View
+                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <View className="mb-6 items-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    Open {selectedApp?.label}
+                  </Text>
+
+                  {/* Note: Icon removed from list but can still show in modal */}
+                  {selectedApp?.icon && (
+                    <Image
+                      source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                      className="mb-6 h-16 w-16 rounded-xl"
+                      resizeMode="contain"
+                    />
+                  )}
+
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+                    Select estimated use time
+                  </Text>
+                </View>
+
+                <View className="mb-6 flex-row flex-wrap justify-between">
+                  {[2, 5, 10, 20].map((mins) => (
+                    <TouchableOpacity
+                      key={mins}
+                      className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
+                      onPress={() => handleLaunchApp(mins)}>
+                      <Text className="text-base font-medium text-white">{mins} min</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <View
+                  className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                  <TouchableOpacity
+                    className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
+                    onPress={() => setModalVisible(false)}>
+                    <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
+                      Quit
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
         </View>
       </GestureDetector>
     </GestureHandlerRootView>
