@@ -11,6 +11,7 @@ import {
   useColorScheme,
   Keyboard,
 } from 'react-native';
+import * as IntentLauncher from 'expo-intent-launcher';
 import {
   Gesture,
   GestureDetector,
@@ -84,10 +85,10 @@ const SidebarItem = ({
           className={`text-[12px] font-medium ${
             currentLetter === letter
               ? isDarkMode
-                ? 'font-bold text-white'
+                ? 'font-bold text-[16px] text-[#738099]'
                 : 'text-[14px] font-extrabold text-[#5C8BCC]'
               : isDarkMode
-                ? 'text-blue-400'
+                ? 'text-[#738099]'
                 : 'text-[#5B8BDF]'
           }`}>
           {letter}
@@ -157,6 +158,14 @@ export default function AllApps() {
   // Selection Mode State
   const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
 
+  // New State for Features
+  const [pinnedPackageNames, setPinnedPackageNames] = useState<string[]>([]);
+  const [blockedPackageNames, setBlockedPackageNames] = useState<string[]>([]);
+  const [appRenames, setAppRenames] = useState<Record<string, string>>({});
+  const [optionsModalVisible, setOptionsModalVisible] = useState(false);
+  const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [newName, setNewName] = useState('');
+
   const router = useRouter();
   const params = useLocalSearchParams();
   const isSelectMode = params.mode === 'select';
@@ -165,10 +174,26 @@ export default function AllApps() {
 
   useEffect(() => {
     loadApps();
+    loadSettings();
     if (isSelectMode) {
       loadSelectedApps();
     }
   }, [isSelectMode]);
+
+  const loadSettings = async () => {
+    try {
+      const pinned = await AsyncStorage.getItem('pinnedApps');
+      if (pinned) setPinnedPackageNames(JSON.parse(pinned));
+      
+      const blocked = await AsyncStorage.getItem('blockedApps');
+      if (blocked) setBlockedPackageNames(JSON.parse(blocked));
+
+      const renames = await AsyncStorage.getItem('appRenames');
+      if (renames) setAppRenames(JSON.parse(renames));
+    } catch (e) {
+      console.error('Failed to load settings', e);
+    }
+  };
 
   const loadSelectedApps = async () => {
     try {
@@ -207,8 +232,30 @@ export default function AllApps() {
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
-    // Group apps by first letter
-    const grouped = apps.reduce(
+    // Filter blocked apps
+    const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
+
+    // Separate pinned and unpinned, and apply renames
+    const pinned: AppItem[] = [];
+    const unpinned: AppItem[] = [];
+
+    visibleApps.forEach((app) => {
+      // Apply rename
+      const rename = appRenames[app.packageName];
+      const displayApp = rename ? { ...app, label: rename } : app;
+
+      if (pinnedPackageNames.includes(app.packageName)) {
+        pinned.push(displayApp);
+      } else {
+        unpinned.push(displayApp);
+      }
+    });
+
+    // Sort pinned
+    pinned.sort((a, b) => a.label.localeCompare(b.label));
+
+    // Group unpinned
+    const grouped = unpinned.reduce(
       (acc, app) => {
         const firstChar = app.label.charAt(0).toUpperCase();
         const key = /^[A-Z]/.test(firstChar) ? firstChar : '#';
@@ -234,6 +281,14 @@ export default function AllApps() {
       data: grouped[key],
     }));
 
+    // Add Pinned Section at top
+    if (pinned.length > 0) {
+      result.unshift({
+        title: '*',
+        data: pinned,
+      });
+    }
+
     if (searchQuery) {
       result = result
         .map((section) => ({
@@ -246,7 +301,7 @@ export default function AllApps() {
     }
 
     return result;
-  }, [apps, searchQuery]);
+  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
 
   const handleAppPress = (app: AppItem) => {
     if (isSelectMode) {
@@ -264,6 +319,13 @@ export default function AllApps() {
     } else {
       setSelectedApp(app);
       setModalVisible(true);
+    }
+  };
+
+  const handleAppLongPress = (app: AppItem) => {
+    if (!isSelectMode) {
+      setSelectedApp(app);
+      setOptionsModalVisible(true);
     }
   };
 
@@ -323,6 +385,115 @@ export default function AllApps() {
     }
   };
 
+  const handleAddToHome = async () => {
+    if (!selectedApp) return;
+    try {
+      const stored = await AsyncStorage.getItem('homeApps');
+      let currentHomeApps: AppItem[] = stored ? JSON.parse(stored) : [];
+
+      if (currentHomeApps.length >= 6) {
+        Alert.alert('Limit Reached', 'Home screen is full (max 6 apps).');
+        return;
+      }
+
+      if (currentHomeApps.some((a) => a.packageName === selectedApp.packageName)) {
+        Alert.alert('Already Added', 'This app is already on the home screen.');
+        return;
+      }
+
+      currentHomeApps.push(selectedApp);
+      await AsyncStorage.setItem('homeApps', JSON.stringify(currentHomeApps));
+      setOptionsModalVisible(false);
+      router.push('/home');
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handlePinToTop = async () => {
+    if (!selectedApp) return;
+    try {
+      let newPinned = [...pinnedPackageNames];
+      if (newPinned.includes(selectedApp.packageName)) {
+        newPinned = newPinned.filter((p) => p !== selectedApp.packageName);
+      } else {
+        newPinned.push(selectedApp.packageName);
+      }
+      setPinnedPackageNames(newPinned);
+      await AsyncStorage.setItem('pinnedApps', JSON.stringify(newPinned));
+      setOptionsModalVisible(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleBlock = async () => {
+    if (!selectedApp) return;
+    Alert.alert('Block App', `Are you sure you want to block ${selectedApp.label}?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Block',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const newBlocked = [...blockedPackageNames, selectedApp.packageName];
+            setBlockedPackageNames(newBlocked);
+            await AsyncStorage.setItem('blockedApps', JSON.stringify(newBlocked));
+            setOptionsModalVisible(false);
+          } catch (e) {
+            console.error(e);
+          }
+        },
+      },
+    ]);
+  };
+
+  const handleRename = () => {
+    if (!selectedApp) return;
+    setNewName(selectedApp.label);
+    setRenameModalVisible(true);
+  };
+
+  const saveRename = async () => {
+    if (!selectedApp) return;
+    try {
+      const newRenames = { ...appRenames, [selectedApp.packageName]: newName };
+      setAppRenames(newRenames);
+      await AsyncStorage.setItem('appRenames', JSON.stringify(newRenames));
+      setRenameModalVisible(false);
+      setOptionsModalVisible(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleAppInfo = async () => {
+    if (!selectedApp) return;
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
+        {
+          data: 'package:' + selectedApp.packageName,
+        }
+      );
+      setOptionsModalVisible(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleUninstall = async () => {
+    if (!selectedApp) return;
+    try {
+      await IntentLauncher.startActivityAsync('android.intent.action.DELETE', {
+        data: 'package:' + selectedApp.packageName,
+      });
+      setOptionsModalVisible(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
   const renderItem = ({ item }: { item: AppItem }) => {
     const formatUsageTime = (millis?: number) => {
       if (!millis) return '0 min';
@@ -340,8 +511,10 @@ export default function AllApps() {
 
     return (
       <TouchableOpacity
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#7EA9E5]'} ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
-        onPress={() => handleAppPress(item)}>
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA9E5]'} ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
+        onPress={() => handleAppPress(item)}
+        onLongPress={() => handleAppLongPress(item)}
+        delayLongPress={300}>
         <View className="flex-1 flex-row items-center">
           {isSelectMode && (
             <Ionicons
@@ -353,7 +526,7 @@ export default function AllApps() {
           )}
           <Text
             allowFontScaling={false}
-            className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-white'}`}
+            className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}
             numberOfLines={1}>
             {item.label}
           </Text>
@@ -362,7 +535,7 @@ export default function AllApps() {
         <View className="flex-row items-center">
           <Text
             allowFontScaling={false}
-            className={`text-[10px] font-light ${isDarkMode ? 'text-slate-400' : 'text-white'} opacity-90`}>
+            className={`text-[10px] font-light ${isDarkMode ? 'text-[#728099]' : 'text-white'} opacity-90`}>
             TO: {item.launchCount || 0} times || DU: {usageText}
           </Text>
         </View>
@@ -373,11 +546,15 @@ export default function AllApps() {
   const sidebarChars = useMemo(() => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const hasNonAlpha = apps.some((app) => !/^[a-zA-Z]/.test(app.label));
+    let result = [...chars];
     if (hasNonAlpha) {
-      return ['#', ...chars];
+      result.unshift('#');
     }
-    return chars;
-  }, [apps]);
+    if (pinnedPackageNames.length > 0) {
+      result.unshift('*');
+    }
+    return result;
+  }, [apps, pinnedPackageNames]);
 
   const [currentLetter, setCurrentLetter] = useState('');
 
@@ -516,11 +693,11 @@ export default function AllApps() {
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
-                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-[#728099]' : 'border-[#858E9D]'}`}>
+                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={isDarkMode ? '#728099' : '#858E9D'}
+                    color={isDarkMode ? '#94A3B8' : '#858E9D'}
                   />
                 </View>
               </TouchableOpacity>
@@ -536,7 +713,7 @@ export default function AllApps() {
                 renderItem={renderItem}
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
-                    className={` text-lg font-bold ${isDarkMode ? 'text-slate-400' : 'text-[#5C8BCC]'}`}>
+                    className={` text-lg font-bold ${isDarkMode ? 'text-[#728099]' : 'text-[#5C8BCC]'}`}>
                     {title}
                   </Text>
                 )}
@@ -636,6 +813,111 @@ export default function AllApps() {
                     <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
                       Quit
                     </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={optionsModalVisible}
+            onRequestClose={() => setOptionsModalVisible(false)}>
+            <View className="flex-1 items-center justify-center bg-black/70">
+              <View
+                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <View className="mb-6 items-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    {selectedApp?.label} Options
+                  </Text>
+                  {selectedApp?.icon && (
+                    <Image
+                      source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                      className="mb-6 h-16 w-16 rounded-xl"
+                      resizeMode="contain"
+                    />
+                  )}
+                </View>
+
+                <View className="flex-row flex-wrap justify-between gap-y-4">
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handleAddToHome}>
+                    <Text className="font-medium text-white">Add to Home</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handlePinToTop}>
+                    <Text className="font-medium text-white">
+                      {pinnedPackageNames.includes(selectedApp?.packageName || '')
+                        ? 'Unpin'
+                        : 'Pin to top'}
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handleBlock}>
+                    <Text className="font-medium text-white">Block</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handleRename}>
+                    <Text className="font-medium text-white">Rename</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handleAppInfo}>
+                    <Text className="font-medium text-white">App Info</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    onPress={handleUninstall}>
+                    <Text className="font-medium text-white">Uninstall</Text>
+                  </TouchableOpacity>
+                </View>
+
+                <View
+                  className={`mt-6 border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                  <TouchableOpacity
+                    className="w-full items-center py-2"
+                    onPress={() => setOptionsModalVisible(false)}>
+                    <Text
+                      className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      Cancel
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
+          <Modal
+            visible={renameModalVisible}
+            transparent={true}
+            animationType="fade"
+            onRequestClose={() => setRenameModalVisible(false)}>
+            <View className="flex-1 items-center justify-center bg-black/70">
+              <View
+                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <Text
+                  className={`mb-4 text-lg font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                  Rename App
+                </Text>
+                <TextInput
+                  value={newName}
+                  onChangeText={setNewName}
+                  className={`mb-6 border-b pb-2 text-lg ${isDarkMode ? 'border-slate-600 text-white' : 'border-slate-300 text-black'}`}
+                  autoFocus
+                />
+                <View className="flex-row justify-end gap-4">
+                  <TouchableOpacity onPress={() => setRenameModalVisible(false)}>
+                    <Text className="text-lg font-medium text-red-500">Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={saveRename}>
+                    <Text className="text-lg font-medium text-blue-500">Save</Text>
                   </TouchableOpacity>
                 </View>
               </View>

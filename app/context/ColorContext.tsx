@@ -7,15 +7,17 @@ export type WallpaperItem = string | ImageSourcePropType;
 
 // Define the available wallpapers
 export const AVAILABLE_WALLPAPERS: WallpaperItem[] = [
-  require('../../assets/images/AbstractGradient.png'),
-  require('../../assets/images/NightSky.png'),
-  require('../../assets/images/MosqueSilhouette.png'),
-  require('../../assets/images/AbstractPattern.png'),
-  require('../../assets/images/CloudSky.png'),
-  require('../../assets/images/RoundPattern.png'),
-  require('../../assets/images/SunFlower.png'),
   '#0D121A',
   '#EBF0F7',
+  require('../../assets/Wallpaper/3.jpg'),
+  require('../../assets/Wallpaper/4.jpg'),
+  require('../../assets/Wallpaper/5.jpg'),
+  require('../../assets/Wallpaper/6.jpg'),
+  require('../../assets/Wallpaper/7.jpg'),
+  require('../../assets/Wallpaper/8.jpg'),
+  require('../../assets/Wallpaper/9.jpg'),
+  require('../../assets/Wallpaper/10.jpg'),
+ 
 ];
 
 // Define the context type
