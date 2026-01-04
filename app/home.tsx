@@ -47,6 +47,7 @@ const SidebarItem = ({
   onSelect,
   isDarkMode,
   currentLetter,
+  alpha,
 }: {
   letter: string;
   index: number;
@@ -55,6 +56,7 @@ const SidebarItem = ({
   onSelect: (letter: string) => void;
   isDarkMode: boolean;
   currentLetter: string;
+  alpha?: any;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
     const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
@@ -104,7 +106,8 @@ const SidebarItem = ({
       <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
         <Text
           allowFontScaling={false}
-          style={{ fontSize: currentLetter === letter ? ITEM_HEIGHT * 0.8 : ITEM_HEIGHT * 0.6 }}
+
+          style={[{ fontSize: currentLetter === letter ? ITEM_HEIGHT * 0.8 : ITEM_HEIGHT * 0.6 }, alpha]}
           className={`font-medium ${
             currentLetter === letter
               ? isDarkMode
@@ -112,7 +115,7 @@ const SidebarItem = ({
                 : 'font-extrabold text-[#5C8BCC]'
               : isDarkMode
                 ? 'text-[#738099]'
-                : 'text-[#5B8BDF]'
+                : 'text-[#405B80]'
           }`}>
           {letter}
         </Text>
@@ -564,7 +567,7 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock, date, info, color, fontSize, } = fontConfig || ({} as any);
+  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert} = fontConfig || ({} as any);
   
 
   return (
@@ -599,42 +602,43 @@ export default function Home() {
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}
-                style={clock ? { fontFamily: clock, color, fontSize } : undefined}
-                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
+                style={time}
+                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                 {timeDisplay.main}
               </Text>
               {timeDisplay.suffix && (
                 <Text
                   allowFontScaling={false}
-                  style={clock ? { fontFamily: clock, color, fontSize } : undefined}
-                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                  style={pm}
+                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                   {timeDisplay.suffix}
                 </Text>
               )}
             </View>
             <Text
               allowFontScaling={false}
-             
-              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#8698B2]'}`}>
+              style={date}
+              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
               {getFormattedDate(currentTime)}
             </Text>
             <View className="mt-3 flex-row items-center gap-2">
               <Ionicons
                 name={getBatteryIcon()}
+                style={battery}
                 size={24}
                 color={
                   wallpaper && typeof wallpaper !== 'string'
                     ? '#E6EBF2'
                     : isDarkMode
                       ? '#7FA8E5'
-                      : '#5B8BDF'
+                      : '#8699B2'
                 }
               />
               {batteryLevel !== null && (
                 <Text
                   allowFontScaling={false}
-                 
-                  className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]'}`}>
+                  style={battery}
+                  className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8699B2]'}`}>
                   {Math.round(batteryLevel * 100)}%
                 </Text>
               )}
@@ -654,7 +658,8 @@ export default function Home() {
                 }}>
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
+                  style={home}
+                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                   {appRenames[app.packageName] || app.label}
                 </Text>
               </TouchableOpacity>
@@ -663,22 +668,24 @@ export default function Home() {
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
               <TouchableOpacity className="mt-4 items-center">
-                <View
-                  className={`rounded-full border border-2 p-1 ${wallpaper && typeof wallpaper !== 'string' ? 'border-[#A3B9D9]' : isDarkMode ? 'border-[#738099]' : 'border-[#A3B9D9]'}`}>
+               
                   <MaterialCommunityIcons
-                    name="plus"
-                    size={20}
+                    name="plus-circle-outline"
+                    style={icon}
+                    size={30}
                     color={
                       wallpaper && typeof wallpaper !== 'string'
                         ? '#A3B9D9'
                         : isDarkMode
                           ? '#738099'
-                          : '#A3B9D9'
+                          : '#B8CBE5'
                     }
                   />
-                </View>
+             
+                {/* do */}
                 <Text
                   allowFontScaling={false}
+                  style={don}
                   className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
                   Don't add unnecessary addictive app!
                 </Text>
@@ -691,25 +698,30 @@ export default function Home() {
             <View className="mb-2 flex-row items-center gap-4">
               <Text
                 allowFontScaling={false}
+                style={footer}
                 className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Today Unlock:{' '}
                 <Text
                   allowFontScaling={false}
+                  style={footer}
                   className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {todayStats.unlockCount}
                 </Text>
               </Text>
               <Text
                 allowFontScaling={false}
+                style={footer}
                 className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 ||
               </Text>
               <Text
                 allowFontScaling={false}
+                style={footer}
                 className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Today Use:{' '}
                 <Text
                   allowFontScaling={false}
+                  style={footer}
                   className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {formatUsageTime(todayStats.totalUsageTime)}
                 </Text>
@@ -717,7 +729,8 @@ export default function Home() {
             </View>
             <Text
               allowFontScaling={false}
-              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#A3B9D9]'}`}>
+              style={leave}
+              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
               Leave it! Do something mindful in real world.
             </Text>
 
@@ -725,7 +738,8 @@ export default function Home() {
             <View className="w-full flex-row gap-1">
               <TouchableOpacity
                 onPress={openDialer}
-                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'border-[#131B26] bg-[#131B26]' : 'border-white bg-[#DAE4F2]'}`}>
+                style={bottom}
+                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'border-[#131B26] bg-[#131B26]' : 'border-white bg-[#CEDDF2]'}`}>
                 {showPhoneDialer ? (
                   <Ionicons
                     name="call-outline"
@@ -741,6 +755,7 @@ export default function Home() {
                 ) : (
                   <Text
                     allowFontScaling={false}
+                    style={dialer}
                     className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Dialer
                   </Text>
@@ -748,7 +763,8 @@ export default function Home() {
               </TouchableOpacity>
               <TouchableOpacity
                 onPress={openCamera}
-                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? 'border border-[#C2DEF2] bg-[#7EA9E51A]' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#DAE4F2]'}`}>
+                style={bottom}
+                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'}`}>
                 {showCameraIcon ? (
                   <Ionicons
                     name="camera-outline"
@@ -764,6 +780,7 @@ export default function Home() {
                 ) : (
                   <Text
                     allowFontScaling={false}
+                    style={dialer}
                     className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Camera
                   </Text>
@@ -794,6 +811,7 @@ export default function Home() {
                     onSelect={(l) => navigateToAllAppsWithLetter(l)}
                     isDarkMode={isDarkMode}
                     currentLetter={dragLetter}
+                    alpha={alpha}
                   />
                 ))}
                 <BubbleCursor
@@ -813,10 +831,12 @@ export default function Home() {
             onRequestClose={() => setModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
               <View
+                style={modalbg}
                 className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
                   <Text
                     allowFontScaling={false}
+                    style={open}
                     className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'}`}>
                     Open{' '}
                     {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
@@ -832,19 +852,22 @@ export default function Home() {
 
                   <Text
                     allowFontScaling={false}
+                    style={select}
                     className={`text-center text-base font-medium ${isDarkMode ? 'text-[#728099]' : 'text-gray-800'}`}>
                     Select estimated use time
                   </Text>
                 </View>
-
+               {/* number */}
                 <View className="mb-6 flex-row flex-wrap justify-between">
                   {[2, 5, 10, 20].map((mins) => (
                     <TouchableOpacity
                       key={mins}
+                      style={numberbg}
                       className={`mb-3 w-[48%] items-center rounded-xl ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#5B8BDF]'} py-3 active:opacity-80`}
                       onPress={() => handleLaunchApp(mins)}>
                       <Text
                         allowFontScaling={false}
+                        style={number}
                         className={`text-base font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}>
                         {mins} min
                       </Text>
@@ -856,6 +879,7 @@ export default function Home() {
                   onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
                   className="mb-2 self-center p-2">
                   <Ionicons
+                    style={toggle}
                     name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
                     size={24}
                     color={isDarkMode ? '#94A3B8' : '#64748B'}
@@ -866,6 +890,7 @@ export default function Home() {
                   <View className="mb-4 w-full">
                     <Text
                       allowFontScaling={false}
+                      style={when}
                       className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
                       When time is over
                     </Text>
@@ -900,6 +925,7 @@ export default function Home() {
                         </View>
                         <Text
                           allowFontScaling={false}
+                          style={remind}
                           className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
                           Remind Me
                         </Text>
@@ -935,6 +961,7 @@ export default function Home() {
                       </View>
                       <Text
                         allowFontScaling={false}
+                        style={remind}
                         className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
                         Quit
                       </Text>
@@ -942,13 +969,15 @@ export default function Home() {
                   </View>
                 )}
                 <View
+                  style={bordert}
                   className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
+                  style={quitbg}
                     className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
                       isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
                     }`}
                     onPress={() => setModalVisible(false)}>
-                    <Text allowFontScaling={false} className="text-base font-medium text-white">
+                    <Text style={quit} allowFontScaling={false} className="text-base font-medium text-white">
                       Quit
                     </Text>
                   </TouchableOpacity>

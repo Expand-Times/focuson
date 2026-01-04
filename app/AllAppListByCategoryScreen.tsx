@@ -350,7 +350,7 @@ export default function AllAppListByCategoryScreen() {
                 : 'transparent'
               : isDarkMode
                 ? '#0D121A'
-                : '#EEF2F6',
+                : '#EBF1F7',
           }}>
           <View className="flex-1 px-4">
         {/* Search Bar */}
@@ -393,7 +393,7 @@ export default function AllAppListByCategoryScreen() {
                 ? 'text-white decoration-white'
                 : isDarkMode
                   ? 'text-[#DBDFE4] decoration-slate-400'
-                  : 'text-[#858E9D] decoration-[#858E9D]'
+                  : 'text-[#142C4D] decoration-[#142C4D]'
             }`}>
             App Category
           </Text>
@@ -477,7 +477,7 @@ export default function AllAppListByCategoryScreen() {
                           ? 'text-white'
                           : isDarkMode
                             ? 'text-[#728099]'
-                            : 'text-[#858E9D]'
+                            : 'text-[#142C4D]'
                       }`}>
                       {displayTitle}
                     </Text>
@@ -509,7 +509,7 @@ export default function AllAppListByCategoryScreen() {
                           ? 'bg-black/40'
                           : isDarkMode
                             ? 'bg-[#131B27]'
-                            : 'bg-[#7FA8E5]'
+                            : 'bg-[#CEDDF2]'
                       }`}
                       onPress={() => handleLaunchApp(app.packageName)}
                       onLongPress={() => handleLongPress(app)}>
@@ -520,7 +520,7 @@ export default function AllAppListByCategoryScreen() {
                             ? 'text-white'
                             : isDarkMode
                               ? 'text-[#DBDFE5]'
-                              : 'text-white'
+                              : 'text-[#142C4D]'
                         }`}
                         numberOfLines={1}
                         style={{ maxWidth: '60%' }}>
@@ -534,7 +534,7 @@ export default function AllAppListByCategoryScreen() {
                               ? 'text-slate-300'
                               : isDarkMode
                                 ? 'text-[#728099]'
-                                : 'text-white'
+                                : 'text-[#4D6D99]'
                           }`}>
                           TO: {app.launchCount || 0} Times || DU: {formatUsageTime(app.usageTime)}
                         </Text>
