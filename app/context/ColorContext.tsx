@@ -29,6 +29,7 @@ interface ColorContextType {
   isDarkMode: boolean;
   isLoading: boolean;
   wallpaper: WallpaperItem | null;
+  wallpaperIndex: number;
   setWallpaper: (wallpaper: WallpaperItem) => void;
   showPhoneDialer: boolean;
   setShowPhoneDialer: (show: boolean) => void;
@@ -67,6 +68,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   }, [systemColorScheme]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
+  const [wallpaperIndex, setWallpaperIndex] = useState<number>(-1);
   const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
   const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
@@ -102,6 +104,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         const index = parseInt(savedWallpaperIndex, 10);
         if (index >= 0 && index < AVAILABLE_WALLPAPERS.length) {
           setWallpaperState(AVAILABLE_WALLPAPERS[index]);
+          setWallpaperIndex(index);
         }
       }
     } catch (err) {
@@ -133,6 +136,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
       }
       const index = AVAILABLE_WALLPAPERS.indexOf(newWallpaper);
       if (index !== -1) {
+        setWallpaperIndex(index);
         await AsyncStorage.setItem('selectedWallpaperIndex', index.toString());
       } else {
          // If for some reason it's not in the list (shouldn't happen with current UI), maybe clear it or store differently
@@ -217,9 +221,10 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         unlockPremium,
         isDarkMode,
         isLoading,
-        wallpaper,
-        setWallpaper,
-        showPhoneDialer,
+    wallpaper,
+    wallpaperIndex,
+    setWallpaper,
+    showPhoneDialer,
         setShowPhoneDialer,
         showCameraIcon,
         setShowCameraIcon,

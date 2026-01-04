@@ -47,6 +47,7 @@ const SidebarItem = ({
   onSelect,
   isDarkMode,
   currentLetter,
+  isImageWallpaper,
 }: {
   letter: string;
   index: number;
@@ -54,6 +55,7 @@ const SidebarItem = ({
   isTouching: SharedValue<boolean>;
   onSelect: (letter: string) => void;
   isDarkMode: boolean;
+  isImageWallpaper?: boolean;
   currentLetter: string;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
@@ -84,12 +86,16 @@ const SidebarItem = ({
           allowFontScaling={false}
           className={`text-[12px] font-medium ${
             currentLetter === letter
-              ? isDarkMode
-                ? 'font-bold text-[16px] text-[#738099]'
-                : 'text-[14px] font-extrabold text-[#5C8BCC]'
-              : isDarkMode
-                ? 'text-[#738099]'
-                : 'text-[#5B8BDF]'
+              ? isImageWallpaper
+                ? 'font-bold text-[16px] text-white'
+                : isDarkMode
+                  ? 'font-bold text-[16px] text-[#738099]'
+                  : 'text-[14px] font-extrabold text-[#405B80]'
+              : isImageWallpaper
+                ? 'text-white'
+                : isDarkMode
+                  ? 'text-[#738099]'
+                  : 'text-[#405B80]'
           }`}>
           {letter}
         </Text>
@@ -147,7 +153,9 @@ const BubbleCursor = ({
 };
 
 export default function AllApps() {
-  const { isDarkMode } = useColorContext();
+  const { isDarkMode, wallpaper } = useColorContext();
+  const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
+
   const colorScheme = useColorScheme();
   const [apps, setApps] = useState<AppItem[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -511,7 +519,13 @@ export default function AllApps() {
 
     return (
       <TouchableOpacity
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA9E5]'} ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${
+          isImageWallpaper
+            ? 'bg-black/40'
+            : isDarkMode
+              ? 'bg-[#131B26]'
+              : 'bg-[#CEDDF2]'
+        } ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
         onPress={() => handleAppPress(item)}
         onLongPress={() => handleAppLongPress(item)}
         delayLongPress={300}>
@@ -526,7 +540,9 @@ export default function AllApps() {
           )}
           <Text
             allowFontScaling={false}
-            className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}
+            className={`font-regular text-[16px] ${
+              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
+            }`}
             numberOfLines={1}>
             {item.label}
           </Text>
@@ -535,7 +551,9 @@ export default function AllApps() {
         <View className="flex-row items-center">
           <Text
             allowFontScaling={false}
-            className={`text-[10px] font-light ${isDarkMode ? 'text-[#728099]' : 'text-white'} opacity-90`}>
+            className={`text-[10px] font-light ${
+              isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
+            } opacity-90`}>
             TO: {item.launchCount || 0} times || DU: {usageText}
           </Text>
         </View>
@@ -640,10 +658,23 @@ export default function AllApps() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      {isImageWallpaper && (
+        <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />
+      )}
       <GestureDetector gesture={rightSwipeGesture}>
-        <View className={`flex-1 px-4 pt-12 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EFF6FC]'}`}>
+        <View
+          className="flex-1 px-4 pt-12"
+          style={{
+            backgroundColor: wallpaper
+              ? typeof wallpaper === 'string'
+                ? wallpaper
+                : 'transparent'
+              : isDarkMode
+                ? '#0D121A'
+                : '#EBF0F7',
+          }}>
           {/* Search Bar */}
-          <View className="mb-6 flex-row items-center gap-3">
+          <View className="mb-6 flex-row items-center ">
             {/* Back Button (small) */}
             {/* <TouchableOpacity
           onPress={() => router.back()}
@@ -652,21 +683,31 @@ export default function AllApps() {
         </TouchableOpacity> */}
 
             <View
-              className={` flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${isDarkMode ? 'border-[#212D41] bg-[#131B27]' : 'border-slate-100 bg-white'}`}>
+              className={` flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${
+                isImageWallpaper
+                  ? 'border-white/20 bg-black/30'
+                  : isDarkMode
+                    ? 'border-[#212D41] bg-[#131B27]'
+                    : 'border-slate-100 bg-white'
+              }`}>
               <Ionicons
                 name="search"
                 size={20}
-                color={isDarkMode ? '#434C59' : '#5C8BCC'}
+                color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC'}
                 className="mr-2"
               />
               <TextInput
-                className={`ml-2 flex-1 text-[16px] ${isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'}`}
+                className={`ml-2 flex-1 text-[16px] ${
+                  isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
+                }`}
                 placeholder="Search app here"
-                placeholderTextColor={isDarkMode ? '#64748B' : '#A3B9D9'}
+                placeholderTextColor={
+                  isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9'
+                }
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 autoCapitalize="none"
-                cursorColor={isDarkMode ? '#434C59' : '#A3B9D9'}
+                cursorColor={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9'}
                 autoCorrect={false}
                 autoFocus={true}
                 showSoftInputOnFocus={isKeyboardEnabled}
@@ -677,7 +718,7 @@ export default function AllApps() {
             {isSelectMode && (
               <TouchableOpacity
                 onPress={handleSaveSelection}
-                className={`rounded-full p-2 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                className={`rounded-full p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
               </TouchableOpacity>
             )}
@@ -687,17 +728,29 @@ export default function AllApps() {
           <View className="mb-4 flex-row items-center justify-between px-1">
             <Text
               allowFontScaling={false}
-              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${isDarkMode ? 'text-[#DADFE5] decoration-[#DADFE5]' : 'text-[#858E9D] decoration-[#858E9D]'}`}>
+              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${
+                isImageWallpaper
+                  ? 'text-white decoration-white'
+                  : isDarkMode
+                    ? 'text-[#DADFE5] decoration-[#DADFE5]'
+                    : 'text-[#858E9D] decoration-[#858E9D]'
+              }`}>
               All Apps
             </Text>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
-                  className={`rounded-lg border border-2 ${isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}>
+                  className={`rounded-lg border border-2 ${
+                    isImageWallpaper
+                      ? 'border-white/50'
+                      : isDarkMode
+                        ? 'border-slate-400'
+                        : 'border-[#858E9D]'
+                  }`}>
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={isDarkMode ? '#94A3B8' : '#858E9D'}
+                    color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D'}
                   />
                 </View>
               </TouchableOpacity>
@@ -713,7 +766,9 @@ export default function AllApps() {
                 renderItem={renderItem}
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
-                    className={` text-lg font-bold ${isDarkMode ? 'text-[#728099]' : 'text-[#5C8BCC]'}`}>
+                    className={` text-lg font-bold ${
+                      isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                    }`}>
                     {title}
                   </Text>
                 )}
@@ -755,6 +810,7 @@ export default function AllApps() {
                       isTouching={isTouching}
                       onSelect={scrollToLetter}
                       isDarkMode={isDarkMode}
+                      isImageWallpaper={!!isImageWallpaper}
                       currentLetter={currentLetter}
                     />
                   ))}

@@ -33,6 +33,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
+import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
 const { height } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
@@ -180,6 +181,7 @@ export default function Home() {
   const insets = useSafeAreaInsets();
   const {
     wallpaper,
+    wallpaperIndex,
     showPhoneDialer,
     showCameraIcon,
     timeFormat,
@@ -561,6 +563,10 @@ export default function Home() {
 
   const timeDisplay = getFormattedTime(currentTime);
 
+  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+  const { clock, date, info, color, fontSize, } = fontConfig || ({} as any);
+  
+
   return (
     <GestureHandlerRootView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
       <StatusBar
@@ -593,12 +599,14 @@ export default function Home() {
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}
+                style={clock ? { fontFamily: clock, color, fontSize } : undefined}
                 className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                 {timeDisplay.main}
               </Text>
               {timeDisplay.suffix && (
                 <Text
                   allowFontScaling={false}
+                  style={clock ? { fontFamily: clock, color, fontSize } : undefined}
                   className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                   {timeDisplay.suffix}
                 </Text>
@@ -606,6 +614,7 @@ export default function Home() {
             </View>
             <Text
               allowFontScaling={false}
+             
               className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#8698B2]'}`}>
               {getFormattedDate(currentTime)}
             </Text>
@@ -624,6 +633,7 @@ export default function Home() {
               {batteryLevel !== null && (
                 <Text
                   allowFontScaling={false}
+                 
                   className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#5B8BDF]'}`}>
                   {Math.round(batteryLevel * 100)}%
                 </Text>
@@ -669,7 +679,7 @@ export default function Home() {
                 </View>
                 <Text
                   allowFontScaling={false}
-                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
+                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
                   Don't add unnecessary addictive app!
                 </Text>
               </TouchableOpacity>
