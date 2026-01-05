@@ -60,12 +60,6 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [isPremium, setIsPremium] = useState<boolean>(DEFAULT_PREMIUM);
   const systemColorScheme = useColorScheme();
   const [isDarkMode, setIsDarkMode] = useState(systemColorScheme === 'dark');
-
-  useEffect(() => {
-    if (systemColorScheme) {
-       setIsDarkMode(systemColorScheme === 'dark');
-    }
-  }, [systemColorScheme]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
   const [wallpaperIndex, setWallpaperIndex] = useState<number>(-1);
@@ -74,6 +68,16 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
   const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
   const [timeOffset, setTimeOffsetState] = useState<number>(0);
+
+  useEffect(() => {
+    if (wallpaper === '#0D121A') {
+      setIsDarkMode(true);
+    } else if (wallpaper === '#EBF0F7') {
+      setIsDarkMode(false);
+    } else if (systemColorScheme) {
+      setIsDarkMode(systemColorScheme === 'dark');
+    }
+  }, [systemColorScheme, wallpaper]);
 
   // ✅ Load saved data when app starts
   useEffect(() => {
@@ -105,7 +109,26 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         if (index >= 0 && index < AVAILABLE_WALLPAPERS.length) {
           setWallpaperState(AVAILABLE_WALLPAPERS[index]);
           setWallpaperIndex(index);
+          // Ensure correct dark mode state for restored wallpaper
+          if (AVAILABLE_WALLPAPERS[index] === '#0D121A') {
+            setIsDarkMode(true);
+          } else if (AVAILABLE_WALLPAPERS[index] === '#EBF0F7') {
+            setIsDarkMode(false);
+          }
         }
+      } else {
+        // No saved wallpaper, set based on system theme
+        const defaultIndex = systemColorScheme === 'dark' ? 0 : 1;
+        setWallpaperState(AVAILABLE_WALLPAPERS[defaultIndex]);
+        setWallpaperIndex(defaultIndex);
+        setIsDarkMode(systemColorScheme === 'dark');
+        // We don't persist here automatically to allow user to "cancel" by not choosing? 
+        // User said "initial app run... shows this".
+        // But if we don't persist, next time it checks system again.
+        // User request: "tarpore jodi amar app ... acolor set dake" (then if my app has color set).
+        // It implies if they DON'T change it, it should behave like it's set?
+        // Let's persist it to be safe, as if the app "chose" for them.
+        AsyncStorage.setItem('selectedWallpaperIndex', defaultIndex.toString());
       }
     } catch (err) {
       console.error("Failed to load persisted data:", err);

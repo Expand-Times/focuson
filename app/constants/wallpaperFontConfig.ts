@@ -4,19 +4,7 @@ const wallpaperFontConfig: Record<number, {
    clock?: string; 
    [key: string]: any;
  }> = { 
-   0: { // Dark Solid Color
-     clock: 'Poppins-Bold', 
-     time: {'fontFamily': 'Poppins-Regular', fontSize: 16,color: '#DBDFE5'},
-     date: {'fontFamily': 'Poppins-Regular', fontSize: 16,color: '#DBDFE5'},
-     info: 'Poppins-Light', 
-   }, 
-   1: { // Light Solid Color
-     clock: 'Imprima-Regular', 
-     time: {'fontFamily': 'Imprima-Regular', fontSize: 16,color: '#DBDFE5'},
-     date: {'fontFamily': 'Imprima-Regular', fontSize: 16,color: '#DBDFE5'},
-     info: 'Imprima-Regular', 
-     
-   }, 
+  
    2: { // Wallpaper/3.jpg
     // home
      time: {'fontFamily': 'RampartOne-Regular', fontSize: 32,color: '#1A2B33'},

@@ -380,11 +380,11 @@ export default function AllAppListByCategoryScreen() {
             }`}
             placeholder="Search app here"
             placeholderTextColor={
-             searchCi.color || (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
+             searchCi?.color || (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
             }
             value={searchQuery}
             onChangeText={setSearchQuery}
-            cursorColor={searchCi.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')}
+            cursorColor={searchCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')}
             autoFocus={true}
             showSoftInputOnFocus={isKeyboardEnabled}
             onTouchStart={() => setIsKeyboardEnabled(true)}
@@ -408,7 +408,7 @@ export default function AllAppListByCategoryScreen() {
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
               <View
-                style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
+                style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                 className={`rounded-lg border border-2 ${
                   isImageWallpaper
                     ? 'border-white/50'
@@ -419,14 +419,14 @@ export default function AllAppListByCategoryScreen() {
                 <MaterialCommunityIcons
                   name="plus"
                   size={22}
-                  color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                  color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                 />
               </View>
             </TouchableOpacity>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
-                  style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
+                  style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                   className={`rounded-lg border border-2 ${
                     isImageWallpaper
                       ? 'border-white/50'
@@ -437,7 +437,7 @@ export default function AllAppListByCategoryScreen() {
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                    color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                   />
                 </View>
               </TouchableOpacity>
@@ -493,7 +493,7 @@ export default function AllAppListByCategoryScreen() {
                       {displayTitle}
                     </Text>
                     <TouchableOpacity
-                      style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
+                      style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                       className={`border-b ${
                         isImageWallpaper
                           ? 'border-white/50'
@@ -505,7 +505,7 @@ export default function AllAppListByCategoryScreen() {
                       <MaterialCommunityIcons
                         name="pencil-outline"
                         size={16}
-                        color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                        color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                       />
                     </TouchableOpacity>
                   </View>
