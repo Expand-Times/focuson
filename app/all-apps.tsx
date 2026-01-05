@@ -541,7 +541,7 @@ export default function AllApps() {
             : isDarkMode
               ? 'bg-[#131B26]'
               : 'bg-[#CEDDF2]'
-        } ${isSelectMode && isSelected ? 'border-2 border-white' : ''}`}
+        } ${isSelectMode && isSelected ? '' : ''}`}
         onPress={() => handleAppPress(item)}
         onLongPress={() => handleAppLongPress(item)}
         delayLongPress={300}>
@@ -550,8 +550,8 @@ export default function AllApps() {
             <Ionicons
               name={isSelected ? 'checkbox' : 'square-outline'}
               size={20}
-              color="white"
-              style={{ marginRight: 8 }}
+              color={applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')}
+              style={[{ marginRight: 8 }, applist]}
             />
           )}
           <Text
@@ -702,7 +702,7 @@ export default function AllApps() {
 
             <View
             style={searchbg}
-              className={` flex-row items-center rounded-xl border px-4 py-1 ${
+              className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${
                 isImageWallpaper
                   ? 'border-white/20 '
                   : isDarkMode
@@ -738,7 +738,8 @@ export default function AllApps() {
             {isSelectMode && (
               <TouchableOpacity
                 onPress={handleSaveSelection}
-                className={`rounded-full p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                 style={searchbg}
+                className={`ml-3 rounded-full p-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
               </TouchableOpacity>
             )}
