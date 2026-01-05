@@ -395,6 +395,7 @@ export default function AllAppListByCategoryScreen() {
         <View className="mb-4 flex-row items-center justify-between">
           <Text
             allowFontScaling={false}
+            style={appC}
             className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${
               isImageWallpaper
                 ? 'text-white decoration-white'
@@ -407,6 +408,7 @@ export default function AllAppListByCategoryScreen() {
           <View className="flex-row items-center gap-4">
             <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
               <View
+                style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                 className={`rounded-lg border border-2 ${
                   isImageWallpaper
                     ? 'border-white/50'
@@ -417,13 +419,14 @@ export default function AllAppListByCategoryScreen() {
                 <MaterialCommunityIcons
                   name="plus"
                   size={22}
-                  color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'}
+                  color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                 />
               </View>
             </TouchableOpacity>
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
+                  style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                   className={`rounded-lg border border-2 ${
                     isImageWallpaper
                       ? 'border-white/50'
@@ -434,7 +437,7 @@ export default function AllAppListByCategoryScreen() {
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'}
+                    color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                   />
                 </View>
               </TouchableOpacity>
