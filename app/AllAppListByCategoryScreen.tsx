@@ -482,6 +482,7 @@ export default function AllAppListByCategoryScreen() {
                   <View className="mb-2 flex-row items-center justify-end">
                     <Text
                       allowFontScaling={false}
+                      style={appC}
                       className={`mr-2 text-[16px] ${
                         isImageWallpaper
                           ? 'text-white'
@@ -492,6 +493,7 @@ export default function AllAppListByCategoryScreen() {
                       {displayTitle}
                     </Text>
                     <TouchableOpacity
+                      style={[appC, {borderColor: appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                       className={`border-b ${
                         isImageWallpaper
                           ? 'border-white/50'
@@ -503,7 +505,7 @@ export default function AllAppListByCategoryScreen() {
                       <MaterialCommunityIcons
                         name="pencil-outline"
                         size={16}
-                        color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'}
+                        color={appC.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                       />
                     </TouchableOpacity>
                   </View>
