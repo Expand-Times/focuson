@@ -61,7 +61,7 @@ export default function AllAppListByCategoryScreen() {
   const [tempAppName, setTempAppName] = useState('');
   // wallpaperFontConfig
  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { searchCbg, searchCi, appC, applistC, applistCbg, applistCdu } = fontConfig || ({} as any);
+  const { searchCbg, searchCi, appC, applistC, applistCbg, applistCdu,modalbg,open,numberbg,number } = fontConfig || ({} as any);
 
   useEffect(() => {
     loadRenamedCategories();
@@ -577,10 +577,10 @@ export default function AllAppListByCategoryScreen() {
         <TouchableWithoutFeedback onPress={closeModal}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
-              <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
+              <View style={modalbg} className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
                 {selectedApp && (
                   <>
-                    <Text allowFontScaling={false} className={`mb-6 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                    <Text allowFontScaling={false} style={open} className={`mb-6 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                       {selectedApp.label} Options
                     </Text>
 
@@ -597,44 +597,50 @@ export default function AllAppListByCategoryScreen() {
                       <View className="w-full flex-row flex-wrap justify-between gap-y-4">
                         {/* Move to */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={() => setShowCategorySelector(true)}>
-                          <Text  allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Move to</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Move to</Text>
                         </TouchableOpacity>
 
                         {/* Copy to */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={() => console.log('Copy to')}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Copy to</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Copy to</Text>
                         </TouchableOpacity>
 
                         {/* Block */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={() => console.log('Block')}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Block</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Block</Text>
                         </TouchableOpacity>
 
                         {/* Rename */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={startAppRenaming}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Rename</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Rename</Text>
                         </TouchableOpacity>
 
                         {/* App Info */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={handleAppInfo}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>App Info</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>App Info</Text>
                         </TouchableOpacity>
 
                         {/* Uninstall */}
                         <TouchableOpacity
+                          style={numberbg}
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={handleUninstall}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Uninstall</Text>
+                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Uninstall</Text>
                         </TouchableOpacity>
                       </View>
                     ) : showAppRenamer ? (
