@@ -59,6 +59,7 @@ const wallpaperFontConfig: Record<number, {
     searchCi: {color: '#5C8BCC'}, 
     appC: {color: '#1A2B33'}, 
     applistC: {color: '#1A2B33'}, 
+    applistCdu: {color: '#1A2B33'}, 
     applistCbg: {backgroundColor: '#0A26331A'}, 
    },
   

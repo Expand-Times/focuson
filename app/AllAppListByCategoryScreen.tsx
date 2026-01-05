@@ -61,7 +61,7 @@ export default function AllAppListByCategoryScreen() {
   const [tempAppName, setTempAppName] = useState('');
   // wallpaperFontConfig
  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { searchCbg, searchCi, appC, applistC, applistCbg } = fontConfig || ({} as any);
+  const { searchCbg, searchCi, appC, applistC, applistCbg, applistCdu } = fontConfig || ({} as any);
 
   useEffect(() => {
     loadRenamedCategories();
@@ -516,7 +516,8 @@ export default function AllAppListByCategoryScreen() {
                   {category.data.map((app) => (
                     <TouchableOpacity
                       key={app.packageName}
-                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${
+                      style={applistCbg}
+                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
                         isImageWallpaper
                           ? 'bg-black/40'
                           : isDarkMode
@@ -527,6 +528,7 @@ export default function AllAppListByCategoryScreen() {
                       onLongPress={() => handleLongPress(app)}>
                       <Text
                         allowFontScaling={false}
+                        style={[applistC, { maxWidth: '60%' }]}
                         className={`text-[16px] font-regular ${
                           isImageWallpaper
                             ? 'text-white'
@@ -534,13 +536,13 @@ export default function AllAppListByCategoryScreen() {
                               ? 'text-[#DBDFE5]'
                               : 'text-[#142C4D]'
                         }`}
-                        numberOfLines={1}
-                        style={{ maxWidth: '60%' }}>
+                        numberOfLines={1}>
                         {app.label}
                       </Text>
                       <View className="flex-row items-center">
                         <Text
                           allowFontScaling={false}
+                          style={applistCdu}
                           className={`text-[12px] font-regular opacity-90 ${
                             isImageWallpaper
                               ? 'text-slate-300'
