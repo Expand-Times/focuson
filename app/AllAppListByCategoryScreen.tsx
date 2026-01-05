@@ -574,6 +574,7 @@ export default function AllAppListByCategoryScreen() {
         transparent={true}
         visible={modalVisible}
         onRequestClose={closeModal}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={closeModal}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
@@ -645,12 +646,18 @@ export default function AllAppListByCategoryScreen() {
                       </View>
                     ) : showAppRenamer ? (
                       <View className="w-full">
-                        <Text allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
+                        <Text style={appC} allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
                         <TextInput
                           value={tempAppName}
                           onChangeText={setTempAppName}
-                          className={`mb-4 rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
-                          autoFocus
+                          style={[appC, applistCbg]}
+                          className={`mb-4 rounded-lg border px-4 py-3 text-lg ${
+                            isImageWallpaper
+                              ? 'border-white/20 text-white'
+                              : isDarkMode
+                                ? 'bg-slate-800 border-slate-600 text-slate-300'
+                                : 'bg-slate-50 border-slate-300 text-slate-700'
+                          }`}
                           selectTextOnFocus
                         />
                         <View className="flex-row gap-3">
@@ -668,14 +675,15 @@ export default function AllAppListByCategoryScreen() {
                       </View>
                     ) : (
                       <View className="h-64 w-full">
-                        <Text allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
+                        <Text style={applistC} allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
                         <ScrollView className="w-full flex-1">
                           {categories.map((cat, idx) => (
                             <TouchableOpacity
                               key={idx}
+                              style={applistC}
                               className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
                               onPress={() => handleMoveApp(cat.title)}>
-                              <Text allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                              <Text style={applistC} allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                                 {renamedCategories[cat.title] || cat.title}
                               </Text>
                             </TouchableOpacity>
@@ -690,9 +698,10 @@ export default function AllAppListByCategoryScreen() {
                           )}
                         </ScrollView>
                         <TouchableOpacity
+                          style={numberbg}
                           className={`mt-4 items-center rounded-lg py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
                           onPress={() => setShowCategorySelector(false)}>
-                          <Text allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
+                          <Text style={number} allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
                         </TouchableOpacity>
                       </View>
                     )}
@@ -702,6 +711,7 @@ export default function AllAppListByCategoryScreen() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* Create Category Modal */}
@@ -710,6 +720,7 @@ export default function AllAppListByCategoryScreen() {
         transparent={true}
         visible={createCategoryModalVisible}
         onRequestClose={() => setCreateCategoryModalVisible(false)}>
+        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={() => setCreateCategoryModalVisible(false)}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
@@ -743,6 +754,7 @@ export default function AllAppListByCategoryScreen() {
             </TouchableWithoutFeedback>
           </View>
         </TouchableWithoutFeedback>
+        </KeyboardAvoidingView>
       </Modal>
         </View>
         </KeyboardAvoidingView>

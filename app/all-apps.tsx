@@ -10,6 +10,9 @@ import {
   ScrollView,
   useColorScheme,
   Keyboard,
+  Platform,
+  TouchableWithoutFeedback,
+  KeyboardAvoidingView,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
@@ -160,7 +163,7 @@ export default function AllApps() {
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-    const {searchbg,searchi,appdu,applist,alphaside,applistbg,header, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert ,open,togglei} = fontConfig || ({} as any);
+    const {searchbg,searchi,appdu,applist,alphaside,applistbg,header, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert ,open,togglei, appC, applistCbg} = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
   const [apps, setApps] = useState<AppItem[]>([]);
@@ -471,6 +474,7 @@ export default function AllApps() {
     if (!selectedApp) return;
     setNewName(selectedApp.label);
     setRenameModalVisible(true);
+    setOptionsModalVisible(false);
   };
 
   const saveRename = async () => {
@@ -1085,33 +1089,50 @@ export default function AllApps() {
           </Modal>
 
           <Modal
-            visible={renameModalVisible}
-            transparent={true}
             animationType="fade"
+            transparent={true}
+            visible={renameModalVisible}
             onRequestClose={() => setRenameModalVisible(false)}>
-            <View className="flex-1 items-center justify-center bg-black/70">
-              <View
-                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <Text
-                  className={`mb-4 text-lg font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                  Rename App
-                </Text>
-                <TextInput
-                  value={newName}
-                  onChangeText={setNewName}
-                  className={`mb-6 border-b pb-2 text-lg ${isDarkMode ? 'border-slate-600 text-white' : 'border-slate-300 text-black'}`}
-                  autoFocus
-                />
-                <View className="flex-row justify-end gap-4">
-                  <TouchableOpacity onPress={() => setRenameModalVisible(false)}>
-                    <Text className="text-lg font-medium text-red-500">Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity onPress={saveRename}>
-                    <Text className="text-lg font-medium text-blue-500">Save</Text>
-                  </TouchableOpacity>
-                </View>
+            <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+            <TouchableWithoutFeedback onPress={() => setRenameModalVisible(false)}>
+              <View className="flex-1 items-center justify-center bg-black/50">
+                <TouchableWithoutFeedback>
+                  <View style={modalbg} className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                    <Text style={appC} allowFontScaling={false} className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                      Rename App
+                    </Text>
+
+                    <TextInput
+                      value={newName}
+                      onChangeText={setNewName}
+                      style={[appC, applistCbg]}
+                      className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
+                        isImageWallpaper
+                          ? 'border-white/20 text-white'
+                          : isDarkMode
+                            ? 'bg-slate-800 border-slate-600 text-slate-300'
+                            : 'bg-slate-50 border-slate-300 text-slate-700'
+                      }`}
+                      selectTextOnFocus
+                    />
+
+                    <View className="w-full flex-row gap-3">
+                      <TouchableOpacity
+                        className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                        onPress={() => setRenameModalVisible(false)}>
+                        <Text allowFontScaling={false} className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
+                        onPress={saveRename}>
+                        <Text allowFontScaling={false} className="font-medium text-white">Save</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+                </TouchableWithoutFeedback>
               </View>
-            </View>
+            </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
           </Modal>
         </View>
       </GestureDetector>
