@@ -36,7 +36,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
-
+import wallpaperFontConfig from './constants/wallpaperFontConfig';
 const ITEM_HEIGHT = 20;
 
 const SidebarItem = ({
@@ -48,6 +48,7 @@ const SidebarItem = ({
   isDarkMode,
   currentLetter,
   isImageWallpaper,
+  alphaside,
 }: {
   letter: string;
   index: number;
@@ -57,6 +58,7 @@ const SidebarItem = ({
   isDarkMode: boolean;
   isImageWallpaper?: boolean;
   currentLetter: string;
+  alphaside?: any;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
     const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
@@ -84,6 +86,7 @@ const SidebarItem = ({
       <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
         <Text
           allowFontScaling={false}
+          style={alphaside}
           className={`text-[12px] font-medium ${
             currentLetter === letter
               ? isImageWallpaper
@@ -153,8 +156,11 @@ const BubbleCursor = ({
 };
 
 export default function AllApps() {
-  const { isDarkMode, wallpaper } = useColorContext();
+  const { isDarkMode, wallpaper,wallpaperIndex } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
+  // wallpaper
+  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+    const {searchbg,searchi,appdu,applist,alphaside,applistbg,header, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert ,open,togglei} = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
   const [apps, setApps] = useState<AppItem[]>([]);
@@ -173,6 +179,11 @@ export default function AllApps() {
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [newName, setNewName] = useState('');
+
+  // Time Over Settings State
+  const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
+  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('mindful');
+  const [secondWarning, setSecondWarning] = useState(false);
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -519,7 +530,8 @@ export default function AllApps() {
 
     return (
       <TouchableOpacity
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 shadow-sm ${
+      style={applistbg}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
           isImageWallpaper
             ? 'bg-black/40'
             : isDarkMode
@@ -540,6 +552,7 @@ export default function AllApps() {
           )}
           <Text
             allowFontScaling={false}
+            style={applist}
             className={`font-regular text-[16px] ${
               isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
             }`}
@@ -551,6 +564,7 @@ export default function AllApps() {
         <View className="flex-row items-center">
           <Text
             allowFontScaling={false}
+            style={appdu}
             className={`text-[10px] font-light ${
               isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
             } opacity-90`}>
@@ -683,9 +697,10 @@ export default function AllApps() {
         </TouchableOpacity> */}
 
             <View
-              className={` flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${
+            style={searchbg}
+              className={` flex-row items-center rounded-xl border px-4 py-1 ${
                 isImageWallpaper
-                  ? 'border-white/20 bg-black/30'
+                  ? 'border-white/20 '
                   : isDarkMode
                     ? 'border-[#212D41] bg-[#131B27]'
                     : 'border-slate-100 bg-white'
@@ -693,21 +708,22 @@ export default function AllApps() {
               <Ionicons
                 name="search"
                 size={20}
-                color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC'}
+                color={searchi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC')}
                 className="mr-2"
               />
               <TextInput
+                style={searchi}
                 className={`ml-2 flex-1 text-[16px] ${
-                  isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
+                  searchi ? '' : isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
                 }`}
                 placeholder="Search app here"
                 placeholderTextColor={
-                  isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9'
+                  searchi?.color || (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
                 }
                 value={searchQuery}
                 onChangeText={setSearchQuery}
                 autoCapitalize="none"
-                cursorColor={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9'}
+                cursorColor={searchi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')}
                 autoCorrect={false}
                 autoFocus={true}
                 showSoftInputOnFocus={isKeyboardEnabled}
@@ -728,7 +744,8 @@ export default function AllApps() {
           <View className="mb-4 flex-row items-center justify-between px-1">
             <Text
               allowFontScaling={false}
-              className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${
+              style={applist}
+              className={`text-[18px] ${applist ? '' : 'font-bold'} underline decoration-2 underline-offset-4 ${
                 isImageWallpaper
                   ? 'text-white decoration-white'
                   : isDarkMode
@@ -740,8 +757,9 @@ export default function AllApps() {
             <Link href="/settingScreen" asChild>
               <TouchableOpacity>
                 <View
-                  className={`rounded-lg border border-2 ${
-                    isImageWallpaper
+                  style={[{ borderColor: applist?.color || (isImageWallpaper ? '#ffffff80' : isDarkMode ? '#94a3b8' : '#858E9D') }, applist]}
+                  className={`rounded-lg border-2 ${
+                    applist ? '' : isImageWallpaper
                       ? 'border-white/50'
                       : isDarkMode
                         ? 'border-slate-400'
@@ -750,7 +768,7 @@ export default function AllApps() {
                   <MaterialCommunityIcons
                     name="tune-variant"
                     size={22}
-                    color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D'}
+                    color={applist?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D')}
                   />
                 </View>
               </TouchableOpacity>
@@ -766,6 +784,7 @@ export default function AllApps() {
                 renderItem={renderItem}
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
+                  style={header}
                     className={` text-lg font-bold ${
                       isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
                     }`}>
@@ -812,6 +831,7 @@ export default function AllApps() {
                       isDarkMode={isDarkMode}
                       isImageWallpaper={!!isImageWallpaper}
                       currentLetter={currentLetter}
+                      alphaside={alphaside}
                     />
                   ))}
                 </View>
@@ -825,10 +845,10 @@ export default function AllApps() {
             visible={modalVisible}
             onRequestClose={() => setModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
-              <View
+              <View style={modalbg}
                 className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
-                  <Text
+                  <Text style={open}
                     allowFontScaling={false}
                     className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                     Open {selectedApp?.label}
@@ -844,6 +864,7 @@ export default function AllApps() {
                   )}
 
                   <Text
+                     style={select}
                     allowFontScaling={false}
                     className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
                     Select estimated use time
@@ -853,20 +874,122 @@ export default function AllApps() {
                 <View className="mb-6 flex-row flex-wrap justify-between">
                   {[2, 5, 10, 20].map((mins) => (
                     <TouchableOpacity
+                      style={numberbg}
                       key={mins}
                       className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
                       onPress={() => handleLaunchApp(mins)}>
-                      <Text className="text-base font-medium text-white">{mins} min</Text>
+                      <Text style={number} className="text-base font-medium text-white">{mins} min</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
+                {/* Toggle Icon */}
+                <TouchableOpacity
+                  onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
+                  className="mb-2 self-center p-2">
+                  <Ionicons
+                    style={toggle}
+                    name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
+                    size={24}
+                    color={isDarkMode ? '#94A3B8' : '#64748B'}
+                  />
+                </TouchableOpacity>
 
+                {showTimeOverSettings && (
+                  <View className="mb-4 w-full">
+                    <Text
+                      allowFontScaling={false}
+                      style={when}
+                      className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                      When time is over
+                    </Text>
+
+                    {/* Mindful Delay */}
+                    <TouchableOpacity
+                      className="mb-3 flex-row items-center"
+                      onPress={() => setTimeOverAction('mindful')}>
+                      <View
+                        style={[{ borderColor: togglei?.color || (timeOverAction === 'mindful' ? '#5B8BDF' : '#9ca3af') }, togglei]}
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'mindful' && (
+                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className="h-3 w-3 rounded-full" />
+                        )}
+                      </View>
+                      <Text
+                        allowFontScaling={false}
+                        style={remind}
+                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                        Mindful Delay
+                      </Text>
+                    </TouchableOpacity>
+
+                    {/* Remind Me */}
+                    <View className="mb-3 flex-row items-center justify-between">
+                      <TouchableOpacity
+                        className="flex-row items-center"
+                        onPress={() => setTimeOverAction('remind')}>
+                        <View
+                          style={[{ borderColor: togglei?.color || (timeOverAction === 'remind' ? '#5B8BDF' : '#9ca3af') }, togglei]}
+                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {timeOverAction === 'remind' && (
+                            <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className="h-3 w-3 rounded-full" />
+                          )}
+                        </View>
+                        <Text
+                          allowFontScaling={false}
+                          style={remind}
+                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                          Remind Me
+                        </Text>
+                      </TouchableOpacity>
+
+                      {/* 2nd Warning Checkbox */}
+                      <TouchableOpacity
+                        className="flex-row items-center"
+                        onPress={() => setSecondWarning(!secondWarning)}
+                        disabled={timeOverAction !== 'remind'}
+                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
+                        <View
+                          style={[{ borderColor: togglei?.color || (secondWarning ? '#5B8BDF' : '#9ca3af'), backgroundColor: secondWarning ? (togglei?.color || '#5B8BDF') : 'transparent' }, togglei]}
+                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${togglei ? '' : secondWarning ? 'border-[#5B8BDF] bg-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
+                        </View>
+                        <Text
+                          allowFontScaling={false}
+                          style={remind}
+                          className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                          2nd Warning
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+
+                    {/* Quit */}
+                    <TouchableOpacity
+                      className="mb-3 flex-row items-center"
+                      onPress={() => setTimeOverAction('quit')}>
+                      <View
+                        style={[{ borderColor: togglei?.color || (timeOverAction === 'quit' ? '#5B8BDF' : '#9ca3af') }, togglei]}
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        {timeOverAction === 'quit' && (
+                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className="h-3 w-3 rounded-full" />
+                        )}
+                      </View>
+                      <Text
+                        allowFontScaling={false}
+                        style={remind}
+                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                        Quit
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                )}
                 <View
+                style={bordert}
                   className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
+                  style={quitbg}
                     className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
                     onPress={() => setModalVisible(false)}>
-                    <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
+                    <Text style={quit} allowFontScaling={false} className="font-regular text-[16px] text-white">
                       Quit
                     </Text>
                   </TouchableOpacity>
@@ -882,9 +1005,11 @@ export default function AllApps() {
             onRequestClose={() => setOptionsModalVisible(false)}>
             <View className="flex-1 items-center justify-center bg-black/70">
               <View
+              style={modalbg}
                 className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
                   <Text
+                  style={open}
                     allowFontScaling={false}
                     className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
                     {selectedApp?.label} Options
@@ -900,47 +1025,56 @@ export default function AllApps() {
 
                 <View className="flex-row flex-wrap justify-between gap-y-4">
                   <TouchableOpacity
+                   style={numberbg}
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleAddToHome}>
-                    <Text className="font-medium text-white">Add to Home</Text>
+                    <Text style={number} className="font-medium text-white">Add to Home</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                  style={numberbg}
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handlePinToTop}>
-                    <Text className="font-medium text-white">
+                    <Text style={number} className="font-medium text-white">
                       {pinnedPackageNames.includes(selectedApp?.packageName || '')
                         ? 'Unpin'
                         : 'Pin to top'}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                  style={numberbg}
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleBlock}>
-                    <Text className="font-medium text-white">Block</Text>
+                    <Text style={number} className="font-medium text-white">Block</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                  style={numberbg}    
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleRename}>
-                    <Text className="font-medium text-white">Rename</Text>
+                    <Text style={number} className="font-medium text-white">Rename</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                  style={numberbg}
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleAppInfo}>
-                    <Text className="font-medium text-white">App Info</Text>
+                    <Text style={number} className="font-medium text-white">App Info</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
+                  style={numberbg}    
                     className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleUninstall}>
-                    <Text className="font-medium text-white">Uninstall</Text>
+                    <Text style={number} className="font-medium text-white">Uninstall</Text>
                   </TouchableOpacity>
                 </View>
 
                 <View
+                 style={bordert}
                   className={`mt-6 border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                  <TouchableOpacity
-                    className="w-full items-center py-2"
+                  <TouchableOpacity  style={quitbg}
+                     className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
+                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                    }`}
                     onPress={() => setOptionsModalVisible(false)}>
-                    <Text
+                    <Text style={quit}
                       className={`font-medium text-lg ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
                       Cancel
                     </Text>

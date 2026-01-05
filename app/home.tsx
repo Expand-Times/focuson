@@ -567,7 +567,7 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert} = fontConfig || ({} as any);
+  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert} = fontConfig || ({} as any);
   
 
   return (
@@ -900,9 +900,10 @@ export default function Home() {
                       className="mb-3 flex-row items-center"
                       onPress={() => setTimeOverAction('mindful')}>
                       <View
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        style={[{ borderColor: togglei?.color || (timeOverAction === 'mindful' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
                         {timeOverAction === 'mindful' && (
-                          <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
                         )}
                       </View>
                       <Text
@@ -918,9 +919,10 @@ export default function Home() {
                         className="flex-row items-center"
                         onPress={() => setTimeOverAction('remind')}>
                         <View
-                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          style={[{ borderColor: togglei?.color || (timeOverAction === 'remind' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
+                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
                           {timeOverAction === 'remind' && (
-                            <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                            <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
                           )}
                         </View>
                         <Text
@@ -938,7 +940,8 @@ export default function Home() {
                         disabled={timeOverAction !== 'remind'}
                         style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
                         <View
-                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? 'border-[#5B8BDF] bg-[#5B8BDF]' : 'border-gray-400'}`}>
+                          style={[{ borderColor: togglei?.color || (secondWarning ? '#5B8BDF' : '#9CA3AF'), backgroundColor: secondWarning ? (togglei?.color || '#5B8BDF') : 'transparent' }, togglei]}
+                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? (togglei ? '' : 'border-[#5B8BDF] bg-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
                           {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
                         </View>
                         <Text
@@ -954,9 +957,10 @@ export default function Home() {
                       className="mb-3 flex-row items-center"
                       onPress={() => setTimeOverAction('quit')}>
                       <View
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                        style={[{ borderColor: togglei?.color || (timeOverAction === 'quit' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
+                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
                         {timeOverAction === 'quit' && (
-                          <View className="h-3 w-3 rounded-full bg-[#5B8BDF]" />
+                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
                         )}
                       </View>
                       <Text

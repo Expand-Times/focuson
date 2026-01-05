@@ -28,6 +28,7 @@ import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
+import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
 
 type Category = {
@@ -37,7 +38,7 @@ type Category = {
 
 export default function AllAppListByCategoryScreen() {
   const router = useRouter();
-  const { isDarkMode, wallpaper } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
@@ -58,6 +59,9 @@ export default function AllAppListByCategoryScreen() {
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [showAppRenamer, setShowAppRenamer] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
+  // wallpaperFontConfig
+ const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+  const { searchCbg, searchCi, appC, applistC, applistCbg } = fontConfig || ({} as any);
 
   useEffect(() => {
     loadRenamedCategories();
@@ -355,7 +359,8 @@ export default function AllAppListByCategoryScreen() {
           <View className="flex-1 px-4">
         {/* Search Bar */}
         <View
-          className={`mb-6 flex-row items-center rounded-xl border px-4 py-1 shadow-sm ${
+        style={searchCbg}
+          className={`mb-6 flex-row items-center rounded-xl border px-4 py-1  ${
             isImageWallpaper
               ? 'border-white/20 bg-black/30'
               : isDarkMode
@@ -363,21 +368,23 @@ export default function AllAppListByCategoryScreen() {
                 : 'bg-white border-slate-100'
           }`}>
           <MaterialCommunityIcons
+            style={searchCi}
             name="magnify"
             size={20}
             color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC'}
           />
           <TextInput
+            style={searchCi}
             className={`ml-3 flex-1 text-[16px] ${
               isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
             }`}
             placeholder="Search app here"
             placeholderTextColor={
-              isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9'
+             searchCi.color || (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
             }
             value={searchQuery}
             onChangeText={setSearchQuery}
-            cursorColor={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9'}
+            cursorColor={searchCi.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')}
             autoFocus={true}
             showSoftInputOnFocus={isKeyboardEnabled}
             onTouchStart={() => setIsKeyboardEnabled(true)}
@@ -585,7 +592,7 @@ export default function AllAppListByCategoryScreen() {
                         <TouchableOpacity
                           className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
                           onPress={() => setShowCategorySelector(true)}>
-                          <Text allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Move to</Text>
+                          <Text  allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Move to</Text>
                         </TouchableOpacity>
 
                         {/* Copy to */}

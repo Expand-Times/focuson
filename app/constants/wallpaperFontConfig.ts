@@ -39,18 +39,27 @@ const wallpaperFontConfig: Record<number, {
       numberbg: {backgroundColor: '#51CDE5'}, 
       number: {color: '#FFFFFF'}, 
       toggle: {color: '#2E3B4D'}, 
+      togglei: {color: '#5C8BCC'}, 
       when: {color: '#2E3B4D'}, 
       remind: {color: '#2E3B4D'}, 
       quit: {color: '#FFFFFF'}, 
       bordert: {borderColor: '#A2B9D9'}, 
       quitbg: {backgroundColor: '#42ABBE'}, 
-    //  allApp
-    search: {'fontFamily': 'RampartOne-Regular', fontSize: 20,color: '#DBDFE5'}, 
-    header: {'fontFamily': 'RampartOne-Regular', fontSize: 20,color: '#DBDFE5'}, 
-    applist: {'fontFamily': 'RampartOne-Regular', fontSize: 20,color: '#DBDFE5'}, 
-    alphaside: {'fontFamily': 'RampartOne-Regular', fontSize: 20,color: '#DBDFE5'}, 
-
-    
+    //  allApps
+    searchbg: {backgroundColor: '#FFFFFF26'}, 
+    searchi: {color: '#5C8BCC'}, 
+    allapp: {color: '#1A2B33'}, 
+    header: {color: '#192B33'}, 
+    applist: {color: '#1A2B33'}, 
+    applistbg: {backgroundColor: '#0A26331A'}, 
+    appdu: {color: '#1A2B33'}, 
+    alphaside: {color: '#1A2B33'}, 
+// category
+    searchCbg: {backgroundColor: '#FFFFFF26'}, 
+    searchCi: {color: '#5C8BCC'}, 
+    appC: {color: '#1A2B33'}, 
+    applistC: {color: '#1A2B33'}, 
+    applistCbg: {backgroundColor: '#0A26331A'}, 
    },
   
  }; 
