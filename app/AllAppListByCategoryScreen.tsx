@@ -61,7 +61,7 @@ export default function AllAppListByCategoryScreen() {
   const [tempAppName, setTempAppName] = useState('');
   // wallpaperFontConfig
  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { searchCbg, searchCi, appC, applistC, applistCbg, applistCdu,modalbg,open,numberbg,number } = fontConfig || ({} as any);
+  const { searchCbg, searchCi, appC, appCn,appCi, applistC, applistCbg, applistCdu,modalbg,open,numberbg,number } = fontConfig || ({} as any);
 
   useEffect(() => {
     loadRenamedCategories();
@@ -482,7 +482,7 @@ export default function AllAppListByCategoryScreen() {
                   <View className="mb-2 flex-row items-center justify-end">
                     <Text
                       allowFontScaling={false}
-                      style={appC}
+                      style={appCn}
                       className={`mr-2 text-[16px] ${
                         isImageWallpaper
                           ? 'text-white'
@@ -493,7 +493,7 @@ export default function AllAppListByCategoryScreen() {
                       {displayTitle}
                     </Text>
                     <TouchableOpacity
-                      style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
+                      style={[appCi, {borderColor: appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
                       className={`border-b ${
                         isImageWallpaper
                           ? 'border-white/50'
@@ -505,7 +505,7 @@ export default function AllAppListByCategoryScreen() {
                       <MaterialCommunityIcons
                         name="pencil-outline"
                         size={16}
-                        color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                        color={appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                       />
                     </TouchableOpacity>
                   </View>

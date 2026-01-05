@@ -20,6 +20,8 @@ export default function Layout() {
     'Monoton-Regular': require('../assets/fonts/Monoton-Regular.ttf'),
     'RampartOne-Regular': require('../assets/fonts/RampartOne-Regular.ttf'),
     'RubikMoonrocks-Regular': require('../assets/fonts/RubikMoonrocks-Regular.ttf'),
+    'NovaFlat-Regular': require('../assets/fonts/NovaFlat-Regular.ttf'),
+    'Codystar-Regular': require('../assets/fonts/Codystar-Regular.ttf'),
   });
 
   useEffect(() => {

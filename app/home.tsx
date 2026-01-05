@@ -610,7 +610,7 @@ export default function Home() {
                 <Text
                   allowFontScaling={false}
                   style={pm}
-                  className={`ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                  className={`ml-1 font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                   {timeDisplay.suffix}
                 </Text>
               )}
@@ -730,7 +730,7 @@ export default function Home() {
             <Text
               allowFontScaling={false}
               style={leave}
-              className={`mb-10 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
+              className={`mb-10 text-[12px] font-light  ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
               Leave it! Do something mindful in real world.
             </Text>
 
