@@ -22,6 +22,18 @@ export default function Layout() {
     'RubikMoonrocks-Regular': require('../assets/fonts/RubikMoonrocks-Regular.ttf'),
     'NovaFlat-Regular': require('../assets/fonts/NovaFlat-Regular.ttf'),
     'Codystar-Regular': require('../assets/fonts/Codystar-Regular.ttf'),
+    'LeagueGothic-Regular': require('../assets/fonts/LeagueGothic-Regular.ttf'),
+    'GreatVibes-Regular': require('../assets/fonts/GreatVibes-Regular.ttf'),
+    'FingerPaint-Regular': require('../assets/fonts/FingerPaint-Regular.ttf'),
+    'GajrajOne-Regular': require('../assets/fonts/GajrajOne-Regular.ttf'),
+    'NovaRound-Regular': require('../assets/fonts/NovaRound-Regular.ttf'),
+    'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
+    'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
+    'Nunito-Light': require('../assets/fonts/Nunito-Light.ttf'),
+    'FredokaOne-Regular': require('../assets/fonts/FredokaOne-Regular.ttf'),
+    'Comfortaa-Regular': require('../assets/fonts/Comfortaa-Regular.ttf'),
+    'Comfortaa-Bold': require('../assets/fonts/Comfortaa-Bold.ttf'),
+    'Comfortaa-Light': require('../assets/fonts/Comfortaa-Light.ttf'),
   });
 
   useEffect(() => {

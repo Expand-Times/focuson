@@ -756,7 +756,7 @@ export default function Home() {
                   <Text
                     allowFontScaling={false}
                     style={dialer}
-                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
+                    className={`font-regula text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Dialer
                   </Text>
                 )}
