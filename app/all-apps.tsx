@@ -163,7 +163,7 @@ export default function AllApps() {
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-    const {searchbg,searchi,appdu,applist,alphaside,applistbg,header, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert ,open,togglei, appC, applistCbg} = fontConfig || ({} as any);
+    const {searchbg,searchi,appdu,applist,alphaside,applistbg,header, select, numberbg, number, toggle, when, remind, quit, modalbg ,quitbg,bordert ,open,togglei, appC, applistCbg,allappt,tikbg} = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
   const [apps, setApps] = useState<AppItem[]>([]);
@@ -738,7 +738,7 @@ export default function AllApps() {
             {isSelectMode && (
               <TouchableOpacity
                 onPress={handleSaveSelection}
-                 style={searchbg}
+                 style={tikbg}
                 className={`ml-3 rounded-full p-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
               </TouchableOpacity>
@@ -749,8 +749,8 @@ export default function AllApps() {
           <View className="mb-4 flex-row items-center justify-between px-1">
             <Text
               allowFontScaling={false}
-              style={applist}
-              className={`text-[18px] ${applist ? '' : 'font-bold'} underline decoration-2 underline-offset-4 ${
+              style={allappt}
+              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline decoration-2 underline-offset-4 ${
                 isImageWallpaper
                   ? 'text-white decoration-white'
                   : isDarkMode
