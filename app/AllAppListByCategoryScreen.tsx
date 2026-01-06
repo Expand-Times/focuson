@@ -30,7 +30,6 @@ import * as IntentLauncher from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
-
 type Category = {
   title: string;
   data: AppItem[];
@@ -60,8 +59,24 @@ export default function AllAppListByCategoryScreen() {
   const [showAppRenamer, setShowAppRenamer] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
   // wallpaperFontConfig
- const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { searchCbg, searchCi, appC, appCn,appCi, applistC, applistCbg, applistCdu,modalbg,open,numberbg,number } = fontConfig || ({} as any);
+  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+  const {
+    searchCbg,
+    searchCi,
+    appC,
+    appCn,
+    appCi,
+    applistC,
+    applistCbg,
+    applistCdu,
+    modalbg,
+    open,
+    numberbg,
+    number,
+    allappt,
+    appi,
+    searchCt
+  } = fontConfig || ({} as any);
 
   useEffect(() => {
     loadRenamedCategories();
@@ -341,422 +356,553 @@ export default function AllAppListByCategoryScreen() {
         <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />
       )}
       <GestureDetector gesture={leftSwipeGesture}>
-        <KeyboardAvoidingView 
-          style={{ flex: 1 }} 
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        >
-        <View
-          className="flex-1 pt-12"
-          style={{
-            backgroundColor: wallpaper
-              ? typeof wallpaper === 'string'
-                ? wallpaper
-                : 'transparent'
-              : isDarkMode
-                ? '#0D121A'
-                : '#EBF1F7',
-          }}>
-          <View className="flex-1 px-4">
-        {/* Search Bar */}
-        <View
-        style={searchCbg}
-          className={`mb-6 flex-row items-center rounded-xl border px-4 py-1  ${
-            isImageWallpaper
-              ? 'border-white/20 bg-black/30'
-              : isDarkMode
-                ? 'bg-[#131B27] border-[#212D41]'
-                : 'bg-white border-slate-100'
-          }`}>
-          <MaterialCommunityIcons
-            style={searchCi}
-            name="magnify"
-            size={20}
-            color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC'}
-          />
-          <TextInput
-            style={searchCi}
-            className={`ml-3 flex-1 text-[16px] ${
-              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
-            }`}
-            placeholder="Search app here"
-            placeholderTextColor={
-             searchCi?.color || (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
-            }
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-            cursorColor={searchCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')}
-            autoFocus={true}
-            showSoftInputOnFocus={isKeyboardEnabled}
-            onTouchStart={() => setIsKeyboardEnabled(true)}
-          />
-        </View>
-
-        {/* Header */}
-        <View className="mb-4 flex-row items-center justify-between">
-          <Text
-            allowFontScaling={false}
-            style={appC}
-            className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${
-              isImageWallpaper
-                ? 'text-white decoration-white'
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          <View
+            className="flex-1 pt-12"
+            style={{
+              backgroundColor: wallpaper
+                ? typeof wallpaper === 'string'
+                  ? wallpaper
+                  : 'transparent'
                 : isDarkMode
-                  ? 'text-[#DBDFE4] decoration-slate-400'
-                  : 'text-[#142C4D] decoration-[#142C4D]'
-            }`}>
-            App Category
-          </Text>
-          <View className="flex-row items-center gap-4">
-            <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
+                  ? '#0D121A'
+                  : '#EBF1F7',
+            }}>
+            <View className="flex-1 px-4">
+              {/* Search Bar */}
               <View
-                style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
-                className={`rounded-lg border border-2 ${
+                style={searchCbg}
+                className={`mb-6 flex-row items-center rounded-xl border px-4 py-1  ${
                   isImageWallpaper
-                    ? 'border-white/50'
+                    ? 'border-white/20 bg-black/30'
                     : isDarkMode
-                      ? 'border-[#728099]'
-                      : 'border-[#858E9D]'
+                      ? 'border-[#212D41] bg-[#131B27]'
+                      : 'border-slate-100 bg-white'
                 }`}>
                 <MaterialCommunityIcons
-                  name="plus"
-                  size={22}
-                  color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                  style={searchCi}
+                  name="magnify"
+                  size={20}
+                  color={isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC'}
+                />
+                <TextInput
+                  style={searchCt}
+                  className={`ml-3 flex-1 text-[16px] ${
+                    isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
+                  }`}
+                  placeholder="Search app here"
+                  placeholderTextColor={
+                    searchCt?.color ||
+                    (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
+                  }
+                  value={searchQuery}
+                  onChangeText={setSearchQuery}
+                  cursorColor={
+                    searchCt?.color ||
+                    (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')
+                  }
+                  autoFocus={true}
+                  showSoftInputOnFocus={isKeyboardEnabled}
+                  onTouchStart={() => setIsKeyboardEnabled(true)}
                 />
               </View>
-            </TouchableOpacity>
-            <Link href="/settingScreen" asChild>
-              <TouchableOpacity>
-                <View
-                  style={[appC, {borderColor: appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
-                  className={`rounded-lg border border-2 ${
+
+              {/* Header */}
+              <View className="mb-4 flex-row items-center justify-between">
+                <Text
+                  allowFontScaling={false}
+                  style={appC}
+                  className={`text-[18px] font-bold underline decoration-2 underline-offset-4 ${
                     isImageWallpaper
-                      ? 'border-white/50'
+                      ? 'text-white decoration-white'
                       : isDarkMode
-                        ? 'border-[#858E9D]'
-                        : 'border-[#858E9D]'
+                        ? 'text-[#DBDFE4] decoration-slate-400'
+                        : 'text-[#142C4D] decoration-[#142C4D]'
                   }`}>
-                  <MaterialCommunityIcons
-                    name="tune-variant"
-                    size={22}
-                    color={appC?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
-                  />
-                </View>
-              </TouchableOpacity>
-            </Link>
-          </View>
-        </View>
-
-        <ScrollView
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingBottom: 40 }}>
-    
-          {filteredCategories.map((category, index) => {
-            const displayTitle = renamedCategories[category.title] || category.title;
-            const isEditing = editingCategory === category.title;
-
-            return (
-              <View key={index} className="">
-                {/* Category Header */}
-                {isEditing ? (
-                  <View className="mb-2 flex-row items-center justify-end">
-                    <TextInput
-                      value={tempCategoryName}
-                      onChangeText={setTempCategoryName}
-                      className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${
-                        isImageWallpaper
-                          ? 'text-white border-white/50'
-                          : isDarkMode
-                            ? 'text-slate-300 border-slate-500'
-                            : 'text-slate-600 border-slate-400'
-                      }`}
-                      autoFocus
-                      onSubmitEditing={handleSaveCategoryName}
-                    />
-                    <TouchableOpacity onPress={handleSaveCategoryName} className="mr-2">
-                      <MaterialCommunityIcons name="check" size={20} color="#4ADE80" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={handleCancelEditing}>
-                      <MaterialCommunityIcons name="close" size={20} color="#F87171" />
-                    </TouchableOpacity>
-                  </View>
-                ) : (
-                  <View className="mb-2 flex-row items-center justify-end">
-                    <Text
-                      allowFontScaling={false}
-                      style={appCn}
-                      className={`mr-2 text-[16px] ${
-                        isImageWallpaper
-                          ? 'text-white'
-                          : isDarkMode
-                            ? 'text-[#728099]'
-                            : 'text-[#142C4D]'
-                      }`}>
-                      {displayTitle}
-                    </Text>
-                    <TouchableOpacity
-                      style={[appCi, {borderColor: appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}]}
-                      className={`border-b ${
+                  App Category
+                </Text>
+                <View className="flex-row items-center gap-4">
+                  <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
+                    <View
+                      style={[
+                        appi,
+                        {
+                          borderColor:
+                            appi?.color ||
+                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                        },
+                      ]}
+                      className={`rounded-lg border border-2 ${
                         isImageWallpaper
                           ? 'border-white/50'
                           : isDarkMode
-                            ? 'border-slate-400'
+                            ? 'border-[#728099]'
                             : 'border-[#858E9D]'
-                      }`}
-                      onPress={() => handleStartEditing(category.title, displayTitle)}>
+                      }`}>
                       <MaterialCommunityIcons
-                        name="pencil-outline"
-                        size={16}
-                        color={appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
-                      />
-                    </TouchableOpacity>
-                  </View>
-                )}
-
-                {/* App List */}
-                <View className="space-y-2">
-                  {category.data.map((app) => (
-                    <TouchableOpacity
-                      key={app.packageName}
-                      style={applistCbg}
-                      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-                        isImageWallpaper
-                          ? 'bg-black/40'
-                          : isDarkMode
-                            ? 'bg-[#131B27]'
-                            : 'bg-[#CEDDF2]'
-                      }`}
-                      onPress={() => handleLaunchApp(app.packageName)}
-                      onLongPress={() => handleLongPress(app)}>
-                      <Text
-                        allowFontScaling={false}
-                        style={[applistC, { maxWidth: '60%' }]}
-                        className={`text-[16px] font-regular ${
-                          isImageWallpaper
-                            ? 'text-white'
-                            : isDarkMode
-                              ? 'text-[#DBDFE5]'
-                              : 'text-[#142C4D]'
-                        }`}
-                        numberOfLines={1}>
-                        {app.label}
-                      </Text>
-                      <View className="flex-row items-center">
-                        <Text
-                          allowFontScaling={false}
-                          style={applistCdu}
-                          className={`text-[12px] font-regular opacity-90 ${
-                            isImageWallpaper
-                              ? 'text-slate-300'
-                              : isDarkMode
-                                ? 'text-[#728099]'
-                                : 'text-[#4D6D99]'
-                          }`}>
-                          TO: {app.launchCount || 0} Times || DU: {formatUsageTime(app.usageTime)}
-                        </Text>
-                      </View>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </View>
-            );
-          })}
-
-          {filteredCategories.length === 0 && (
-            <View className="mt-10 items-center">
-              <Text className="text-slate-400">No apps found</Text>
-            </View>
-          )}
-        </ScrollView>
-      </View>
-
-      {/* App Options Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <TouchableWithoutFeedback onPress={closeModal}>
-          <View className="flex-1 items-center justify-center bg-black/50">
-            <TouchableWithoutFeedback>
-              <View style={modalbg} className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
-                {selectedApp && (
-                  <>
-                    <Text allowFontScaling={false} style={open} className={`mb-6 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-                      {selectedApp.label} Options
-                    </Text>
-
-                    {/* App Icon */}
-                    <View className="mb-8 rounded-full p-4">
-                      <Image
-                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                        className="h-16 w-16"
+                        name="plus"
+                        size={22}
+                        color={
+                          appi?.color ||
+                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
+                        }
                       />
                     </View>
-
-                    {/* Options Grid */}
-                    {!showCategorySelector && !showAppRenamer ? (
-                      <View className="w-full flex-row flex-wrap justify-between gap-y-4">
-                        {/* Move to */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={() => setShowCategorySelector(true)}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Move to</Text>
-                        </TouchableOpacity>
-
-                        {/* Copy to */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={() => console.log('Copy to')}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Copy to</Text>
-                        </TouchableOpacity>
-
-                        {/* Block */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={() => console.log('Block')}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Block</Text>
-                        </TouchableOpacity>
-
-                        {/* Rename */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={startAppRenaming}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Rename</Text>
-                        </TouchableOpacity>
-
-                        {/* App Info */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={handleAppInfo}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>App Info</Text>
-                        </TouchableOpacity>
-
-                        {/* Uninstall */}
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                          onPress={handleUninstall}>
-                          <Text style={number} allowFontScaling={false} className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>Uninstall</Text>
-                        </TouchableOpacity>
-                      </View>
-                    ) : showAppRenamer ? (
-                      <View className="w-full">
-                        <Text style={appC} allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Rename App:</Text>
-                        <TextInput
-                          value={tempAppName}
-                          onChangeText={setTempAppName}
-                          style={[appC, applistCbg]}
-                          className={`mb-4 rounded-lg border px-4 py-3 text-lg ${
-                            isImageWallpaper
-                              ? 'border-white/20 text-white'
-                              : isDarkMode
-                                ? 'bg-slate-800 border-slate-600 text-slate-300'
-                                : 'bg-slate-50 border-slate-300 text-slate-700'
-                          }`}
-                          selectTextOnFocus
+                  </TouchableOpacity>
+                  <Link href="/settingScreen" asChild>
+                    <TouchableOpacity>
+                      <View
+                        style={[
+                          appi,
+                          {
+                            borderColor:
+                              appi?.color ||
+                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                          },
+                        ]}
+                        className={`rounded-lg border border-2 ${
+                          isImageWallpaper
+                            ? 'border-white/50'
+                            : isDarkMode
+                              ? 'border-[#858E9D]'
+                              : 'border-[#858E9D]'
+                        }`}>
+                        <MaterialCommunityIcons
+                          name="tune-variant"
+                          size={22}
+                          color={
+                            appi?.color ||
+                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
+                          }
                         />
-                        <View className="flex-row gap-3">
+                      </View>
+                    </TouchableOpacity>
+                  </Link>
+                </View>
+              </View>
+
+              <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={{ paddingBottom: 40 }}>
+                {filteredCategories.map((category, index) => {
+                  const displayTitle = renamedCategories[category.title] || category.title;
+                  const isEditing = editingCategory === category.title;
+
+                  return (
+                    <View key={index} className="">
+                      {/* Category Header */}
+                      {isEditing ? (
+                        <View className="mb-2 flex-row items-center justify-end">
+                          <TextInput
+                            value={tempCategoryName}
+                            onChangeText={setTempCategoryName}
+                            className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${
+                              isImageWallpaper
+                                ? 'border-white/50 text-white'
+                                : isDarkMode
+                                  ? 'border-slate-500 text-slate-300'
+                                  : 'border-slate-400 text-slate-600'
+                            }`}
+                            autoFocus
+                            onSubmitEditing={handleSaveCategoryName}
+                          />
+                          <TouchableOpacity onPress={handleSaveCategoryName} className="mr-2">
+                            <MaterialCommunityIcons name="check" size={20} color="#4ADE80" />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={handleCancelEditing}>
+                            <MaterialCommunityIcons name="close" size={20} color="#F87171" />
+                          </TouchableOpacity>
+                        </View>
+                      ) : (
+                        <View className="mb-2 flex-row items-center justify-end">
+                          <Text
+                            allowFontScaling={false}
+                            style={appCn}
+                            className={`mr-2 text-[16px] ${
+                              isImageWallpaper
+                                ? 'text-white'
+                                : isDarkMode
+                                  ? 'text-[#728099]'
+                                  : 'text-[#142C4D]'
+                            }`}>
+                            {displayTitle}
+                          </Text>
+                          <TouchableOpacity
+                            style={[
+                              appCi,
+                              {
+                                borderColor:
+                                  appCi?.color ||
+                                  (isImageWallpaper
+                                    ? '#E2E8F0'
+                                    : isDarkMode
+                                      ? '#728099'
+                                      : '#858E9D'),
+                              },
+                            ]}
+                            className={`border-b ${
+                              isImageWallpaper
+                                ? 'border-white/50'
+                                : isDarkMode
+                                  ? 'border-slate-400'
+                                  : 'border-[#858E9D]'
+                            }`}
+                            onPress={() => handleStartEditing(category.title, displayTitle)}>
+                            <MaterialCommunityIcons
+                              name="pencil-outline"
+                              size={16}
+                              color={
+                                appCi?.color ||
+                                (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
+                              }
+                            />
+                          </TouchableOpacity>
+                        </View>
+                      )}
+
+                      {/* App List */}
+                      <View className="space-y-2">
+                        {category.data.map((app) => (
+                          <TouchableOpacity
+                            key={app.packageName}
+                            style={applistCbg}
+                            className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
+                              isImageWallpaper
+                                ? 'bg-black/40'
+                                : isDarkMode
+                                  ? 'bg-[#131B27]'
+                                  : 'bg-[#CEDDF2]'
+                            }`}
+                            onPress={() => handleLaunchApp(app.packageName)}
+                            onLongPress={() => handleLongPress(app)}>
+                            <View className="flex-row items-center flex-1 mr-2">
+                              {wallpaperIndex === 6 && (
+                                <View
+                                  style={{
+                                    width: 6,
+                                    height: 6,
+                                    borderRadius: 3,
+                                    backgroundColor: '#132C4D',
+                                    marginRight: 8,
+                                    opacity: 0.8,
+                                  }}
+                                />
+                              )}
+                              <Text
+                                allowFontScaling={false}
+                                style={[applistC, { maxWidth: '90%' }]}
+                                className={`font-regular text-[16px] ${
+                                  isImageWallpaper
+                                    ? 'text-white'
+                                    : isDarkMode
+                                      ? 'text-[#DBDFE5]'
+                                      : 'text-[#142C4D]'
+                                }`}
+                                numberOfLines={1}>
+                                {(appRenames[app.packageName] || app.label).length > 15
+                                  ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
+                                  : appRenames[app.packageName] || app.label}
+                              </Text>
+                            </View>
+                            <View className="flex-row items-center">
+                              <Text
+                                allowFontScaling={false}
+                                style={applistCdu}
+                                className={`font-regular text-[12px] opacity-90 ${
+                                  isImageWallpaper
+                                    ? 'text-slate-300'
+                                    : isDarkMode
+                                      ? 'text-[#728099]'
+                                      : 'text-[#4D6D99]'
+                                }`}>
+                                TO: {app.launchCount || 0} Times || DU:{' '}
+                                {formatUsageTime(app.usageTime)}
+                              </Text>
+                            </View>
+                          </TouchableOpacity>
+                        ))}
+                      </View>
+                    </View>
+                  );
+                })}
+
+                {filteredCategories.length === 0 && (
+                  <View className="mt-10 items-center">
+                    <Text className="text-slate-400">No apps found</Text>
+                  </View>
+                )}
+              </ScrollView>
+            </View>
+
+            {/* App Options Modal */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={closeModal}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={closeModal}>
+                  <View className="flex-1 items-center justify-center bg-black/50">
+                    <TouchableWithoutFeedback>
+                      <View
+                        style={modalbg}
+                        className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
+                        {selectedApp && (
+                          <>
+                            <Text
+                              allowFontScaling={false}
+                              style={open}
+                              className={`mb-6 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                              {selectedApp.label} Options
+                            </Text>
+
+                            {/* App Icon */}
+                            <View className="mb-8 rounded-full p-4">
+                              <Image
+                                source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                                className="h-16 w-16"
+                              />
+                            </View>
+
+                            {/* Options Grid */}
+                            {!showCategorySelector && !showAppRenamer ? (
+                              <View className="w-full flex-row flex-wrap justify-between gap-y-4">
+                                {/* Move to */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={() => setShowCategorySelector(true)}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    Move to
+                                  </Text>
+                                </TouchableOpacity>
+
+                                {/* Copy to */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={() => console.log('Copy to')}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    Copy to
+                                  </Text>
+                                </TouchableOpacity>
+
+                                {/* Block */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={() => console.log('Block')}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    Block
+                                  </Text>
+                                </TouchableOpacity>
+
+                                {/* Rename */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={startAppRenaming}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    Rename
+                                  </Text>
+                                </TouchableOpacity>
+
+                                {/* App Info */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={handleAppInfo}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    App Info
+                                  </Text>
+                                </TouchableOpacity>
+
+                                {/* Uninstall */}
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                  onPress={handleUninstall}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                    Uninstall
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            ) : showAppRenamer ? (
+                              <View className="w-full">
+                                <Text
+                                  style={appC}
+                                  allowFontScaling={false}
+                                  className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                  Rename App:
+                                </Text>
+                                <TextInput
+                                  value={tempAppName}
+                                  onChangeText={setTempAppName}
+                                  style={[appC, applistCbg]}
+                                  className={`mb-4 rounded-lg border px-4 py-3 text-lg ${
+                                    isImageWallpaper
+                                      ? 'border-white/20 text-white'
+                                      : isDarkMode
+                                        ? 'border-slate-600 bg-slate-800 text-slate-300'
+                                        : 'border-slate-300 bg-slate-50 text-slate-700'
+                                  }`}
+                                  selectTextOnFocus
+                                />
+                                <View className="flex-row gap-3">
+                                  <TouchableOpacity
+                                    className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                                    onPress={() => setShowAppRenamer(false)}>
+                                    <Text
+                                      allowFontScaling={false}
+                                      className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                                      Cancel
+                                    </Text>
+                                  </TouchableOpacity>
+                                  <TouchableOpacity
+                                    className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
+                                    onPress={saveAppRename}>
+                                    <Text
+                                      allowFontScaling={false}
+                                      className="font-medium text-white">
+                                      Save
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </View>
+                            ) : (
+                              <View className="h-64 w-full">
+                                <Text
+                                  style={applistC}
+                                  allowFontScaling={false}
+                                  className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                                  Select Category:
+                                </Text>
+                                <ScrollView className="w-full flex-1">
+                                  {categories.map((cat, idx) => (
+                                    <TouchableOpacity
+                                      key={idx}
+                                      style={applistC}
+                                      className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
+                                      onPress={() => handleMoveApp(cat.title)}>
+                                      <Text
+                                        style={applistC}
+                                        allowFontScaling={false}
+                                        className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        {renamedCategories[cat.title] || cat.title}
+                                      </Text>
+                                    </TouchableOpacity>
+                                  ))}
+                                  {/* Always add 'Other' as an option if not present */}
+                                  {!categories.find((c) => c.title === 'Other') && (
+                                    <TouchableOpacity
+                                      className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
+                                      onPress={() => handleMoveApp('Other')}>
+                                      <Text
+                                        allowFontScaling={false}
+                                        className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                                        Other
+                                      </Text>
+                                    </TouchableOpacity>
+                                  )}
+                                </ScrollView>
+                                <TouchableOpacity
+                                  style={numberbg}
+                                  className={`mt-4 items-center rounded-lg py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                                  onPress={() => setShowCategorySelector(false)}>
+                                  <Text
+                                    style={number}
+                                    allowFontScaling={false}
+                                    className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>
+                                    Cancel
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            )}
+                          </>
+                        )}
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </KeyboardAvoidingView>
+            </Modal>
+
+            {/* Create Category Modal */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={createCategoryModalVisible}
+              onRequestClose={() => setCreateCategoryModalVisible(false)}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={() => setCreateCategoryModalVisible(false)}>
+                  <View className="flex-1 items-center justify-center bg-black/50">
+                    <TouchableWithoutFeedback>
+                      <View
+                        className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                        <Text
+                          allowFontScaling={false}
+                          className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                          Create New Category
+                        </Text>
+
+                        <TextInput
+                          value={newCategoryName}
+                          onChangeText={setNewCategoryName}
+                          placeholder="Category Name"
+                          placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                          className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-50 text-slate-700'}`}
+                          autoFocus
+                        />
+
+                        <View className="w-full flex-row gap-3">
                           <TouchableOpacity
                             className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                            onPress={() => setShowAppRenamer(false)}>
-                            <Text allowFontScaling={false} className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
+                            onPress={() => setCreateCategoryModalVisible(false)}>
+                            <Text
+                              allowFontScaling={false}
+                              className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                              Cancel
+                            </Text>
                           </TouchableOpacity>
                           <TouchableOpacity
                             className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
-                            onPress={saveAppRename}>
-                            <Text allowFontScaling={false} className="font-medium text-white">Save</Text>
+                            onPress={handleCreateCategory}>
+                            <Text allowFontScaling={false} className="font-medium text-white">
+                              Create
+                            </Text>
                           </TouchableOpacity>
                         </View>
                       </View>
-                    ) : (
-                      <View className="h-64 w-full">
-                        <Text style={applistC} allowFontScaling={false} className={`mb-2 font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>Select Category:</Text>
-                        <ScrollView className="w-full flex-1">
-                          {categories.map((cat, idx) => (
-                            <TouchableOpacity
-                              key={idx}
-                              style={applistC}
-                              className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
-                              onPress={() => handleMoveApp(cat.title)}>
-                              <Text style={applistC} allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                                {renamedCategories[cat.title] || cat.title}
-                              </Text>
-                            </TouchableOpacity>
-                          ))}
-                          {/* Always add 'Other' as an option if not present */}
-                          {!categories.find((c) => c.title === 'Other') && (
-                            <TouchableOpacity
-                              className={`border-b py-3 ${isDarkMode ? 'border-slate-700' : 'border-slate-100'}`}
-                              onPress={() => handleMoveApp('Other')}>
-                              <Text allowFontScaling={false} className={`text-lg ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>Other</Text>
-                            </TouchableOpacity>
-                          )}
-                        </ScrollView>
-                        <TouchableOpacity
-                          style={numberbg}
-                          className={`mt-4 items-center rounded-lg py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                          onPress={() => setShowCategorySelector(false)}>
-                          <Text style={number} allowFontScaling={false} className={isDarkMode ? 'text-slate-300' : 'text-slate-600'}>Cancel</Text>
-                        </TouchableOpacity>
-                      </View>
-                    )}
-                  </>
-                )}
-              </View>
-            </TouchableWithoutFeedback>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </KeyboardAvoidingView>
+            </Modal>
           </View>
-        </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
-      </Modal>
-
-      {/* Create Category Modal */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={createCategoryModalVisible}
-        onRequestClose={() => setCreateCategoryModalVisible(false)}>
-        <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
-        <TouchableWithoutFeedback onPress={() => setCreateCategoryModalVisible(false)}>
-          <View className="flex-1 items-center justify-center bg-black/50">
-            <TouchableWithoutFeedback>
-              <View className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <Text allowFontScaling={false} className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
-                  Create New Category
-                </Text>
-
-                <TextInput
-                  value={newCategoryName}
-                  onChangeText={setNewCategoryName}
-                  placeholder="Category Name"
-                  placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
-                  className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'bg-slate-800 border-slate-600 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'}`}
-                  autoFocus
-                />
-
-                <View className="w-full flex-row gap-3">
-                  <TouchableOpacity
-                    className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                    onPress={() => setCreateCategoryModalVisible(false)}>
-                    <Text allowFontScaling={false} className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>Cancel</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
-                    onPress={handleCreateCategory}>
-                    <Text allowFontScaling={false} className="font-medium text-white">Create</Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </TouchableWithoutFeedback>
-          </View>
-        </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
-      </Modal>
-        </View>
         </KeyboardAvoidingView>
       </GestureDetector>
     </GestureHandlerRootView>

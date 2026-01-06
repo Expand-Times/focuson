@@ -567,7 +567,7 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert} = fontConfig || ({} as any);
+  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot} = fontConfig || ({} as any);
   
 
   return (
@@ -648,22 +648,75 @@ export default function Home() {
           {/* Main Actions */}
           <View className="w-full items-center px-4">
             {/* Render Home Apps */}
-            {homeApps.map((app) => (
-              <TouchableOpacity
-                key={app.packageName}
-                className={`mb-4 w-full items-center py-2 `}
-                onPress={() => {
-                  setSelectedApp(app);
-                  setModalVisible(true);
-                }}>
-                <Text
-                  allowFontScaling={false}
-                  style={home}
-                  className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                  {appRenames[app.packageName] || app.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
+            {wallpaperIndex === 6 ? (
+              <View className="w-full relative">
+                {/* Vertical Line */}
+                <View
+                  style={[{
+                    position: 'absolute',
+                    left: '15%',
+                    marginLeft: -0.75,
+                    top: 8,
+                    bottom: 8,
+                    width: 1.5,
+                    backgroundColor: '#4C6C99',
+                    opacity: 0.8,
+                  },dot]}
+                />
+
+                {homeApps.map((app) => (
+                  <View key={app.packageName} className="w-full flex-row items-center mb-4 py-2">
+                    {/* Dot container (Gutter) */}
+                    <View style={{ width: '30%', alignItems: 'center', justifyContent: 'center' }}>
+                      <View
+                        style={[{
+                          width: 9,
+                          height: 9,
+                          borderRadius: 4.5,
+                          backgroundColor: '#4C6C99',
+                          zIndex: 10,
+                        }, dot]}
+                      />
+                    </View>
+
+                    <TouchableOpacity
+                      className="flex-1 items-start"
+                      onPress={() => {
+                        setSelectedApp(app);
+                        setModalVisible(true);
+                      }}>
+                      <Text
+                        allowFontScaling={false}
+                        style={home}
+                        className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                        {(appRenames[app.packageName] || app.label).length > 15
+                          ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
+                          : appRenames[app.packageName] || app.label}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                ))}
+              </View>
+            ) : (
+              homeApps.map((app) => (
+                <TouchableOpacity
+                  key={app.packageName}
+                  className={`mb-4 w-full items-center py-2 `}
+                  onPress={() => {
+                    setSelectedApp(app);
+                    setModalVisible(true);
+                  }}>
+                  <Text
+                    allowFontScaling={false}
+                    style={home}
+                    className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                    {(appRenames[app.packageName] || app.label).length > 15
+                      ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
+                      : appRenames[app.packageName] || app.label}
+                  </Text>
+                </TouchableOpacity>
+              ))
+            )}
 
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
