@@ -598,7 +598,7 @@ export default function Home() {
           <Stack.Screen options={{ headerShown: false }} />
 
           {/* Header: Time, Date, Battery */}
-          <View className="mt-10 items-center">
+          <View className={`mt-10 ${wallpaperIndex === 3 ? 'items-start' : 'items-center'}`}>
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}
@@ -646,15 +646,15 @@ export default function Home() {
           </View>
 
           {/* Main Actions */}
-          <View className="w-full items-center px-4">
+          <View className="w-full px-4">
             {/* Render Home Apps */}
             {wallpaperIndex === 6 ? (
-              <View className="w-full relative">
+              <View className="w-full relative ">
                 {/* Vertical Line */}
                 <View
                   style={[{
                     position: 'absolute',
-                    left: '15%',
+                    left: '50%',
                     marginLeft: -0.75,
                     top: 8,
                     bottom: 8,
@@ -665,9 +665,9 @@ export default function Home() {
                 />
 
                 {homeApps.map((app) => (
-                  <View key={app.packageName} className="w-full flex-row items-center mb-4 py-2">
+                  <View key={app.packageName} className="w-full flex-row items-center mb-4 py-2 relative">
                     {/* Dot container (Gutter) */}
-                    <View style={{ width: '30%', alignItems: 'center', justifyContent: 'center' }}>
+                    <View style={{ position: 'absolute', left: '50%', marginLeft: -4.5, zIndex: 10 }}>
                       <View
                         style={[{
                           width: 9,
@@ -680,7 +680,7 @@ export default function Home() {
                     </View>
 
                     <TouchableOpacity
-                      className="flex-1 items-start"
+                      className="w-[40%] ml-auto items-start pl-6"
                       onPress={() => {
                         setSelectedApp(app);
                         setModalVisible(true);
@@ -701,7 +701,7 @@ export default function Home() {
               homeApps.map((app) => (
                 <TouchableOpacity
                   key={app.packageName}
-                  className={`mb-4 w-full items-center py-2 `}
+                  className={`mb-4 w-full  ${wallpaperIndex === 11 ? 'items-start' : 'items-center'} py-2 `}
                   onPress={() => {
                     setSelectedApp(app);
                     setModalVisible(true);
@@ -720,7 +720,7 @@ export default function Home() {
 
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
-              <TouchableOpacity className="mt-4 items-center">
+              <TouchableOpacity className={`mt-4 w-full ${wallpaperIndex === 11 ? 'items-start' : 'items-center'}`}>
                
                   <MaterialCommunityIcons
                     name="plus-circle-outline"
@@ -740,7 +740,7 @@ export default function Home() {
                   allowFontScaling={false}
                   style={don}
                   className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                  Don't add unnecessary addictive app!
+                  Don't add unnecessary{wallpaperIndex === 11 ? '\n' : ''}addictive app!
                 </Text>
               </TouchableOpacity>
             </Link>

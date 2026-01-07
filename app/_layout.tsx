@@ -37,6 +37,8 @@ export default function Layout() {
     'RubikBurned-Regular': require('../assets/fonts/RubikBurned-Regular.ttf'),
     'RubikScribble-Regular': require('../assets/fonts/RubikScribble-Regular.ttf'),
     'Caprasimo-Regular': require('../assets/fonts/Caprasimo-Regular.ttf'),
+    'Oxanium-Regular': require('../assets/fonts/Oxanium-Regular.ttf'),
+    'Gugi-Regular': require('../assets/fonts/Gugi-Regular.ttf'),
   });
 
   useEffect(() => {

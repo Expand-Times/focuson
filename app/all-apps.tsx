@@ -190,6 +190,7 @@ export default function AllApps() {
     allappi,
     searchCt,
     searchCi,
+    wallbg,
   } = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
@@ -719,7 +720,7 @@ export default function AllApps() {
       <GestureDetector gesture={rightSwipeGesture}>
         <View
           className="flex-1 px-4 pt-12"
-          style={{
+          style={[{
             backgroundColor: wallpaper
               ? typeof wallpaper === 'string'
                 ? wallpaper
@@ -727,7 +728,7 @@ export default function AllApps() {
               : isDarkMode
                 ? '#0D121A'
                 : '#EBF0F7',
-          }}>
+          }, wallbg]}>
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center ">
             {/* Back Button (small) */}

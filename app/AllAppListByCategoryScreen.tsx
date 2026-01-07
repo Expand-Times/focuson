@@ -75,7 +75,8 @@ export default function AllAppListByCategoryScreen() {
     number,
     allappt,
     appi,
-    searchCt
+    searchCt,
+    wallbg,
   } = fontConfig || ({} as any);
 
   useEffect(() => {
@@ -361,7 +362,7 @@ export default function AllAppListByCategoryScreen() {
           behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
           <View
             className="flex-1 pt-12"
-            style={{
+            style={[{
               backgroundColor: wallpaper
                 ? typeof wallpaper === 'string'
                   ? wallpaper
@@ -369,7 +370,7 @@ export default function AllAppListByCategoryScreen() {
                 : isDarkMode
                   ? '#0D121A'
                   : '#EBF1F7',
-            }}>
+            },wallbg]}>
             <View className="flex-1 px-4">
               {/* Search Bar */}
               <View
