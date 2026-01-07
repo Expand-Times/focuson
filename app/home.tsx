@@ -598,7 +598,7 @@ export default function Home() {
           <Stack.Screen options={{ headerShown: false }} />
 
           {/* Header: Time, Date, Battery */}
-          <View className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+          <View className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}

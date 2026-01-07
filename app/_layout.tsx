@@ -43,6 +43,11 @@ export default function Layout() {
     'Shizuru-Regular': require('../assets/fonts/Shizuru-Regular.ttf'),
     'MontserratAlternates-Regular': require('../assets/fonts/MontserratAlternates-Regular.ttf'),
     'UnicaOne-Regular': require('../assets/fonts/UnicaOne-Regular.ttf'),
+    'Goldman-Regular': require('../assets/fonts/Goldman-Regular.ttf'),
+    'Goldman-Bold': require('../assets/fonts/Goldman-Bold.ttf'),
+    'LobsterTwo-Regular': require('../assets/fonts/LobsterTwo-Regular.ttf'),
+    'LobsterTwo-Bold': require('../assets/fonts/LobsterTwo-Bold.ttf'),
+    'Sacramento-Regular': require('../assets/fonts/Sacramento-Regular.ttf'),
   });
 
   useEffect(() => {
