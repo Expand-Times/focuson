@@ -35,6 +35,7 @@ export default function Layout() {
     'Comfortaa-Bold': require('../assets/fonts/Comfortaa-Bold.ttf'),
     'Comfortaa-Light': require('../assets/fonts/Comfortaa-Light.ttf'),
     'RubikBurned-Regular': require('../assets/fonts/RubikBurned-Regular.ttf'),
+    'RubikScribble-Regular': require('../assets/fonts/RubikScribble-Regular.ttf'),
   });
 
   useEffect(() => {

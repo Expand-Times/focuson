@@ -16,6 +16,7 @@ export const AVAILABLE_WALLPAPERS: WallpaperItem[] = [
   require('../../assets/Wallpaper/7.jpg'),
   require('../../assets/Wallpaper/8.jpg'),
   require('../../assets/Wallpaper/9.jpg'),
+  require('../../assets/Wallpaper/10.jpg'),
   require('../../assets/Wallpaper/11.jpg'),
   require('../../assets/Wallpaper/12.jpg'),
   require('../../assets/Wallpaper/13.jpg'),
