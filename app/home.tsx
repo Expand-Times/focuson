@@ -567,7 +567,7 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot} = fontConfig || ({} as any);
+  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot,camera} = fontConfig || ({} as any);
   
 
   return (
@@ -598,7 +598,7 @@ export default function Home() {
           <Stack.Screen options={{ headerShown: false }} />
 
           {/* Header: Time, Date, Battery */}
-          <View className={`mt-10 ${wallpaperIndex === 3 ? 'items-start' : 'items-center'}`}>
+          <View className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
             <View className="flex-row items-baseline">
               <Text
                 allowFontScaling={false}
@@ -701,7 +701,7 @@ export default function Home() {
               homeApps.map((app) => (
                 <TouchableOpacity
                   key={app.packageName}
-                  className={`mb-4 w-full  ${wallpaperIndex === 11 ? 'items-start' : 'items-center'} py-2 `}
+                  className={`mb-4 w-full  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'} py-2 `}
                   onPress={() => {
                     setSelectedApp(app);
                     setModalVisible(true);
@@ -720,7 +720,7 @@ export default function Home() {
 
             {/* Add Icon */}
             <Link href="/all-apps?mode=select" asChild>
-              <TouchableOpacity className={`mt-4 w-full ${wallpaperIndex === 11 ? 'items-start' : 'items-center'}`}>
+              <TouchableOpacity className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
                
                   <MaterialCommunityIcons
                     name="plus-circle-outline"
@@ -740,51 +740,53 @@ export default function Home() {
                   allowFontScaling={false}
                   style={don}
                   className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                  Don't add unnecessary{wallpaperIndex === 11 ? '\n' : ''}addictive app!
+                  Don't add unnecessary {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
                 </Text>
               </TouchableOpacity>
             </Link>
           </View>
 
           {/* Footer Info */}
-          <View className="w-full items-center">
-            <View className="mb-2 flex-row items-center gap-4">
+          <View className={`w-full ${wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+            <View className={`mb-2 gap-4 ${wallpaperIndex === 15 ? 'flex-col items-start' : 'flex-row items-center'}`}>
+            <Text
+              allowFontScaling={false}
+              style={footer}
+              className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+              Today Unlock:{' '}
               <Text
                 allowFontScaling={false}
                 style={footer}
-                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                Today Unlock:{' '}
-                <Text
-                  allowFontScaling={false}
-                  style={footer}
-                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                  {todayStats.unlockCount}
-                </Text>
+                className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                {todayStats.unlockCount}
               </Text>
+            </Text>
+            {wallpaperIndex !== 15 && (
               <Text
                 allowFontScaling={false}
                 style={footer}
                 className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                ||
+                || 
               </Text>
+            )}
+            <Text
+              allowFontScaling={false}
+              style={footer}
+              className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+              Today Use:{' '}
               <Text
                 allowFontScaling={false}
                 style={footer}
-                className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                Today Use:{' '}
-                <Text
-                  allowFontScaling={false}
-                  style={footer}
-                  className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                  {formatUsageTime(todayStats.totalUsageTime)}
-                </Text>
+                className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                {formatUsageTime(todayStats.totalUsageTime)}
               </Text>
-            </View>
+            </Text>
+          </View>
             <Text
               allowFontScaling={false}
               style={leave}
               className={`mb-10 text-[12px] font-light  ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
-              Leave it! Do something mindful in real world.
+              Leave it! Do something {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}mindful in real world.
             </Text>
 
             {/* Bottom Actions: Dialer & Camera */}
@@ -833,7 +835,7 @@ export default function Home() {
                 ) : (
                   <Text
                     allowFontScaling={false}
-                    style={dialer}
+                    style={wallpaperIndex === 15 ? camera : dialer}
                     className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
                     Camera
                   </Text>

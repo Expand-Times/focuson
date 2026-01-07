@@ -26,7 +26,7 @@ import { openPlayStoreForRating } from './lib/rateApp';
 import { Dimensions } from 'react-native';
 const { width } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const ITEM_SIZE = width * 0.05;
+const ITEM_SIZE = width * 0.047;
 const SIZE = width * 0.08;
 type ColorOptionProps = {
   color: string;

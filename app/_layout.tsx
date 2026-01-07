@@ -30,7 +30,7 @@ export default function Layout() {
     'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
     'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
     'Nunito-Light': require('../assets/fonts/Nunito-Light.ttf'),
-    'FredokaOne-Regular': require('../assets/fonts/FredokaOne-Regular.ttf'),
+    'FredokaOne': require('../assets/fonts/FredokaOne-Regular.ttf'),
     'Comfortaa-Regular': require('../assets/fonts/Comfortaa-Regular.ttf'),
     'Comfortaa-Bold': require('../assets/fonts/Comfortaa-Bold.ttf'),
     'Comfortaa-Light': require('../assets/fonts/Comfortaa-Light.ttf'),
@@ -39,6 +39,10 @@ export default function Layout() {
     'Caprasimo-Regular': require('../assets/fonts/Caprasimo-Regular.ttf'),
     'Oxanium-Regular': require('../assets/fonts/Oxanium-Regular.ttf'),
     'Gugi-Regular': require('../assets/fonts/Gugi-Regular.ttf'),
+    'PlaywriteUSModern-Regular': require('../assets/fonts/PlaywriteUSModern-Regular.ttf'),
+    'Shizuru-Regular': require('../assets/fonts/Shizuru-Regular.ttf'),
+    'MontserratAlternates-Regular': require('../assets/fonts/MontserratAlternates-Regular.ttf'),
+    'UnicaOne-Regular': require('../assets/fonts/UnicaOne-Regular.ttf'),
   });
 
   useEffect(() => {
