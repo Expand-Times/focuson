@@ -48,6 +48,9 @@ export default function Layout() {
     'LobsterTwo-Regular': require('../assets/fonts/LobsterTwo-Regular.ttf'),
     'LobsterTwo-Bold': require('../assets/fonts/LobsterTwo-Bold.ttf'),
     'Sacramento-Regular': require('../assets/fonts/Sacramento-Regular.ttf'),
+    'RobotoSlab-Regular': require('../assets/fonts/RobotoSlab-Regular.ttf'),
+    'CourierPrime-Regular': require('../assets/fonts/CourierPrime-Regular.ttf'),
+    'CourierPrime-Bold': require('../assets/fonts/CourierPrime-Bold.ttf'),
   });
 
   useEffect(() => {

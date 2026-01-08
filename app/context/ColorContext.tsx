@@ -23,7 +23,8 @@ export const AVAILABLE_WALLPAPERS: WallpaperItem[] = [
   require('../../assets/Wallpaper/14.jpg'),
   require('../../assets/Wallpaper/15.jpg'),
   require('../../assets/Wallpaper/16.jpg'),
-  
+  '#000000',
+  '#FFFFFF',
  
 ];
 

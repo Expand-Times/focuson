@@ -1032,7 +1032,7 @@ export default function SettingScreen() {
                   className={`font-regular mb-2 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                   Select
                 </Text>
-                <View className="mb-4 flex-row gap-1">
+                <View className="mb-4 flex-row gap-">
                   {AVAILABLE_WALLPAPERS.map((item, idx) => (
                     <TouchableOpacity
                       key={idx}
