@@ -24,7 +24,7 @@ export default function IntroEight() {
           <View className="mt-[15%] items-center">
             <Text
               allowFontScaling={false}
-              className="mb-4 text-center text-[18px] font-bold text-[#2E3B4D]">
+              className={`mb-4 text-center text-[18px] font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
               Don't panic Uninstall.
             </Text>
             <Text
@@ -40,7 +40,7 @@ export default function IntroEight() {
             {/* Composition for "Figure with Rays" */}
             <View className=" items-center justify-center">
               <Image
-                source={require('@/assets/images/66.png')}
+                source={isDarkMode ? require('@/assets/images/6.png') : require('@/assets/images/66.png')}
                 style={{
                   width: width * 0.9, // screen এর 90%
                   height: height * 0.6, // screen এর 60%
@@ -54,16 +54,16 @@ export default function IntroEight() {
           <View className="mb-[25%]">
             <Text
               allowFontScaling={false}
-              className=" px-4 text-center mb-[5%] text-[13px] font-light leading-5 text-[#8698B2]">
+              className={` px-4 text-center mb-[5%] text-[13px] font-light leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
               Give it only a week, and you'll discover why this is{'\n'}
               your must-have app.
             </Text>
 
             <Text
               allowFontScaling={false}
-              className="px-8 text-center text-[13px] font-light leading-4 text-[#8698B2]">
+              className={`px-8 text-center text-[13px] font-light leading-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
               Next: we need a few permissions to make{' '}
-              <Text className="font-bold text-[#8698B2]">Minimal Launcher</Text> work the way it's meant to
+              <Text className={`font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>Minimal Launcher</Text> work the way it's meant to
             </Text>
           </View>
         </View>

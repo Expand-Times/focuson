@@ -55,7 +55,7 @@ export default function IntroThree() {
             {/* Composition for "Figure with Rays" */}
             <View className="relative items-center justify-center">
               <Image
-                source={require('@/assets/images/11.png')}
+                source={isDarkMode ? require('@/assets/images/1.png') : require('@/assets/images/11.png')}
                 style={{
                   width: width * 0.9, // screen এর 90%
                   height: height * 0.6, // screen এর 60%
@@ -93,7 +93,7 @@ export default function IntroThree() {
 
           {/* Next Button */}
           <TouchableOpacity
-            className={`mb-4 w-full flex-row items-center justify-center rounded-full ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#2E3B4D]'} py-4`}
+            className={`mb-4 w-full flex-row items-center justify-center rounded-full ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA9E5]'} py-4`}
             onPress={() => router.push('/intro/four')}>
             <Text allowFontScaling={false} className="mr-2 text-[16px] font-semibold text-white">
               Next

@@ -28,7 +28,7 @@ export default function IntroFive() {
           <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="relative items-center justify-center">
-              <Image source={require('@/assets/images/33.png')} style={{
+              <Image source={isDarkMode ? require('@/assets/images/3.png') : require('@/assets/images/33.png')} style={{
                   width: width * 0.9, // screen এর 90%
                   height: height * 0.6, // screen এর 60%
                 }}
