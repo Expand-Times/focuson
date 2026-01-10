@@ -14,6 +14,8 @@ import {
   Pressable,
   BackHandler,
   useColorScheme,
+  Animated,
+  ActivityIndicator,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
@@ -50,6 +52,7 @@ type UserObject = {
 };
 export default function SettingScreen() {
   const router = useRouter();
+  const scrollX = useRef(new Animated.Value(0)).current;
   // State for toggles
   const [alarmClock, setAlarmClock] = useState(false);
   const [showMore, setShowMore] = useState(true);
@@ -65,6 +68,7 @@ export default function SettingScreen() {
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
 
   const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
+  const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
     loadReminderOption();
@@ -126,28 +130,36 @@ export default function SettingScreen() {
     { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
     { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
     { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
-    { id: 4, img: require('../assets/Themes/5.png'), wallpaperIndex: 4, name: 'Neon City' },
-    { id: 5, img: require('../assets/Themes/6.png'), wallpaperIndex: 5, name: 'Midnight Purple' },
-    { id: 6, img: require('../assets/Themes/7.png'), wallpaperIndex: 6, name: 'Forest Green' },
-    { id: 7, img: require('../assets/Themes/8.png'), wallpaperIndex: 7, name: 'Ocean Blue' },
-    { id: 8, img: require('../assets/Themes/9.png'), wallpaperIndex: 8, name: 'Sunset Vibes' },
-    { id: 9, img: require('../assets/Themes/10.png'), wallpaperIndex: 9, name: 'Minimal Grey' },
-    { id: 10, img: require('../assets/Themes/11.png'), wallpaperIndex: 10, name: 'Deep Space' },
+    { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Neon City' },
+    { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Midnight Purple' },
+    { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Forest Green' },
+    { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Ocean Blue' },
+    { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Sunset Vibes' },
+    { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Minimal Grey' },
+    { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Deep Space' },
     { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'Mountain Peak' },
-    { id: 12, img: require('../assets/Themes/13.png'), wallpaperIndex: 12, name: 'Abstract Waves' },
+    { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Abstract Waves' },
     { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Urban Jungle' },
     { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'Calm Water' },
-    { id: 15, img: require('../assets/Themes/16.png'), wallpaperIndex: 15, name: 'Retro Vibe' },
-    { id: 16, img: require('../assets/Themes/17.png'), wallpaperIndex: 16, name: 'Dark Matter' },
-    { id: 17, img: require('../assets/Themes/18.png'), wallpaperIndex: 17, name: 'Golden Hour' },
+    { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Retro Vibe' },
+    { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Dark Matter' },
+    { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'Golden Hour' },
   ];
 
   const handleApplyTheme = () => {
+    setIsProcessing(true);
+    
+    // Apply logic here
     const selectedTheme = THEME_DATA[currentThemeIndex];
     if (selectedTheme) {
       setWallpaper(AVAILABLE_WALLPAPERS[selectedTheme.wallpaperIndex]);
-      setThemeModalVisible(false);
     }
+    
+    setTimeout(() => {
+      setIsProcessing(false);
+      router.push('/home');
+      setThemeModalVisible(false);
+    }, 5000);
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
@@ -1437,41 +1449,75 @@ export default function SettingScreen() {
         animationType="slide"
         transparent={false}
         onRequestClose={() => setThemeModalVisible(false)}>
-        <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EBF0F7]'}`}>
+        <SafeAreaView className={`flex-1 bg-white`}>
           {/* Header */}
-          <View className="relative mt-4 items-center justify-center py-4">
+          <View className="relative mt-4 items-center justify-center">
             <TouchableOpacity
               style={{ position: 'absolute', left: 20, zIndex: 10 }}
               onPress={() => setThemeModalVisible(false)}>
-              <Ionicons name="arrow-back" size={24} color={isDarkMode ? 'white' : '#2E3B4D'} />
+              <Ionicons name="arrow-back" size={24} color='#132C4D' />
             </TouchableOpacity>
             <Text
               allowFontScaling={false}
-              className={`text-xl font-medium ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
+              className={`text-xl font-medium text-[#132C4D]`}>
               {THEME_DATA[currentThemeIndex]?.name || 'Theme'}
             </Text>
           </View>
 
           {/* Carousel */}
           <View className="flex-1 items-center justify-center">
-            <FlatList
+            <Animated.FlatList
               data={THEME_DATA}
               horizontal
-              pagingEnabled
+              pagingEnabled={false}
+              snapToInterval={width * 0.8} // ITEM_WIDTH + 2 * SPACING
+              decelerationRate="fast"
+              snapToAlignment="start"
+              contentContainerStyle={{
+                paddingHorizontal: (width - width * 0.8) / 2,
+              }}
               showsHorizontalScrollIndicator={false}
               keyExtractor={(item) => item.id.toString()}
+              onScroll={Animated.event([{ nativeEvent: { contentOffset: { x: scrollX } } }], {
+                useNativeDriver: true,
+              })}
               onViewableItemsChanged={onViewableItemsChanged}
               viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
-              renderItem={({ item }) => (
-                <View style={{ width: width, alignItems: 'center', justifyContent: 'center' }}>
-                  <View
-                    className={`elevation-10 h-[80%] w-[80%] overflow-hidden rounded-[40px] shadow-2xl ${
-                      isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
-                    }`}>
-                    <Image source={item.img} className="h-full w-full" resizeMode="cover" />
-                  </View>
-                </View>
-              )}
+              renderItem={({ item, index }) => {
+                const ITEM_WIDTH = width * 0.8;
+                const SPACING = 0;
+                const FULL_SIZE = ITEM_WIDTH + SPACING * 2;
+
+                const inputRange = [
+                  (index - 1) * FULL_SIZE,
+                  index * FULL_SIZE,
+                  (index + 1) * FULL_SIZE,
+                ];
+
+                const scale = scrollX.interpolate({
+                  inputRange,
+                  outputRange: [0.9, 1, 0.9],
+                  extrapolate: 'clamp',
+                });
+
+                return (
+                  <Animated.View
+                    style={{
+                      width: ITEM_WIDTH,
+                      marginHorizontal: SPACING,
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      transform: [{ scale }],
+                    }}>
+                    <View
+                      className={`elevation-10 h-[95%] w-full overflow-hidden rounded-[40px] shadow-2xl ${
+                        isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+                      }`}>
+                      <Image source={item.img} className="h-full w-full" resizeMode="cover" />
+                    </View>
+                  </Animated.View>
+                );
+              }}
             />
           </View>
 
@@ -1479,57 +1525,46 @@ export default function SettingScreen() {
           <View className="mb-10 w-full items-center px-8">
             <TouchableOpacity
               onPress={handleApplyTheme}
-              className="w-full items-center rounded-2xl bg-[#7EA9E5] py-4 shadow-lg active:opacity-90">
-              <Text allowFontScaling={false} className="text-lg font-medium text-white">
-                Apply this theme
+              disabled={isProcessing}
+              className={`w-full items-center rounded-2xl bg-[#7EA9E5] py-4 shadow-lg active:opacity-90 ${
+                isProcessing ? 'opacity-70' : ''
+              }`}>
+              <Text allowFontScaling={false} className="text-[16px] font-regular text-white">
+                {isProcessing ? 'Processing...' : 'Apply this theme'}
               </Text>
             </TouchableOpacity>
           </View>
+
+          {/* Processing Overlay */}
+          {isProcessing && (
+            <View
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                backgroundColor: 'rgba(0,0,0,0.5)',
+                justifyContent: 'center',
+                alignItems: 'center',
+                zIndex: 50,
+              }}>
+              <View className="items-center justify-center rounded-2xl bg-white p-6 shadow-xl">
+                <Image
+                  source={require('../assets/images/Logo.png')}
+                  style={{ width: 80, height: 80, marginBottom: 20 }}
+                  resizeMode="contain"
+                />
+                <ActivityIndicator size="large" color="#7EA9E5" />
+                <Text allowFontScaling={false} className="mt-4 text-[16px] font-medium text-[#2E3B4D]">
+                  Processing...
+                </Text>
+              </View>
+            </View>
+          )}
         </SafeAreaView>
       </Modal>
     </SafeAreaView>
   );
 }
-const ColorOption = ({
-  color,
-  onPress,
-  isPremium = false,
-  isSelected = false,
-  isDarkMode = false,
-}: ColorOptionProps) => (
-  <TouchableOpacity onPress={onPress} className="items-center justify-center">
-    <View
-      style={{
-        width: SIZE,
-        height: SIZE,
-        borderRadius: SIZE / 2,
-        backgroundColor: color,
-        borderWidth: isSelected ? 2 : 1,
-        borderColor: isSelected
-          ? isDarkMode
-            ? 'gray'
-            : '#3B82F6'
-          : isDarkMode
-            ? '#FFFFFF'
-            : '#3B82F6',
-        position: 'relative',
-      }}>
-      {isPremium && (
-        <View
-          style={{
-            position: 'absolute',
-            top: -4,
-            right: -4,
-            width: SIZE * 0.4,
-            height: SIZE * 0.4,
-            borderRadius: (SIZE * 0.4) / 2,
-            backgroundColor: '#F59E0B',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}>
-          <Ionicons name="lock-closed" size={SIZE * 0.22} color="white" />
-        </View>
-      )}
-    </View>
-  </TouchableOpacity>
-);
+
