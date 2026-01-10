@@ -79,7 +79,7 @@ export default function IntroNine() {
             {/* Top Section */}
             <View className="w-full items-center ">
                 <Text allowFontScaling={false} className={`text-[16px] font-regular text-center mb-8 px-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
-                    How much time do you spend your {'\n'} Phone?
+                    Let's guess! How much time do you spend your {'\n'} Phone?
                 </Text>
 
                 <View className="flex-row items-center space-x-4 mb-16">

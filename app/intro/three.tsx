@@ -38,7 +38,7 @@ export default function IntroThree() {
             <Text
               allowFontScaling={false}
               className={`px-2 text-center text-[14px] font-light leading-6 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
-              The app icons are colorful. They{'\n'}
+               They
               designed{' '}
               <Text
                 allowFontScaling={false}
@@ -69,7 +69,7 @@ export default function IntroThree() {
                   allowFontScaling={false}
                   className={`text-center text-[13px] font-light leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
                   Consequently, your brain learns that opening{'\n'}
-                  colorful icons leads to "interesting" (stimulating){'\n'}
+                  colorful icons leads to stimulating
                   content
                 </Text>
               </View>

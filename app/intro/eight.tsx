@@ -52,19 +52,17 @@ export default function IntroEight() {
 
           {/* Description Text - Moved here */}
           <View className="mb-[25%]">
+             <Text
+              allowFontScaling={false}
+              className={`px-8 text-center mb-[5%] text-[14px] font-bold leading-6 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+               MinimalLife will always remain free, No ads, No data breach. {' '}
+              </Text>
             <Text
               allowFontScaling={false}
-              className={` px-4 text-center mb-[5%] text-[13px] font-light leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+              className={` px-4 text-center  text-[12px] font-light leading-5 ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8698B2]'}`}>
               Give it only a week, and you'll discover why this is{'\n'}
               your must-have app.
-            </Text>
-
-            <Text
-              allowFontScaling={false}
-              className={`px-8 text-center text-[13px] font-light leading-4 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-              Next: we need a few permissions to make{' '}
-              <Text className={`font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>Minimal Launcher</Text> work the way it's meant to
-            </Text>
+            </Text>         
           </View>
         </View>
 

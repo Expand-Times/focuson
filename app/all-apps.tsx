@@ -13,6 +13,7 @@ import {
   Platform,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
+  StatusBar,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
@@ -115,11 +116,13 @@ const BubbleCursor = ({
   isTouching,
   letter,
   isDarkMode,
+  bubblebg,
 }: {
   touchY: SharedValue<number>;
   isTouching: SharedValue<boolean>;
   letter: string;
   isDarkMode: boolean;
+  bubblebg?: any;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -141,7 +144,7 @@ const BubbleCursor = ({
           width: 50,
           height: 50,
           borderRadius: 25,
-          backgroundColor: isDarkMode ? '#4ADE80' : '#fff', // Green color like in screenshot
+          backgroundColor: isDarkMode ? '#212C40' : '#fff', // Green color like in screenshot
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 100,
@@ -151,15 +154,16 @@ const BubbleCursor = ({
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
         },
+        bubblebg,
         animatedStyle,
       ]}>
-      <Text className="text-xl font-bold text-black">{letter}</Text>
+      <Text style={bubblebg} className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{letter}</Text>
     </Animated.View>
   );
 };
 
 export default function AllApps() {
-  const { isDarkMode, wallpaper, wallpaperIndex } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
@@ -191,6 +195,7 @@ export default function AllApps() {
     searchCt,
     searchCi,
     wallbg,
+    bubblebg
   } = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
@@ -213,7 +218,7 @@ export default function AllApps() {
 
   // Time Over Settings State
   const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
-  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('mindful');
+  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('remind');
   const [secondWarning, setSecondWarning] = useState(false);
 
   const router = useRouter();
@@ -603,16 +608,18 @@ export default function AllApps() {
           </Text>
         </View>
 
-        <View className="flex-row items-center">
-          <Text
-            allowFontScaling={false}
-            style={appdu}
-            className={`text-[10px] font-light ${
-              isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
-            } opacity-90`}>
-            TO: {item.launchCount || 0} times || DU: {usageText}
-          </Text>
-        </View>
+        {showUsageInfo && (
+          <View className="flex-row items-center">
+            <Text
+              allowFontScaling={false}
+              style={appdu}
+              className={`text-[10px] font-light ${
+                isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
+              } opacity-90`}>
+              TO: {item.launchCount || 0} times || DU: {usageText}
+            </Text>
+          </View>
+        )}
       </TouchableOpacity>
     );
   };
@@ -714,6 +721,12 @@ export default function AllApps() {
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+        hidden={false}
+      />
       {isImageWallpaper && (
         <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />
       )}
@@ -891,6 +904,7 @@ export default function AllApps() {
                     isTouching={isTouching}
                     letter={dragLetter}
                     isDarkMode={isDarkMode}
+                    bubblebg={bubblebg}
                   />
                   {sidebarChars.map((letter, index) => (
                     <SidebarItem
@@ -982,6 +996,8 @@ export default function AllApps() {
                     {/* Mindful Delay */}
                     <TouchableOpacity
                       className="mb-3 flex-row items-center"
+                      disabled={true}
+                      style={{ opacity: 0.5 }}
                       onPress={() => setTimeOverAction('mindful')}>
                       <View
                         style={[
@@ -1042,7 +1058,7 @@ export default function AllApps() {
                       <TouchableOpacity
                         className="flex-row items-center"
                         onPress={() => setSecondWarning(!secondWarning)}
-                        disabled={timeOverAction !== 'remind'}
+                        disabled={true}
                         style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
                         <View
                           style={[

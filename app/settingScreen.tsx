@@ -24,6 +24,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignInWithGoogle from './SignInWithGoogle';
 import { openPlayStoreForRating } from './lib/rateApp';
 import { Dimensions } from 'react-native';
+import { StatusBar } from 'react-native';
 const { width } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 const ITEM_SIZE = width * 0.047;
@@ -60,6 +61,8 @@ export default function SettingScreen() {
   const [infoModalVisible, setInfoModalVisible] = useState(false);
   const [infoModalType, setInfoModalType] = useState<'privacy' | 'goal'>('privacy');
   const [modalVisible, setModalVisible] = useState(false);
+  const [themeModalVisible, setThemeModalVisible] = useState(false);
+  const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
 
   const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
 
@@ -113,7 +116,46 @@ export default function SettingScreen() {
     setDateFormat,
     timeOffset,
     setTimeOffset,
+    showStatusBar,
+    setShowStatusBar,
+    showUsageInfo,
+    setShowUsageInfo,
   } = useColorContext();
+
+  const THEME_DATA = [
+    { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
+    { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
+    { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
+    { id: 4, img: require('../assets/Themes/5.png'), wallpaperIndex: 4, name: 'Neon City' },
+    { id: 5, img: require('../assets/Themes/6.png'), wallpaperIndex: 5, name: 'Midnight Purple' },
+    { id: 6, img: require('../assets/Themes/7.png'), wallpaperIndex: 6, name: 'Forest Green' },
+    { id: 7, img: require('../assets/Themes/8.png'), wallpaperIndex: 7, name: 'Ocean Blue' },
+    { id: 8, img: require('../assets/Themes/9.png'), wallpaperIndex: 8, name: 'Sunset Vibes' },
+    { id: 9, img: require('../assets/Themes/10.png'), wallpaperIndex: 9, name: 'Minimal Grey' },
+    { id: 10, img: require('../assets/Themes/11.png'), wallpaperIndex: 10, name: 'Deep Space' },
+    { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'Mountain Peak' },
+    { id: 12, img: require('../assets/Themes/13.png'), wallpaperIndex: 12, name: 'Abstract Waves' },
+    { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Urban Jungle' },
+    { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'Calm Water' },
+    { id: 15, img: require('../assets/Themes/16.png'), wallpaperIndex: 15, name: 'Retro Vibe' },
+    { id: 16, img: require('../assets/Themes/17.png'), wallpaperIndex: 16, name: 'Dark Matter' },
+    { id: 17, img: require('../assets/Themes/18.png'), wallpaperIndex: 17, name: 'Golden Hour' },
+  ];
+
+  const handleApplyTheme = () => {
+    const selectedTheme = THEME_DATA[currentThemeIndex];
+    if (selectedTheme) {
+      setWallpaper(AVAILABLE_WALLPAPERS[selectedTheme.wallpaperIndex]);
+      setThemeModalVisible(false);
+    }
+  };
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      setCurrentThemeIndex(viewableItems[0].index);
+    }
+  }).current;
+
   // Update state initialization
   const [showSignOut, setShowSignOut] = useState(false);
   const [userAuthInfo, setUserAuthInfo] = useState<UserObject>({});
@@ -467,8 +509,21 @@ export default function SettingScreen() {
     const m = now.getMonth() + 1;
     const y = now.getFullYear();
     const yy = y.toString().slice(-2);
-    
-    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
+    const monthNames = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
     const mon = monthNames[now.getMonth()];
 
     const z = (n: number) => n.toString().padStart(2, '0');
@@ -564,6 +619,12 @@ export default function SettingScreen() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+        hidden={false}
+      />
       {/* Header */}
       <View
         className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
@@ -817,7 +878,7 @@ export default function SettingScreen() {
                   height: screenHeight * 0.1,
                   alignSelf: 'center',
                 }}>
-                <View className="flex-row justify-center items-center">
+                <View className="flex-row items-center justify-center">
                   <View>
                     <Image
                       source={require('../assets/images/PremiumFeature.png')}
@@ -994,22 +1055,44 @@ export default function SettingScreen() {
             className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             Display
           </Text>
-          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-            {/* Home Wallpaper */}
-            <View className="mb-4 flex-row items-center justify-between">
+          <View
+            className={`rounded-2xl py-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+            {/* Select Theme Section */}
+            <View className="mb-4">
+              <Text
+                allowFontScaling={false}
+                className={`mb-4 px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                Select Theme
+              </Text>
+              <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
+                <Image
+                  source={require('../assets/Themes/group.png')}
+                  style={{
+                    width: '100%',
+                    height: 100,
+                    borderTopLeftRadius: 12,
+                    borderBottomLeftRadius: 12,
+                  }}
+                  resizeMode="cover"
+                />
+              </TouchableOpacity>
+            </View>
+
+            {/* Show Status Bar */}
+            <View className="mb-4 flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
-                Home Wallpaper
+                Show Status Bar
               </Text>
               <TouchableOpacity
                 activeOpacity={0.8}
-                onPress={() => setHomeWallpaper(!homeWallpaper)}
+                onPress={() => setShowStatusBar(!showStatusBar)}
                 className="justify-center rounded-full px-[2px]"
                 style={{
                   width: 45,
                   height: 25,
-                  backgroundColor: homeWallpaper
+                  backgroundColor: showStatusBar
                     ? selectedColor || '#4CAF50'
                     : isDarkMode
                       ? '#4B5563'
@@ -1018,90 +1101,40 @@ export default function SettingScreen() {
                 <View
                   className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
                   style={{
-                    alignSelf: homeWallpaper ? 'flex-end' : 'flex-start',
+                    alignSelf: showStatusBar ? 'flex-end' : 'flex-start',
                   }}
                 />
               </TouchableOpacity>
             </View>
 
-            {/* Select Wallpaper */}
-            {homeWallpaper && (
-              <>
-                <Text
-                  allowFontScaling={false}
-                  className={`font-regular mb-2 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
-                  Select
-                </Text>
-                <View className="mb-4 flex-row gap-">
-                  {AVAILABLE_WALLPAPERS.map((item, idx) => (
-                    <TouchableOpacity
-                      key={idx}
-                      onPress={() => setWallpaper(item)}
-                      style={{
-                        width: ITEM_SIZE,
-                        height: ITEM_SIZE,
-                        borderRadius: 8,
-                        borderWidth: wallpaper === item ? 2 : 1,
-                        borderColor: wallpaper === item ? '#7EA6E0' : '#E2E8F0',
-                        overflow: 'hidden',
-                        backgroundColor: item === null ? (isDarkMode ? '#0D121A' : '#E1EAF5') : undefined,
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                      }}>
-                      {item === null ? (
-                         <Text allowFontScaling={false} style={{fontSize: 10, color: isDarkMode ? '#fff' : '#000'}}>Default</Text>
-                      ) : typeof item === 'string' ? (
-                        <View style={{ backgroundColor: item, width: '100%', height: '100%' }} />
-                      ) : (
-                        <Image
-                          source={item}
-                          style={{ width: '100%', height: '100%' }}
-                          resizeMode="cover"
-                        />
-                      )}
-                    </TouchableOpacity>
-                  ))}
-                </View>
-              </>
-            )}
-
-            {/* Color Scheme */}
-            <View className="mb-2 flex-row items-center justify-between">
+            {/* Show Usage Info */}
+            <View className="flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
-                Color Scheme
+                Show Usage Info
               </Text>
-              <MaterialCommunityIcons
-                onPress={() => setShowThemes(!showThemes)}
-                name={showThemes ? 'chevron-up' : 'chevron-down'}
-                size={25}
-                color="#89A2CA"
-              />
+              <TouchableOpacity
+                activeOpacity={0.8}
+                onPress={() => setShowUsageInfo(!showUsageInfo)}
+                className="justify-center rounded-full px-[2px]"
+                style={{
+                  width: 45,
+                  height: 25,
+                  backgroundColor: showUsageInfo // Replace with actual state
+                    ? selectedColor || '#4CAF50'
+                    : isDarkMode
+                      ? '#4B5563'
+                      : '#A3B9D9',
+                }}>
+                <View
+                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
+                  style={{
+                    alignSelf: showUsageInfo ? 'flex-end' : 'flex-start', // Replace with actual state
+                  }}
+                />
+              </TouchableOpacity>
             </View>
-            {showThemes && (
-              <View className="flex-row items-center justify-center gap-2">
-                {[
-                  ...freeColors.map((color) => ({
-                    color,
-                    isPremium: false,
-                  })),
-                  ...premiumColors.map((color) => ({
-                    color,
-                    isPremium: true,
-                  })),
-                ].map(({ color, isPremium }) => (
-                  <ColorOption
-                    key={color}
-                    color={color}
-                    onPress={() => handleThemeSelect(color)}
-                    isPremium={isPremium}
-                    isSelected={selectedColor === color}
-                    isDarkMode={isDarkMode}
-                  />
-                ))}
-              </View>
-            )}
           </View>
         </View>
 
@@ -1397,6 +1430,63 @@ export default function SettingScreen() {
           />
         </TouchableOpacity>
       </ScrollView>
+
+      {/* Theme Selection Modal */}
+      <Modal
+        visible={themeModalVisible}
+        animationType="slide"
+        transparent={false}
+        onRequestClose={() => setThemeModalVisible(false)}>
+        <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EBF0F7]'}`}>
+          {/* Header */}
+          <View className="relative mt-4 items-center justify-center py-4">
+            <TouchableOpacity
+              style={{ position: 'absolute', left: 20, zIndex: 10 }}
+              onPress={() => setThemeModalVisible(false)}>
+              <Ionicons name="arrow-back" size={24} color={isDarkMode ? 'white' : '#2E3B4D'} />
+            </TouchableOpacity>
+            <Text
+              allowFontScaling={false}
+              className={`text-xl font-medium ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
+              {THEME_DATA[currentThemeIndex]?.name || 'Theme'}
+            </Text>
+          </View>
+
+          {/* Carousel */}
+          <View className="flex-1 items-center justify-center">
+            <FlatList
+              data={THEME_DATA}
+              horizontal
+              pagingEnabled
+              showsHorizontalScrollIndicator={false}
+              keyExtractor={(item) => item.id.toString()}
+              onViewableItemsChanged={onViewableItemsChanged}
+              viewabilityConfig={{ itemVisiblePercentThreshold: 50 }}
+              renderItem={({ item }) => (
+                <View style={{ width: width, alignItems: 'center', justifyContent: 'center' }}>
+                  <View
+                    className={`elevation-10 h-[80%] w-[80%] overflow-hidden rounded-[40px] shadow-2xl ${
+                      isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+                    }`}>
+                    <Image source={item.img} className="h-full w-full" resizeMode="cover" />
+                  </View>
+                </View>
+              )}
+            />
+          </View>
+
+          {/* Footer Button */}
+          <View className="mb-10 w-full items-center px-8">
+            <TouchableOpacity
+              onPress={handleApplyTheme}
+              className="w-full items-center rounded-2xl bg-[#7EA9E5] py-4 shadow-lg active:opacity-90">
+              <Text allowFontScaling={false} className="text-lg font-medium text-white">
+                Apply this theme
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </Modal>
     </SafeAreaView>
   );
 }

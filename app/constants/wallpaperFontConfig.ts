@@ -48,7 +48,8 @@ const wallpaperFontConfig: Record<number, {
     applistbg: {backgroundColor: '#0A26331A'}, 
     appdu: {color: '#1A2B33'}, 
     alphaside: {color: '#1A2B33'}, 
-      tikbg: {backgroundColor: '#434C59'},
+    tikbg: {backgroundColor: '#434C59'},
+    bubblebg: {backgroundColor: '#df0a15ff',color: '#fff'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF26'}, 
     searchCi: {color: '#5C8BCC'}, 
@@ -838,8 +839,7 @@ const wallpaperFontConfig: Record<number, {
     applistCdu: {fontFamily: 'RobotoSlab-Regular', fontSize: 12,color: '#000000'}, 
     applistCbg: {backgroundColor: '',borderWidth: 1,borderColor: '#00000080'}
  },
- 
-   
+  
  }; 
  
  

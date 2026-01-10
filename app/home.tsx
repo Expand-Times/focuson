@@ -129,11 +129,13 @@ const BubbleCursor = ({
   isTouching,
   letter,
   isDarkMode,
+  bubblebg,
 }: {
   touchY: SharedValue<number>;
   isTouching: SharedValue<boolean>;
   letter: string;
   isDarkMode: boolean;
+  bubblebg?: any;
 }) => {
   const animatedStyle = useAnimatedStyle(() => {
     return {
@@ -164,10 +166,10 @@ const BubbleCursor = ({
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
-        },
+        },bubblebg,
         animatedStyle,
       ]}>
-      <Text style={{ fontSize: CURSOR_SIZE * 0.4 }} className="font-bold text-black">
+      <Text style={[{ fontSize: CURSOR_SIZE * 0.4 }, bubblebg]} className={`font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>
         {letter}
       </Text>
     </Animated.View>
@@ -191,6 +193,7 @@ export default function Home() {
     dateFormat,
     timeOffset,
     isDarkMode,
+    showStatusBar,
   } = useColorContext();
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
@@ -567,7 +570,7 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot,camera} = fontConfig || ({} as any);
+  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot,camera,bubblebg,} = fontConfig || ({} as any);
   
 
   return (
@@ -575,6 +578,7 @@ export default function Home() {
       <StatusBar
         backgroundColor={isDarkMode ? '#0D121A' : '#E1EAF5'}
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        hidden={!showStatusBar}
       />
 
       {wallpaper && typeof wallpaper !== 'string' && (
@@ -874,6 +878,7 @@ export default function Home() {
                   isTouching={isTouching}
                   letter={dragLetter}
                   isDarkMode={isDarkMode}
+                  bubblebg={bubblebg}
                 />
               </Animated.View>
             </GestureDetector>

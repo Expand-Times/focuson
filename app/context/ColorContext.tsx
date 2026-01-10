@@ -50,6 +50,10 @@ interface ColorContextType {
   setDateFormat: (format: string) => void;
   timeOffset: number;
   setTimeOffset: (offset: number) => void;
+  showStatusBar: boolean;
+  setShowStatusBar: (show: boolean) => void;
+  showUsageInfo: boolean;
+  setShowUsageInfo: (show: boolean) => void;
 }
 
 const ColorContext = createContext<ColorContextType | undefined>(undefined);
@@ -76,6 +80,8 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
   const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
   const [timeOffset, setTimeOffsetState] = useState<number>(0);
+  const [showStatusBar, setShowStatusBarState] = useState<boolean>(true);
+  const [showUsageInfo, setShowUsageInfoState] = useState<boolean>(true);
 
   useEffect(() => {
     if (wallpaper === '#0D121A') {
@@ -94,7 +100,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
 
   const loadPersistedData = async () => {
     try {
-      const [savedColor, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset] = await Promise.all([
+      const [savedColor, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset, savedShowStatusBar, savedShowUsageInfo] = await Promise.all([
         AsyncStorage.getItem('selectedColor'),
         AsyncStorage.getItem('isPremium'),
         AsyncStorage.getItem('selectedWallpaperIndex'),
@@ -103,6 +109,8 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         AsyncStorage.getItem('timeFormat'),
         AsyncStorage.getItem('dateFormat'),
         AsyncStorage.getItem('timeOffset'),
+        AsyncStorage.getItem('showStatusBar'),
+        AsyncStorage.getItem('showUsageInfo'),
       ]);
 
       if (savedColor) setSelectedColorState(savedColor);
@@ -112,6 +120,8 @@ const ColorProvider = ({children}: ColorProviderProps) => {
       if (savedTimeFormat) setTimeFormatState(savedTimeFormat);
       if (savedDateFormat) setDateFormatState(savedDateFormat);
       if (savedTimeOffset) setTimeOffsetState(parseInt(savedTimeOffset, 10));
+      if (savedShowStatusBar) setShowStatusBarState(savedShowStatusBar === 'true');
+      if (savedShowUsageInfo) setShowUsageInfoState(savedShowUsageInfo === 'true');
       if (savedWallpaperIndex !== null) {
         const index = parseInt(savedWallpaperIndex, 10);
         if (index >= 0 && index < AVAILABLE_WALLPAPERS.length) {
@@ -243,6 +253,24 @@ const ColorProvider = ({children}: ColorProviderProps) => {
     }
   };
 
+  const setShowStatusBar = async (show: boolean) => {
+    try {
+      setShowStatusBarState(show);
+      await AsyncStorage.setItem('showStatusBar', show.toString());
+    } catch (err) {
+      console.error("Failed to save showStatusBar:", err);
+    }
+  };
+
+  const setShowUsageInfo = async (show: boolean) => {
+    try {
+      setShowUsageInfoState(show);
+      await AsyncStorage.setItem('showUsageInfo', show.toString());
+    } catch (err) {
+      console.error("Failed to save showUsageInfo:", err);
+    }
+  };
+
   return (
     <ColorContext.Provider
       value={{
@@ -252,10 +280,10 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         unlockPremium,
         isDarkMode,
         isLoading,
-    wallpaper,
-    wallpaperIndex,
-    setWallpaper,
-    showPhoneDialer,
+        wallpaper,
+        wallpaperIndex,
+        setWallpaper,
+        showPhoneDialer,
         setShowPhoneDialer,
         showCameraIcon,
         setShowCameraIcon,
@@ -266,6 +294,10 @@ const ColorProvider = ({children}: ColorProviderProps) => {
         setDateFormat,
         timeOffset,
         setTimeOffset,
+        showStatusBar,
+        setShowStatusBar,
+        showUsageInfo,
+        setShowUsageInfo,
       }}>
       {children}
     </ColorContext.Provider>

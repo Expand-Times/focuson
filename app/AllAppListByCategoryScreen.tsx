@@ -13,6 +13,9 @@ import {
   Platform,
   useColorScheme,
   Keyboard,
+  Dimensions,
+  Alert,
+  StatusBar,
 } from 'react-native';
 import {
   Gesture,
@@ -21,12 +24,13 @@ import {
   Directions,
 } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
+import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
@@ -37,7 +41,7 @@ type Category = {
 
 export default function AllAppListByCategoryScreen() {
   const router = useRouter();
-  const { isDarkMode, wallpaper, wallpaperIndex } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
@@ -52,12 +56,19 @@ export default function AllAppListByCategoryScreen() {
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
+  const [launchModalVisible, setLaunchModalVisible] = useState(false);
   const [createCategoryModalVisible, setCreateCategoryModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [showAppRenamer, setShowAppRenamer] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
+
+  // Time Over Settings State
+  const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
+  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('remind');
+  const [secondWarning, setSecondWarning] = useState(false);
+
   // wallpaperFontConfig
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
   const {
@@ -77,6 +88,14 @@ export default function AllAppListByCategoryScreen() {
     appi,
     searchCt,
     wallbg,
+    toggle,
+    when,
+    remind,
+    quit,
+    quitbg,
+    bordert,
+    togglei,
+    select,
   } = fontConfig || ({} as any);
 
   useEffect(() => {
@@ -226,15 +245,65 @@ export default function AllAppListByCategoryScreen() {
     }
   };
 
-  const handleLaunchApp = (packageName: string) => {
-    try {
-      const success = Launcher.launchApp(packageName);
-      if (!success) {
-        console.log('Could not launch app:', packageName);
+  const handleLaunchWithTimer = (durationMinutes: number) => {
+    if (selectedApp) {
+      try {
+        // Check permission
+        const hasUsagePermission = Launcher.checkUsageStatsPermission();
+        if (!hasUsagePermission) {
+          Alert.alert(
+            'Permission Required',
+            'To track usage limits, please grant Usage Access permission.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Open Settings',
+                onPress: () => {
+                  Launcher.openUsageAccessSettings();
+                },
+              },
+            ]
+          );
+          return;
+        }
+
+        const hasNotificationPermission = Launcher.checkNotificationPermission();
+        if (!hasNotificationPermission) {
+          Alert.alert(
+            'Permission Required',
+            'To show the usage monitor notification, please grant Notification permission.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              {
+                text: 'Open Settings',
+                onPress: () => {
+                  Launcher.openNotificationSettings();
+                },
+              },
+            ]
+          );
+          return;
+        }
+
+        // Start the overlay timer
+        const durationMs = durationMinutes * 60 * 1000;
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName);
+
+        // Open the app
+        openApplication(selectedApp.packageName);
+
+        // Close modal
+        setLaunchModalVisible(false);
+        setSelectedApp(null);
+      } catch (error) {
+        console.error('Failed to launch app:', error);
       }
-    } catch (e) {
-      console.error('Error opening app:', e);
     }
+  };
+
+  const onAppPress = (app: AppItem) => {
+    setSelectedApp(app);
+    setLaunchModalVisible(true);
   };
 
   const handleAppInfo = () => {
@@ -352,14 +421,35 @@ export default function AllAppListByCategoryScreen() {
     });
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <GestureHandlerRootView
+      style={{
+        flex: 1,
+        backgroundColor: wallpaper
+          ? typeof wallpaper === 'string'
+            ? wallpaper
+            : 'transparent'
+          : isDarkMode
+            ? '#0D121A'
+            : '#EBF1F7',
+      }}>
+      <StatusBar
+        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
+        backgroundColor="transparent"
+        translucent
+        hidden={false}
+      />
       {isImageWallpaper && (
-        <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />
+        <Image
+          source={wallpaper as any}
+          className="absolute w-full"
+          style={{ height: Dimensions.get('screen').height }}
+          resizeMode="cover"
+        />
       )}
       <GestureDetector gesture={leftSwipeGesture}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
           <View
             className="flex-1 pt-12"
             style={[{
@@ -574,10 +664,10 @@ export default function AllAppListByCategoryScreen() {
                                 ? 'bg-black/40'
                                 : isDarkMode
                                   ? 'bg-[#131B27]'
-                                  : 'bg-[#CEDDF2]'
-                            }`}
-                            onPress={() => handleLaunchApp(app.packageName)}
-                            onLongPress={() => handleLongPress(app)}>
+                              : 'bg-[#CEDDF2]'
+                        }`}
+                        onPress={() => onAppPress(app)}
+                        onLongPress={() => handleLongPress(app)}>
                             <View className="flex-row items-center flex-1 mr-2">
                               {wallpaperIndex === 6 && (
                                 <View
@@ -607,21 +697,23 @@ export default function AllAppListByCategoryScreen() {
                                   : appRenames[app.packageName] || app.label}
                               </Text>
                             </View>
-                            <View className="flex-row items-center">
-                              <Text
-                                allowFontScaling={false}
-                                style={applistCdu}
-                                className={`font-regular text-[12px] opacity-90 ${
-                                  isImageWallpaper
-                                    ? 'text-slate-300'
-                                    : isDarkMode
-                                      ? 'text-[#728099]'
-                                      : 'text-[#4D6D99]'
-                                }`}>
-                                TO: {app.launchCount || 0} Times || DU:{' '}
-                                {formatUsageTime(app.usageTime)}
-                              </Text>
-                            </View>
+                            {showUsageInfo && (
+                              <View className="flex-row items-center">
+                                <Text
+                                  allowFontScaling={false}
+                                  style={applistCdu}
+                                  className={`font-regular text-[12px] opacity-90 ${
+                                    isImageWallpaper
+                                      ? 'text-slate-300'
+                                      : isDarkMode
+                                        ? 'text-[#728099]'
+                                        : 'text-[#4D6D99]'
+                                  }`}>
+                                  TO: {app.launchCount || 0} Times || DU:{' '}
+                                  {formatUsageTime(app.usageTime)}
+                                </Text>
+                              </View>
+                            )}
                           </TouchableOpacity>
                         ))}
                       </View>
@@ -636,6 +728,211 @@ export default function AllAppListByCategoryScreen() {
                 )}
               </ScrollView>
             </View>
+
+            {/* Launch App Modal */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={launchModalVisible}
+              onRequestClose={() => setLaunchModalVisible(false)}>
+              <View className="flex-1 items-center justify-center bg-black/70">
+                <View
+                  style={modalbg}
+                  className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                  <View className="mb-6 items-center">
+                    <Text
+                      style={open}
+                      allowFontScaling={false}
+                      className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                      Open {selectedApp?.label}
+                    </Text>
+
+                    {/* Note: Icon removed from list but can still show in modal */}
+                    {selectedApp?.icon && (
+                      <Image
+                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                        className="mb-6 h-16 w-16 rounded-xl"
+                        resizeMode="contain"
+                      />
+                    )}
+
+                    <Text
+                      style={select}
+                      allowFontScaling={false}
+                      className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
+                      Select estimated use time
+                    </Text>
+                  </View>
+
+                  <View className="mb-6 flex-row flex-wrap justify-between">
+                    {[2, 5, 10, 20].map((mins) => (
+                      <TouchableOpacity
+                        style={numberbg}
+                        key={mins}
+                        className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
+                        onPress={() => handleLaunchWithTimer(mins)}>
+                        <Text style={number} className="text-base font-medium text-white">
+                          {mins} min
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                  {/* Toggle Icon */}
+                  <TouchableOpacity
+                    onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
+                    className="mb-2 self-center p-2">
+                    <Ionicons
+                      style={toggle}
+                      name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
+                      size={24}
+                      color={isDarkMode ? '#94A3B8' : '#64748B'}
+                    />
+                  </TouchableOpacity>
+
+                  {showTimeOverSettings && (
+                    <View className="mb-4 w-full">
+                      <Text
+                        allowFontScaling={false}
+                        style={when}
+                        className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
+                        When time is over
+                      </Text>
+
+                      {/* Mindful Delay */}
+                      <TouchableOpacity
+                        className="mb-3 flex-row items-center"
+                        onPress={() => setTimeOverAction('mindful')} disabled={true}>
+                        <View
+                          style={[
+                            {
+                              borderColor:
+                                togglei?.color ||
+                                (timeOverAction === 'mindful' ? '#5B8BDF' : '#9ca3af'),
+                            },
+                            togglei,
+                          ]}
+                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {timeOverAction === 'mindful' && (
+                            <View
+                              style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
+                              className="h-3 w-3 rounded-full"
+                            />
+                          )}
+                        </View>
+                        <Text
+                          allowFontScaling={false}
+                          style={remind}
+                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                          Mindful Delay
+                        </Text>
+                      </TouchableOpacity>
+
+                      {/* Remind Me */}
+                      <View className="mb-3 flex-row items-center justify-between">
+                        <TouchableOpacity
+                          className="flex-row items-center"
+                          onPress={() => setTimeOverAction('remind')}>
+                          <View
+                            style={[
+                              {
+                                borderColor:
+                                  togglei?.color ||
+                                  (timeOverAction === 'remind' ? '#5B8BDF' : '#9ca3af'),
+                              },
+                              togglei,
+                            ]}
+                            className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                            {timeOverAction === 'remind' && (
+                              <View
+                                style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
+                                className="h-3 w-3 rounded-full"
+                              />
+                            )}
+                          </View>
+                          <Text
+                            allowFontScaling={false}
+                            style={remind}
+                            className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                            Remind Me
+                          </Text>
+                        </TouchableOpacity>
+
+                        {/* 2nd Warning Checkbox */}
+                        <TouchableOpacity
+                          className="flex-row items-center"
+                          onPress={() => setSecondWarning(!secondWarning)}
+                          disabled={true}
+                          style={{ opacity: 0.5 }}>
+                          <View
+                            style={[
+                              {
+                                borderColor:
+                                  togglei?.color || (secondWarning ? '#5B8BDF' : '#9ca3af'),
+                                backgroundColor: secondWarning
+                                  ? togglei?.color || '#5B8BDF'
+                                  : 'transparent',
+                              },
+                              togglei,
+                            ]}
+                            className={`mr-2 h-4 w-4 items-center justify-center rounded border ${togglei ? '' : secondWarning ? 'border-[#5B8BDF] bg-[#5B8BDF]' : 'border-gray-400'}`}>
+                            {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
+                          </View>
+                          <Text
+                            allowFontScaling={false}
+                            style={remind}
+                            className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
+                            2nd Warning
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+
+                      {/* Quit */}
+                      <TouchableOpacity
+                        className="mb-3 flex-row items-center"
+                        onPress={() => setTimeOverAction('quit')}>
+                        <View
+                          style={[
+                            {
+                              borderColor:
+                                togglei?.color || (timeOverAction === 'quit' ? '#5B8BDF' : '#9ca3af'),
+                            },
+                            togglei,
+                          ]}
+                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
+                          {timeOverAction === 'quit' && (
+                            <View
+                              style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
+                              className="h-3 w-3 rounded-full"
+                            />
+                          )}
+                        </View>
+                        <Text
+                          allowFontScaling={false}
+                          style={remind}
+                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
+                          Quit
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
+                  <View
+                    style={bordert}
+                    className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                    <TouchableOpacity
+                      style={quitbg}
+                      className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
+                      onPress={() => setLaunchModalVisible(false)}>
+                      <Text
+                        style={quit}
+                        allowFontScaling={false}
+                        className="font-regular text-[16px] text-white">
+                        Quit
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              </View>
+            </Modal>
 
             {/* App Options Modal */}
             <Modal
