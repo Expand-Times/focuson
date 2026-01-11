@@ -2,13 +2,18 @@ import '../global.css';
 
 import { Stack } from 'expo-router';
 import { ColorProvider } from './context/ColorContext';
+import { AppProvider } from './context/AppContext';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
 export default function Layout() {
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
+
   const [loaded, error] = useFonts({
     'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
     'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
@@ -65,11 +70,17 @@ export default function Layout() {
 
   return (
     <ColorProvider>
-      <Stack
-        screenOptions={{
-          headerShown: false,
-        }}
-      />
+      <AppProvider>
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'none',
+            contentStyle: {
+              backgroundColor: isDarkMode ? '#0D121A' : '#EBF1F7',
+            },
+          }}
+        />
+      </AppProvider>
     </ColorProvider>
   );
 }

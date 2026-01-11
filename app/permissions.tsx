@@ -1,4 +1,4 @@
-import { View, Text, TouchableOpacity, ScrollView, Platform } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Platform, useColorScheme } from 'react-native';
 import { useRouter } from 'expo-router';
 import Launcher from '../modules/launcher';
 import { useState, useEffect, useCallback } from 'react';
@@ -8,6 +8,8 @@ import Constants from 'expo-constants';
 
 export default function Permissions() {
   const router = useRouter();
+  const colorScheme = useColorScheme();
+  const isDarkMode = colorScheme === 'dark';
   const [permissions, setPermissions] = useState({
     usageStats: false,
     overlay: false,
@@ -99,32 +101,32 @@ export default function Permissions() {
   };
 
   const PermissionItem = ({ title, description, hasPermission, onPress }: { title: string, description: string, hasPermission: boolean, onPress: () => void }) => (
-    <View className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+    <View className={`mb-6 p-4 rounded-lg border ${isDarkMode ? 'bg-[#131B26] border-[#2E3B4D]' : 'bg-gray-100 border-gray-200'}`}>
       <View className="flex-row justify-between items-center mb-2">
-        <Text className="text-lg font-bold text-gray-800">{title}</Text>
-        <View className={`px-3 py-1 rounded-full ${hasPermission ? 'bg-green-100' : 'bg-red-100'}`}>
-          <Text className={`${hasPermission ? 'text-green-700' : 'text-red-700'} font-medium`}>
+        <Text className={`text-lg font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-800'}`}>{title}</Text>
+        <View className={`px-3 py-1 rounded-full ${hasPermission ? (isDarkMode ? 'bg-green-900' : 'bg-green-100') : (isDarkMode ? 'bg-red-900' : 'bg-red-100')}`}>
+          <Text className={`${hasPermission ? (isDarkMode ? 'text-green-300' : 'text-green-700') : (isDarkMode ? 'text-red-300' : 'text-red-700')} font-medium`}>
             {hasPermission ? 'Granted' : 'Required'}
           </Text>
         </View>
       </View>
-      <Text className="text-gray-600 mb-4">{description}</Text>
+      <Text className={`mb-4 ${isDarkMode ? 'text-[#738099]' : 'text-gray-600'}`}>{description}</Text>
       {!hasPermission && (
         <TouchableOpacity 
           onPress={onPress}
-          className="bg-blue-500 py-3 rounded-lg items-center active:bg-blue-600"
+          className={`${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-blue-500'} py-3 rounded-lg items-center active:opacity-80`}
         >
-          <Text className="text-white font-semibold">Grant Permission</Text>
+          <Text className={`${isDarkMode ? 'text-[#0D121A]' : 'text-white'} font-semibold`}>Grant Permission</Text>
         </TouchableOpacity>
       )}
     </View>
   );
 
   return (
-    <ScrollView className="flex-1 bg-white">
+    <ScrollView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-white'}`}>
       <View className="p-6">
-        <Text className="text-2xl font-bold text-gray-900 mb-2">App Permissions</Text>
-        <Text className="text-gray-500 mb-8">
+        <Text className={`text-2xl font-bold mb-2 ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'}`}>App Permissions</Text>
+        <Text className={`mb-8 ${isDarkMode ? 'text-[#738099]' : 'text-gray-500'}`}>
           To provide the full launcher experience, MinimalLife requires several special permissions.
         </Text>
 
@@ -163,16 +165,16 @@ export default function Permissions() {
           onPress={requestBattery}
         />
 
-        <View className="mb-6 p-4 bg-gray-100 rounded-lg border border-gray-200">
+        <View className={`mb-6 p-4 rounded-lg border ${isDarkMode ? 'bg-[#131B26] border-[#2E3B4D]' : 'bg-gray-100 border-gray-200'}`}>
             <View className="mb-2">
-                <Text className="text-lg font-bold text-gray-800">Default Home App</Text>
+                <Text className={`text-lg font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-800'}`}>Default Home App</Text>
             </View>
-             <Text className="text-gray-600 mb-4">Set MinimalLife as your default home launcher.</Text>
+             <Text className={`mb-4 ${isDarkMode ? 'text-[#738099]' : 'text-gray-600'}`}>Set MinimalLife as your default home launcher.</Text>
              <TouchableOpacity 
               onPress={openHomeSettings}
-              className="bg-indigo-500 py-3 rounded-lg items-center active:bg-indigo-600"
+              className={`${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-indigo-500'} py-3 rounded-lg items-center active:opacity-80`}
             >
-              <Text className="text-white font-semibold">Open Home Settings</Text>
+              <Text className={`${isDarkMode ? 'text-[#0D121A]' : 'text-white'} font-semibold`}>Open Home Settings</Text>
             </TouchableOpacity>
         </View>
         
@@ -180,7 +182,7 @@ export default function Permissions() {
           onPress={() => router.replace('/home')}
           className="mt-4 py-4 items-center"
         >
-          <Text className="text-blue-500 font-medium">Continue to Home</Text>
+          <Text className={`${isDarkMode ? 'text-[#7EA9E5]' : 'text-blue-500'} font-medium`}>Continue to Home</Text>
         </TouchableOpacity>
       </View>
     </ScrollView>

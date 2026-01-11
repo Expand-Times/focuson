@@ -74,6 +74,7 @@ export default function IntroSeven() {
 
           {/* Next Button */}
           <TouchableOpacity
+            activeOpacity={1}
             className={`mb-4 w-full flex-row items-center justify-center rounded-full ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA9E5]'} py-4`}
             onPress={() => router.push('/intro/eight')}>
             <Text allowFontScaling={false} className="mr-2 text-[16px] font-semibold text-white">

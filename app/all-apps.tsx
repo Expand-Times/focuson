@@ -40,6 +40,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
+import { useAppContext } from './context/AppContext';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 const ITEM_HEIGHT = 20;
 
@@ -162,7 +163,7 @@ const BubbleCursor = ({
   );
 };
 
-export default function AllApps() {
+export default function AllApps({ enableGestures = true, initialLetter, showSidebar = true }: { enableGestures?: boolean, initialLetter?: string, showSidebar?: boolean } = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
@@ -199,7 +200,12 @@ export default function AllApps() {
   } = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
-  const [apps, setApps] = useState<AppItem[]>([]);
+  const { apps: rawApps } = useAppContext();
+  
+  const apps = useMemo(() => {
+     return [...rawApps].sort((a, b) => a.label.localeCompare(b.label));
+  }, [rawApps]);
+
   const [searchQuery, setSearchQuery] = useState('');
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
@@ -228,12 +234,22 @@ export default function AllApps() {
   const sectionListRef = useRef<SectionList>(null);
 
   useEffect(() => {
-    loadApps();
+    // loadApps(); // Removed
     loadSettings();
     if (isSelectMode) {
       loadSelectedApps();
     }
   }, [isSelectMode]);
+
+  useEffect(() => {
+    if (initialLetter) {
+      // Small timeout to ensure list is rendered and ref is available
+      const timer = setTimeout(() => {
+        scrollToLetter(initialLetter);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [initialLetter]);
 
   const loadSettings = async () => {
     try {
@@ -273,16 +289,7 @@ export default function AllApps() {
     }
   };
 
-  const loadApps = async () => {
-    try {
-      const installedApps = Launcher.getInstalledApps();
-      // Sort alphabetically
-      const sorted = installedApps.sort((a, b) => a.label.localeCompare(b.label));
-      setApps(sorted);
-    } catch (error) {
-      console.error('Failed to load apps:', error);
-    }
-  };
+  // loadApps removed, using AppContext
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
@@ -715,12 +722,15 @@ export default function AllApps() {
 
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
+    .enabled(enableGestures)
     .onEnd(() => {
       runOnJS(router.back)();
     });
 
+  const RootContainer = enableGestures ? GestureHandlerRootView : View;
+
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
+    <RootContainer style={{ flex: 1 }}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
@@ -896,33 +906,35 @@ export default function AllApps() {
             </View>
 
             {/* Alphabet Sidebar */}
-            <View className="z-50 items-center justify-center py-4">
-              <GestureDetector gesture={sidebarGesture}>
-                <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 10 }}>
-                  <BubbleCursor
-                    touchY={touchY}
-                    isTouching={isTouching}
-                    letter={dragLetter}
-                    isDarkMode={isDarkMode}
-                    bubblebg={bubblebg}
-                  />
-                  {sidebarChars.map((letter, index) => (
-                    <SidebarItem
-                      key={letter}
-                      letter={letter}
-                      index={index}
+            {showSidebar && (
+              <View className="z-50 items-center justify-center py-4">
+                <GestureDetector gesture={sidebarGesture}>
+                  <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 10 }}>
+                    <BubbleCursor
                       touchY={touchY}
                       isTouching={isTouching}
-                      onSelect={scrollToLetter}
+                      letter={dragLetter}
                       isDarkMode={isDarkMode}
-                      isImageWallpaper={!!isImageWallpaper}
-                      currentLetter={currentLetter}
-                      alphaside={alphaside}
+                      bubblebg={bubblebg}
                     />
-                  ))}
-                </View>
-              </GestureDetector>
-            </View>
+                    {sidebarChars.map((letter, index) => (
+                      <SidebarItem
+                        key={letter}
+                        letter={letter}
+                        index={index}
+                        touchY={touchY}
+                        isTouching={isTouching}
+                        onSelect={scrollToLetter}
+                        isDarkMode={isDarkMode}
+                        isImageWallpaper={!!isImageWallpaper}
+                        currentLetter={currentLetter}
+                        alphaside={alphaside}
+                      />
+                    ))}
+                  </View>
+                </GestureDetector>
+              </View>
+            )}
           </View>
 
           <Modal
@@ -1290,6 +1302,6 @@ export default function AllApps() {
           </Modal>
         </View>
       </GestureDetector>
-    </GestureHandlerRootView>
+    </RootContainer>
   );
 }

@@ -32,6 +32,7 @@ import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
+import { useAppContext } from './context/AppContext';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
 type Category = {
@@ -39,20 +40,25 @@ type Category = {
   data: AppItem[];
 };
 
-export default function AllAppListByCategoryScreen() {
+export default function AllAppListByCategoryScreen({ enableGestures = true, autoFocus = true }: { enableGestures?: boolean, autoFocus?: boolean }) {
   const router = useRouter();
   const { isDarkMode, wallpaper, wallpaperIndex, showUsageInfo } = useColorContext();
+  const { apps, loading: appsLoading } = useAppContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  // const [loading, setLoading] = useState(true); // Removed local loading state
   const [renamedCategories, setRenamedCategories] = useState<{ [key: string]: string }>({});
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [tempCategoryName, setTempCategoryName] = useState('');
   const [categoryOverrides, setCategoryOverrides] = useState<{ [packageName: string]: string }>({});
   const [appRenames, setAppRenames] = useState<{ [packageName: string]: string }>({});
   const [customCategories, setCustomCategories] = useState<string[]>([]);
+
+  // Use View instead of GestureHandlerRootView if gestures are disabled (embedded mode)
+  // to avoid nested root views which can cause layout issues.
+  const RootContainer = enableGestures ? GestureHandlerRootView : View;
 
   // Modal State
   const [modalVisible, setModalVisible] = useState(false);
@@ -140,8 +146,11 @@ export default function AllAppListByCategoryScreen() {
 
   useEffect(() => {
     // Re-categorize when overrides or renames change
-    loadAndCategorizeApps();
-  }, [categoryOverrides, appRenames, customCategories]);
+    if (!appsLoading) {
+      const categorized = categorizeApps(apps);
+      setCategories(categorized);
+    }
+  }, [apps, appsLoading, categoryOverrides, appRenames, customCategories]);
 
   const loadRenamedCategories = async () => {
     try {
@@ -181,17 +190,7 @@ export default function AllAppListByCategoryScreen() {
     setTempCategoryName('');
   };
 
-  const loadAndCategorizeApps = async () => {
-    try {
-      const installedApps = Launcher.getInstalledApps();
-      const categorized = categorizeApps(installedApps);
-      setCategories(categorized);
-    } catch (error) {
-      console.error('Failed to load apps:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // loadAndCategorizeApps removed, logic moved to useEffect
 
   const categorizeApps = (apps: AppItem[]): Category[] => {
     const groups: { [key: string]: AppItem[] } = {};
@@ -393,7 +392,7 @@ export default function AllAppListByCategoryScreen() {
     closeModal();
   };
 
-  if (loading) {
+  if (appsLoading) {
     return (
       <View
         className="flex-1 items-center justify-center"
@@ -416,12 +415,13 @@ export default function AllAppListByCategoryScreen() {
 
   const leftSwipeGesture = Gesture.Fling()
     .direction(Directions.LEFT)
+    .enabled(enableGestures)
     .onEnd(() => {
       runOnJS(router.back)();
     });
 
   return (
-    <GestureHandlerRootView
+    <RootContainer
       style={{
         flex: 1,
         backgroundColor: wallpaper
@@ -494,7 +494,7 @@ export default function AllAppListByCategoryScreen() {
                     searchCt?.color ||
                     (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')
                   }
-                  autoFocus={true}
+                  autoFocus={autoFocus}
                   showSoftInputOnFocus={isKeyboardEnabled}
                   onTouchStart={() => setIsKeyboardEnabled(true)}
                 />
@@ -1203,6 +1203,6 @@ export default function AllAppListByCategoryScreen() {
           </View>
         </KeyboardAvoidingView>
       </GestureDetector>
-    </GestureHandlerRootView>
+    </RootContainer>
   );
 }

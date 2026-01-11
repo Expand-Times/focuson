@@ -15,7 +15,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback, useMemo } from 'react';
+import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   Gesture,
   GestureDetector,
@@ -34,8 +34,10 @@ import Animated, {
 import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
+import AllAppListByCategoryScreen from './AllAppListByCategoryScreen';
+import AllApps from './all-apps';
 
-const { height } = Dimensions.get('window');
+const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
 const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
 
@@ -180,10 +182,12 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
+import { useAppContext } from './context/AppContext';
 
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
+  const { apps: allApps } = useAppContext();
   const {
     wallpaper,
     wallpaperIndex,
@@ -206,52 +210,64 @@ export default function Home() {
   const sidebarChars = useMemo(() => ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')], []);
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
+  const isSidebarActive = useSharedValue(false);
   const [dragLetter, setDragLetter] = useState('');
+  const [allAppsLetter, setAllAppsLetter] = useState('');
+  const lastLetterRef = useRef('');
+  const translateX = useSharedValue(-SCREEN_WIDTH);
+  const context = useSharedValue({ startX: 0 });
 
   const navigateToAllAppsWithLetter = (letter: string) => {
     setDragLetter(letter);
-    router.push({ pathname: '/all-apps', params: { initialLetter: letter } });
+    setAllAppsLetter(letter);
+    translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
   };
 
-  const updateDragLetterState = (index: number) => {
-    if (index >= 0 && index < sidebarChars.length) {
-      setDragLetter(sidebarChars[index]);
-    }
-  };
+  const clearDragLetterState = useCallback(() => {
+    setDragLetter('');
+    lastLetterRef.current = '';
+  }, []);
 
-  const performNavigation = (index: number) => {
+  const handleSidebarInteraction = useCallback((index: number) => {
     if (index >= 0 && index < sidebarChars.length) {
       const letter = sidebarChars[index];
-      // Reset drag letter before navigating to avoid stuck state
-      setDragLetter('');
-      router.push({ pathname: '/all-apps', params: { initialLetter: letter } });
+      
+      // Only update if the letter has changed to prevent excessive re-renders
+      if (letter !== lastLetterRef.current) {
+        lastLetterRef.current = letter;
+        setDragLetter(letter);
+        setAllAppsLetter(letter);
+        
+        // Ensure we are on AllApps screen
+        if (translateX.value > -SCREEN_WIDTH * 1.5) {
+          translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
+        }
+      }
     }
-  };
+  }, [sidebarChars, translateX]);
 
-  const clearDragLetterState = () => {
-    setDragLetter('');
-  };
-
-  const sidebarGesture = Gesture.Pan()
+  const sidebarGesture = useMemo(() => Gesture.Pan()
     .onBegin((e) => {
+      isSidebarActive.value = true;
       isTouching.value = true;
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      runOnJS(updateDragLetterState)(index);
+      runOnJS(handleSidebarInteraction)(index);
     })
     .onUpdate((e) => {
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      runOnJS(updateDragLetterState)(index);
+      runOnJS(handleSidebarInteraction)(index);
     })
     .onEnd(() => {
-      const index = Math.floor(touchY.value / ITEM_HEIGHT);
-      runOnJS(performNavigation)(index);
+       // Logic handled in update
     })
     .onFinalize(() => {
+      isSidebarActive.value = false;
       isTouching.value = false;
       runOnJS(clearDragLetterState)();
-    });
+      translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
+    }), [handleSidebarInteraction, clearDragLetterState, isSidebarActive, isTouching, touchY, translateX]);
 
   // Home Apps State
   const [homeApps, setHomeApps] = useState<AppItem[]>([]);
@@ -443,27 +459,60 @@ export default function Home() {
     }
   };
 
-  const navigateToAllApps = () => {
-    router.push('/all-apps');
-  };
+ 
 
-  const navigateToCategoryApps = () => {
-    router.push('/AllAppListByCategoryScreen');
-  };
+  // Main Navigation Pan Gesture
+  const mainPanGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .failOffsetY([-20, 20])
+    .onStart(() => {
+      if (isSidebarActive.value) return;
+      context.value = { startX: translateX.value };
+    })
+    .onUpdate((e) => {
+      if (isSidebarActive.value) return;
+      const nextPos = context.value.startX + e.translationX;
+      // Clamp between -SCREEN_WIDTH * 2 (All Apps) and 0 (Category)
+      translateX.value = Math.max(-SCREEN_WIDTH * 2, Math.min(0, nextPos));
+    })
+    .onEnd((e) => {
+      if (isSidebarActive.value) return;
+      const currentPos = translateX.value;
+      
+      // Determine target position based on velocity and position
+      let targetPos = -SCREEN_WIDTH; // Default to Home
+      
+      if (currentPos > -SCREEN_WIDTH * 0.5) {
+        // Closer to Category (0)
+        if (e.velocityX < -500) {
+           targetPos = -SCREEN_WIDTH; // Fling left -> Home
+        } else {
+           targetPos = 0; // Category
+        }
+      } else if (currentPos < -SCREEN_WIDTH * 1.5) {
+         // Closer to AllApps (-2 * width)
+         if (e.velocityX > 500) {
+            targetPos = -SCREEN_WIDTH; // Fling right -> Home
+         } else {
+            targetPos = -SCREEN_WIDTH * 2; // AllApps
+         }
+      } else {
+        // Middle zone (Home)
+        if (e.velocityX > 500) {
+           targetPos = 0; // Fling right -> Category
+        } else if (e.velocityX < -500) {
+           targetPos = -SCREEN_WIDTH * 2; // Fling left -> AllApps
+        } else {
+           targetPos = -SCREEN_WIDTH; // Stay Home
+        }
+      }
 
-  const leftSwipeGesture = Gesture.Fling()
-    .direction(Directions.LEFT)
-    .onEnd(() => {
-      runOnJS(navigateToAllApps)();
+      translateX.value = withSpring(targetPos, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
     });
 
-  const rightSwipeGesture = Gesture.Fling()
-    .direction(Directions.RIGHT)
-    .onEnd(() => {
-      runOnJS(navigateToCategoryApps)();
-    });
-
-  const composedGestures = Gesture.Simultaneous(leftSwipeGesture, rightSwipeGesture);
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: translateX.value }],
+  }));
 
   const getFormattedTime = (date: Date) => {
     const h = date.getHours();
@@ -573,6 +622,20 @@ export default function Home() {
   const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot,camera,bubblebg,} = fontConfig || ({} as any);
   
 
+  const sidebarContainerStyle = useAnimatedStyle(() => {
+    const opacity = interpolate(
+      translateX.value,
+      [-SCREEN_WIDTH, -SCREEN_WIDTH * 0.8], 
+      [1, 0],
+      Extrapolation.CLAMP
+    );
+
+    return {
+      opacity,
+      zIndex: translateX.value > -SCREEN_WIDTH * 0.9 ? -1 : 100,
+    };
+  });
+
   return (
     <GestureHandlerRootView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
       <StatusBar
@@ -581,13 +644,17 @@ export default function Home() {
         hidden={!showStatusBar}
       />
 
-      {wallpaper && typeof wallpaper !== 'string' && (
-        <Image source={wallpaper} className="absolute h-full w-full" resizeMode="cover" />
-      )}
-
-      <GestureDetector gesture={composedGestures}>
-        <View
-          className="flex-1 justify-between px-6"
+      <GestureDetector gesture={mainPanGesture}>
+        <Animated.View style={[{ flexDirection: 'row', width: SCREEN_WIDTH * 3, height: '100%' }, animatedStyle]}>
+          <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
+            <AllAppListByCategoryScreen enableGestures={false} autoFocus={false} />
+          </View>
+          <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
+            {wallpaper && typeof wallpaper !== 'string' && (
+              <Image source={wallpaper} className="absolute h-full w-full" resizeMode="cover" />
+            )}
+            <View
+              className="flex-1 justify-between px-6"
           style={{
             paddingTop: 48,
             paddingBottom: 48 + insets.bottom,
@@ -848,41 +915,7 @@ export default function Home() {
             </View>
           </View>
 
-          {/* Sidebar Overlay */}
-          <View
-            style={{
-              position: 'absolute',
-              right: 0,
-              top: 0,
-              bottom: 0,
-              justifyContent: 'center',
-              zIndex: 100,
-            }}>
-            <GestureDetector gesture={sidebarGesture}>
-              <Animated.View style={{ paddingHorizontal: 4 }}>
-                {sidebarChars.map((letter, index) => (
-                  <SidebarItem
-                    key={index}
-                    letter={letter}
-                    index={index}
-                    touchY={touchY}
-                    isTouching={isTouching}
-                    onSelect={(l) => navigateToAllAppsWithLetter(l)}
-                    isDarkMode={isDarkMode}
-                    currentLetter={dragLetter}
-                    alpha={alpha}
-                  />
-                ))}
-                <BubbleCursor
-                  touchY={touchY}
-                  isTouching={isTouching}
-                  letter={dragLetter}
-                  isDarkMode={isDarkMode}
-                  bubblebg={bubblebg}
-                />
-              </Animated.View>
-            </GestureDetector>
-          </View>
+
 
           <Modal
             animationType="fade"
@@ -1049,8 +1082,49 @@ export default function Home() {
               </View>
             </View>
           </Modal>
-        </View>
+            </View>
+          </View>
+          <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
+            <AllApps enableGestures={false} initialLetter={allAppsLetter} showSidebar={false} />
+          </View>
+        </Animated.View>
       </GestureDetector>
+
+      {/* Sidebar Overlay - Moved to Root */}
+      <Animated.View
+        style={[{
+          position: 'absolute',
+          right: 0,
+          top: 0,
+          bottom: 0,
+          justifyContent: 'center',
+          zIndex: 100,
+        }, sidebarContainerStyle]}>
+        <GestureDetector gesture={sidebarGesture}>
+          <Animated.View style={{ paddingHorizontal: 4 }}>
+            {sidebarChars.map((letter, index) => (
+              <SidebarItem
+                key={index}
+                letter={letter}
+                index={index}
+                touchY={touchY}
+                isTouching={isTouching}
+                onSelect={(l) => navigateToAllAppsWithLetter(l)}
+                isDarkMode={isDarkMode}
+                currentLetter={dragLetter}
+                alpha={alpha}
+              />
+            ))}
+            <BubbleCursor
+              touchY={touchY}
+              isTouching={isTouching}
+              letter={dragLetter}
+              isDarkMode={isDarkMode}
+              bubblebg={bubblebg}
+            />
+          </Animated.View>
+        </GestureDetector>
+      </Animated.View>
     </GestureHandlerRootView>
   );
 }

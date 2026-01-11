@@ -662,7 +662,7 @@ export default function SettingScreen() {
       </View>
       <View className="border-b border-[#A3B9D9]"></View>
       <ScrollView
-        className="flex-1 px-4"
+        className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}>
         {/* Time Settings Modal */}
@@ -930,7 +930,7 @@ export default function SettingScreen() {
           </View>
         </Modal>
         {/* Home Screen Section */}
-        <View className="mt-4">
+        <View className="mt-4 px-4">
           <Text
             allowFontScaling={false}
             className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
@@ -1064,7 +1064,7 @@ export default function SettingScreen() {
         <View className="mt-6">
           <Text
             allowFontScaling={false}
-            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mb-2 px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             Display
           </Text>
           <View
@@ -1151,7 +1151,7 @@ export default function SettingScreen() {
         </View>
 
         {/* In-app time reminder */}
-        <View className="mt-6">
+        <View className="mt-6 px-4">
           <Text
             allowFontScaling={false}
             className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
@@ -1217,7 +1217,7 @@ export default function SettingScreen() {
         </View>
 
         {/* More */}
-        <View className="mt-6">
+        <View className="mt-6 px-4">
           <View className="mb-2 flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
@@ -1318,7 +1318,7 @@ export default function SettingScreen() {
         </View>
 
         {/* About Minimal Life */}
-        <View className="mt-6">
+        <View className="mt-6 px-4">
           <View className="mb-2 flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
@@ -1370,7 +1370,7 @@ export default function SettingScreen() {
 
         {/* Support Section */}
         <View
-          className={`mt-4 rounded-2xl   shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#FFFFFF]'}`}>
+          className={`mt-4 mx-4 rounded-2xl   shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#FFFFFF]'}`}>
           <View
             className={`mb-[5%] mt-[5%] flex-row justify-around ${isDarkMode ? 'border-[#121212]' : 'border-[#FFFFFF]'}`}>
             {['App Issue', 'Suggestion'].map((option) => {
@@ -1510,7 +1510,7 @@ export default function SettingScreen() {
                       transform: [{ scale }],
                     }}>
                     <View
-                      className={`elevation-10 h-[95%] w-full overflow-hidden rounded-[40px] shadow-2xl ${
+                      className={`elevation-10 h-[95%] w-full overflow-hidden rounded-[20px] shadow-2xl ${
                         isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
                       }`}>
                       <Image source={item.img} className="h-full w-full" resizeMode="cover" />
