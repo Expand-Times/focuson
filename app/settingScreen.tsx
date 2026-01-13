@@ -130,6 +130,7 @@ export default function SettingScreen() {
     { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
     { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
     { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
+    { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Desert Dusk' },
     { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Neon City' },
     { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Midnight Purple' },
     { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Forest Green' },
@@ -144,6 +145,8 @@ export default function SettingScreen() {
     { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Retro Vibe' },
     { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Dark Matter' },
     { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'Golden Hour' },
+    { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Golden Hour' },
+    { id: 19, img: require('../assets/Themes/20.jpg'), wallpaperIndex: 19, name: 'Golden Hour' },
   ];
 
   const handleApplyTheme = () => {
@@ -159,7 +162,7 @@ export default function SettingScreen() {
       setIsProcessing(false);
       router.push('/home');
       setThemeModalVisible(false);
-    }, 5000);
+    }, 1000);
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {

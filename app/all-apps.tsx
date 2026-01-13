@@ -36,11 +36,11 @@ import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
+import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 const ITEM_HEIGHT = 20;
 
@@ -200,7 +200,19 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   } = fontConfig || ({} as any);
 
   const colorScheme = useColorScheme();
-  const { apps: rawApps } = useAppContext();
+  const {
+    apps: rawApps,
+    homeApps,
+    updateHomeApps,
+    pinnedPackageNames,
+    togglePinApp,
+    blockedPackageNames,
+    toggleBlockApp,
+    appRenames,
+    renameApp,
+    reminderOption,
+    setReminderOptionState
+  } = useAppContext();
   
   const apps = useMemo(() => {
      return [...rawApps].sort((a, b) => a.label.localeCompare(b.label));
@@ -215,17 +227,9 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
 
   // New State for Features
-  const [pinnedPackageNames, setPinnedPackageNames] = useState<string[]>([]);
-  const [blockedPackageNames, setBlockedPackageNames] = useState<string[]>([]);
-  const [appRenames, setAppRenames] = useState<Record<string, string>>({});
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [newName, setNewName] = useState('');
-
-  // Time Over Settings State
-  const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
-  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('remind');
-  const [secondWarning, setSecondWarning] = useState(false);
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -234,12 +238,11 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const sectionListRef = useRef<SectionList>(null);
 
   useEffect(() => {
-    // loadApps(); // Removed
-    loadSettings();
     if (isSelectMode) {
-      loadSelectedApps();
+      // Initialize selection with current home apps
+      setSelectedPackageNames(homeApps.map(a => a.packageName));
     }
-  }, [isSelectMode]);
+  }, [isSelectMode, homeApps]);
 
   useEffect(() => {
     if (initialLetter) {
@@ -251,38 +254,11 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     }
   }, [initialLetter]);
 
-  const loadSettings = async () => {
-    try {
-      const pinned = await AsyncStorage.getItem('pinnedApps');
-      if (pinned) setPinnedPackageNames(JSON.parse(pinned));
-
-      const blocked = await AsyncStorage.getItem('blockedApps');
-      if (blocked) setBlockedPackageNames(JSON.parse(blocked));
-
-      const renames = await AsyncStorage.getItem('appRenames');
-      if (renames) setAppRenames(JSON.parse(renames));
-    } catch (e) {
-      console.error('Failed to load settings', e);
-    }
-  };
-
-  const loadSelectedApps = async () => {
-    try {
-      const stored = await AsyncStorage.getItem('homeApps');
-      if (stored) {
-        const parsed: AppItem[] = JSON.parse(stored);
-        setSelectedPackageNames(parsed.map((a) => a.packageName));
-      }
-    } catch (e) {
-      console.error('Failed to load home apps', e);
-    }
-  };
-
   const handleSaveSelection = async () => {
     try {
       // Filter the full apps list to get the full AppItem objects for selected packages
       const selectedAppItems = apps.filter((app) => selectedPackageNames.includes(app.packageName));
-      await AsyncStorage.setItem('homeApps', JSON.stringify(selectedAppItems));
+      await updateHomeApps(selectedAppItems);
       router.back();
     } catch (e) {
       console.error('Failed to save selection', e);
@@ -432,8 +408,8 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         }
 
         // Start the overlay timer
-        const durationMs = durationMinutes * 60 * 1000;
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName);
+        const durationMs = durationMinutes * 15 * 1000;
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption);
 
         // Open the app
         openApplication(selectedApp.packageName);
@@ -450,8 +426,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const handleAddToHome = async () => {
     if (!selectedApp) return;
     try {
-      const stored = await AsyncStorage.getItem('homeApps');
-      let currentHomeApps: AppItem[] = stored ? JSON.parse(stored) : [];
+      const currentHomeApps = [...homeApps];
 
       if (currentHomeApps.length >= 6) {
         Alert.alert('Limit Reached', 'Home screen is full (max 6 apps).');
@@ -464,7 +439,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
       }
 
       currentHomeApps.push(selectedApp);
-      await AsyncStorage.setItem('homeApps', JSON.stringify(currentHomeApps));
+      await updateHomeApps(currentHomeApps);
       setOptionsModalVisible(false);
       router.push('/home');
     } catch (e) {
@@ -475,14 +450,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const handlePinToTop = async () => {
     if (!selectedApp) return;
     try {
-      let newPinned = [...pinnedPackageNames];
-      if (newPinned.includes(selectedApp.packageName)) {
-        newPinned = newPinned.filter((p) => p !== selectedApp.packageName);
-      } else {
-        newPinned.push(selectedApp.packageName);
-      }
-      setPinnedPackageNames(newPinned);
-      await AsyncStorage.setItem('pinnedApps', JSON.stringify(newPinned));
+      await togglePinApp(selectedApp.packageName);
       setOptionsModalVisible(false);
     } catch (e) {
       console.error(e);
@@ -498,9 +466,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         style: 'destructive',
         onPress: async () => {
           try {
-            const newBlocked = [...blockedPackageNames, selectedApp.packageName];
-            setBlockedPackageNames(newBlocked);
-            await AsyncStorage.setItem('blockedApps', JSON.stringify(newBlocked));
+            await toggleBlockApp(selectedApp.packageName);
             setOptionsModalVisible(false);
           } catch (e) {
             console.error(e);
@@ -520,9 +486,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const saveRename = async () => {
     if (!selectedApp) return;
     try {
-      const newRenames = { ...appRenames, [selectedApp.packageName]: newName };
-      setAppRenames(newRenames);
-      await AsyncStorage.setItem('appRenames', JSON.stringify(newRenames));
+      await renameApp(selectedApp.packageName, newName);
       setRenameModalVisible(false);
       setOptionsModalVisible(false);
     } catch (e) {
@@ -575,7 +539,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     return (
       <TouchableOpacity
         style={applistbg}
-        className={`mb-2  w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
+        className={`mb-[2%] w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
           isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
         } ${isSelectMode && isSelected ? '' : ''}`}
         onPress={() => handleAppPress(item)}
@@ -595,9 +559,9 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
           {wallpaperIndex === 6 && (
             <View
               style={{
-                width: 6,
-                height: 6,
-                borderRadius: 3,
+                width: 10,
+                height: 10,
+                borderRadius: 5,
                 backgroundColor: '#132C4D',
                 marginRight: 8,
                 opacity: 0.8,
@@ -623,7 +587,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
               className={`text-[10px] font-light ${
                 isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
               } opacity-90`}>
-              TO: {item.launchCount || 0} times || DU: {usageText}
+              TO: {item.launchCount || 0} times || TU: {usageText}
             </Text>
           </View>
         )}
@@ -767,7 +731,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 isImageWallpaper
                   ? 'border-white/20 '
                   : isDarkMode
-                    ? 'border-[#212D41] bg-[#131B27]'
+                    ? 'border-[#212D41] bg-[]'
                     : 'border-slate-100 bg-white'
               }`}>
               <Ionicons
@@ -775,7 +739,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 size={20}
                 color={
                   searchCi?.color ||
-                  (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#5C8BCC')
+                  (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C5980' : '#5C8BCC')
                 }
                 className="mr-2"
               />
@@ -793,7 +757,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 placeholder="Search app here"
                 placeholderTextColor={
                   searchCt?.color ||
-                  (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#64748B' : '#A3B9D9')
+                  (isImageWallpaper ? '#94A3B8' : isDarkMode ? '#434C5980' : '#A3B9D9')
                 }
                 value={searchQuery}
                 onChangeText={setSearchQuery}
@@ -808,15 +772,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 onTouchStart={() => setIsKeyboardEnabled(true)}
               />
             </View>
-
-            {isSelectMode && (
-              <TouchableOpacity
-                onPress={handleSaveSelection}
-                style={tikbg}
-                className={`ml-3 rounded-full p-3 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <MaterialCommunityIcons name="check" size={24} color="#4ADE80" />
-              </TouchableOpacity>
-            )}
           </View>
 
           {/* Header */}
@@ -824,51 +779,86 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
             <Text
               allowFontScaling={false}
               style={allappt}
-              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline decoration-2 underline-offset-4 ${
+              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
                 isImageWallpaper
                   ? 'text-white decoration-white'
                   : isDarkMode
                     ? 'text-[#DADFE5] decoration-[#DADFE5]'
                     : 'text-[#858E9D] decoration-[#858E9D]'
               }`}>
-              All Apps
+              {isSelectMode ? 'Select Apps' : 'All Apps'}
             </Text>
-            <Link href="/settingScreen" asChild>
-              <TouchableOpacity>
-                <View
-                  style={[
-                    {
-                      borderColor:
-                       allappi?.color ||
-                        (isImageWallpaper ? '#ffffff80' : isDarkMode ? '#94a3b8' : '#858E9D'),
-                    },
-                    allappi,
-                  ]}
-                  className={`rounded-lg border-2 ${
-                    allappi
-                      ? ''
-                      : isImageWallpaper
-                        ? 'border-white/50'
+            {isSelectMode ? (
+              <View className="flex-row items-center gap-2">
+                <TouchableOpacity
+                  className={`rounded-lg px-4 py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                  onPress={() => router.back()}>
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-[14px] font-medium ${
+                      isImageWallpaper
+                        ? 'text-white'
                         : isDarkMode
-                          ? 'border-slate-400'
-                          : 'border-[#858E9D]'
-                  }`}>
-                  <MaterialCommunityIcons
-                    name="tune-variant"
-                    size={22}
-                    color={
-                      allappi?.color ||
-                      (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D')
-                    }
-                  />
-                </View>
-              </TouchableOpacity>
-            </Link>
+                          ? 'text-[#DADFE5]'
+                          : 'text-[#858E9D]'
+                    }`}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  className="items-center rounded-lg bg-[#7EA6E0] px-6 py-2"
+                  onPress={handleSaveSelection}>
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-[14px] font-bold ${
+                      isImageWallpaper
+                        ? 'text-white'
+                        : isDarkMode
+                          ? 'text-[#DADFE5]'
+                          : 'text-[#FFFFFF]'
+                    }`}>
+                    Add
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <Link href="/settingScreen" asChild>
+                <TouchableOpacity>
+                  <View
+                    style={[
+                      {
+                        borderColor:
+                          allappi?.color ||
+                          (isImageWallpaper ? '#ffffff80' : isDarkMode ? '#94a3b8' : '#858E9D'),
+                      },
+                      allappi,
+                    ]}
+                    className={`rounded-lg border-2 ${
+                      allappi
+                        ? ''
+                        : isImageWallpaper
+                          ? 'border-white/50'
+                          : isDarkMode
+                            ? 'border-slate-400'
+                            : 'border-[#858E9D]'
+                    }`}>
+                    <MaterialCommunityIcons
+                      name="tune-variant"
+                      size={22}
+                      color={
+                        allappi?.color ||
+                        (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D')
+                      }
+                    />
+                  </View>
+                </TouchableOpacity>
+              </Link>
+            )}
           </View>
 
           <View className="flex-1 flex-row">
             {/* Apps List */}
-            <View className="flex-1 pr-2">
+            <View className="w-[95%] ">
               <SectionList
                 ref={sectionListRef}
                 sections={sections}
@@ -876,7 +866,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
                     style={header}
-                    className={` text-lg font-bold ${
+                    className={` mt-[4%] text-lg ${header ? '' : 'font-bold'} ${
                       isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
@@ -937,211 +927,14 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
             )}
           </View>
 
-          <Modal
-            animationType="fade"
-            transparent={true}
+          <AppModal
             visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}>
-            <View className="flex-1 items-center justify-center bg-black/70">
-              <View
-                style={modalbg}
-                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <View className="mb-6 items-center">
-                  <Text
-                    style={open}
-                    allowFontScaling={false}
-                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                    Open {selectedApp?.label}
-                  </Text>
-
-                  {/* Note: Icon removed from list but can still show in modal */}
-                  {selectedApp?.icon && (
-                    <Image
-                      source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                      className="mb-6 h-16 w-16 rounded-xl"
-                      resizeMode="contain"
-                    />
-                  )}
-
-                  <Text
-                    style={select}
-                    allowFontScaling={false}
-                    className={`text-center text-base font-medium ${isDarkMode ? 'text-slate-400' : 'text-gray-800'}`}>
-                    Select estimated use time
-                  </Text>
-                </View>
-
-                <View className="mb-6 flex-row flex-wrap justify-between">
-                  {[2, 5, 10, 20].map((mins) => (
-                    <TouchableOpacity
-                      style={numberbg}
-                      key={mins}
-                      className="mb-3 w-[48%] items-center rounded-2xl bg-[#7EA9E5] py-3 active:opacity-80"
-                      onPress={() => handleLaunchApp(mins)}>
-                      <Text style={number} className="text-base font-medium text-white">
-                        {mins} min
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {/* Toggle Icon */}
-                <TouchableOpacity
-                  onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
-                  className="mb-2 self-center p-2">
-                  <Ionicons
-                    style={toggle}
-                    name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
-                    size={24}
-                    color={isDarkMode ? '#94A3B8' : '#64748B'}
-                  />
-                </TouchableOpacity>
-
-                {showTimeOverSettings && (
-                  <View className="mb-4 w-full">
-                    <Text
-                      allowFontScaling={false}
-                      style={when}
-                      className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
-                      When time is over
-                    </Text>
-
-                    {/* Mindful Delay */}
-                    <TouchableOpacity
-                      className="mb-3 flex-row items-center"
-                      disabled={true}
-                      style={{ opacity: 0.5 }}
-                      onPress={() => setTimeOverAction('mindful')}>
-                      <View
-                        style={[
-                          {
-                            borderColor:
-                              togglei?.color ||
-                              (timeOverAction === 'mindful' ? '#5B8BDF' : '#9ca3af'),
-                          },
-                          togglei,
-                        ]}
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'mindful' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                        {timeOverAction === 'mindful' && (
-                          <View
-                            style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
-                            className="h-3 w-3 rounded-full"
-                          />
-                        )}
-                      </View>
-                      <Text
-                        allowFontScaling={false}
-                        style={remind}
-                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                        Mindful Delay
-                      </Text>
-                    </TouchableOpacity>
-
-                    {/* Remind Me */}
-                    <View className="mb-3 flex-row items-center justify-between">
-                      <TouchableOpacity
-                        className="flex-row items-center"
-                        onPress={() => setTimeOverAction('remind')}>
-                        <View
-                          style={[
-                            {
-                              borderColor:
-                                togglei?.color ||
-                                (timeOverAction === 'remind' ? '#5B8BDF' : '#9ca3af'),
-                            },
-                            togglei,
-                          ]}
-                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'remind' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                          {timeOverAction === 'remind' && (
-                            <View
-                              style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
-                              className="h-3 w-3 rounded-full"
-                            />
-                          )}
-                        </View>
-                        <Text
-                          allowFontScaling={false}
-                          style={remind}
-                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                          Remind Me
-                        </Text>
-                      </TouchableOpacity>
-
-                      {/* 2nd Warning Checkbox */}
-                      <TouchableOpacity
-                        className="flex-row items-center"
-                        onPress={() => setSecondWarning(!secondWarning)}
-                        disabled={true}
-                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
-                        <View
-                          style={[
-                            {
-                              borderColor:
-                                togglei?.color || (secondWarning ? '#5B8BDF' : '#9ca3af'),
-                              backgroundColor: secondWarning
-                                ? togglei?.color || '#5B8BDF'
-                                : 'transparent',
-                            },
-                            togglei,
-                          ]}
-                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${togglei ? '' : secondWarning ? 'border-[#5B8BDF] bg-[#5B8BDF]' : 'border-gray-400'}`}>
-                          {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
-                        </View>
-                        <Text
-                          allowFontScaling={false}
-                          style={remind}
-                          className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                          2nd Warning
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* Quit */}
-                    <TouchableOpacity
-                      className="mb-3 flex-row items-center"
-                      onPress={() => setTimeOverAction('quit')}>
-                      <View
-                        style={[
-                          {
-                            borderColor:
-                              togglei?.color || (timeOverAction === 'quit' ? '#5B8BDF' : '#9ca3af'),
-                          },
-                          togglei,
-                        ]}
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${togglei ? '' : timeOverAction === 'quit' ? 'border-[#5B8BDF]' : 'border-gray-400'}`}>
-                        {timeOverAction === 'quit' && (
-                          <View
-                            style={{ backgroundColor: togglei?.color || '#5B8BDF' }}
-                            className="h-3 w-3 rounded-full"
-                          />
-                        )}
-                      </View>
-                      <Text
-                        allowFontScaling={false}
-                        style={remind}
-                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                        Quit
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-                <View
-                  style={bordert}
-                  className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                  <TouchableOpacity
-                    style={quitbg}
-                    className="w-full items-center rounded-2xl bg-[#A3B9D8] py-3 active:opacity-80"
-                    onPress={() => setModalVisible(false)}>
-                    <Text
-                      style={quit}
-                      allowFontScaling={false}
-                      className="font-regular text-[16px] text-white">
-                      Quit
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
+            onClose={() => setModalVisible(false)}
+            selectedApp={selectedApp}
+            onLaunch={handleLaunchApp}
+            isDarkMode={isDarkMode}
+            theme={fontConfig}
+          />
 
           <Modal
             animationType="fade"

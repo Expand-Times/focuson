@@ -35,7 +35,7 @@ export default function Layout() {
     'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
     'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
     'Nunito-Light': require('../assets/fonts/Nunito-Light.ttf'),
-    'FredokaOne': require('../assets/fonts/FredokaOne-Regular.ttf'),
+    'FredokaOne-Regular': require('../assets/fonts/FredokaOne-Regular.ttf'),
     'Comfortaa-Regular': require('../assets/fonts/Comfortaa-Regular.ttf'),
     'Comfortaa-Bold': require('../assets/fonts/Comfortaa-Bold.ttf'),
     'Comfortaa-Light': require('../assets/fonts/Comfortaa-Light.ttf'),
@@ -56,6 +56,8 @@ export default function Layout() {
     'RobotoSlab-Regular': require('../assets/fonts/RobotoSlab-Regular.ttf'),
     'CourierPrime-Regular': require('../assets/fonts/CourierPrime-Regular.ttf'),
     'CourierPrime-Bold': require('../assets/fonts/CourierPrime-Bold.ttf'),
+    'Dangrek-Regular': require('../assets/fonts/Dangrek-Regular.ttf'),
+    'DynaPuff-Regular': require('../assets/fonts/DynaPuff-Regular.ttf'),
   });
 
   useEffect(() => {

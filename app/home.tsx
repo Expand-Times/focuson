@@ -178,16 +178,17 @@ const BubbleCursor = ({
   );
 };
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 
+import AppModal from './context/Modal';
+
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { apps: allApps } = useAppContext();
+  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState } = useAppContext();
   const {
     wallpaper,
     wallpaperIndex,
@@ -270,15 +271,8 @@ export default function Home() {
     }), [handleSidebarInteraction, clearDragLetterState, isSidebarActive, isTouching, touchY, translateX]);
 
   // Home Apps State
-  const [homeApps, setHomeApps] = useState<AppItem[]>([]);
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
-  const [appRenames, setAppRenames] = useState<Record<string, string>>({});
-
-  // Time Over Settings State
-  const [showTimeOverSettings, setShowTimeOverSettings] = useState(false);
-  const [timeOverAction, setTimeOverAction] = useState<'mindful' | 'remind' | 'quit'>('remind');
-  const [secondWarning, setSecondWarning] = useState(true);
 
   useEffect(() => {
     // Update time immediately when timeOffset changes
@@ -298,43 +292,7 @@ export default function Home() {
         }
       };
 
-      const loadHomeApps = async () => {
-        try {
-          const stored = await AsyncStorage.getItem('homeApps');
-          if (stored) {
-            setHomeApps(JSON.parse(stored));
-          }
-        } catch (e) {
-          console.error('Failed to load home apps', e);
-        }
-      };
-
-      const loadRenamedApps = async () => {
-        try {
-          const stored = await AsyncStorage.getItem('appRenames');
-          if (stored) {
-            setAppRenames(JSON.parse(stored));
-          }
-        } catch (e) {
-          console.error('Failed to load app renames', e);
-        }
-      };
-
-      const loadTimeOverSettings = async () => {
-        try {
-          const stored = await AsyncStorage.getItem('reminderOption');
-          if (stored) {
-            setTimeOverAction(stored as any);
-          }
-        } catch (e) {
-          console.error('Failed to load time over settings', e);
-        }
-      };
-
       fetchStats();
-      loadHomeApps();
-      loadRenamedApps();
-      loadTimeOverSettings();
       // Update stats every minute while focused
       const interval = setInterval(fetchStats, 60000);
       return () => clearInterval(interval);
@@ -414,8 +372,8 @@ export default function Home() {
         }
 
         // Start the overlay timer
-        const durationMs = durationMinutes * 60 * 1000;
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, timeOverAction);
+        const durationMs = durationMinutes * 15 * 1000;
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption);
 
         // Open the app
         openApplication(selectedApp.packageName);
@@ -717,7 +675,7 @@ export default function Home() {
           </View>
 
           {/* Main Actions */}
-          <View className="w-full px-4">
+          <View className="w-full ">
             {/* Render Home Apps */}
             {wallpaperIndex === 6 ? (
               <View className="w-full relative ">
@@ -741,8 +699,8 @@ export default function Home() {
                     <View style={{ position: 'absolute', left: '50%', marginLeft: -4.5, zIndex: 10 }}>
                       <View
                         style={[{
-                          width: 9,
-                          height: 9,
+                          width: 10,
+                          height: 10,
                           borderRadius: 4.5,
                           backgroundColor: '#4C6C99',
                           zIndex: 10,
@@ -772,7 +730,7 @@ export default function Home() {
               homeApps.map((app) => (
                 <TouchableOpacity
                   key={app.packageName}
-                  className={`mb-4 w-full  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'} py-2 `}
+                  className={`mb-4 w-fulL  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
                   onPress={() => {
                     setSelectedApp(app);
                     setModalVisible(true);
@@ -914,174 +872,14 @@ export default function Home() {
               </TouchableOpacity>
             </View>
           </View>
-
-
-
-          <Modal
-            animationType="fade"
-            transparent={true}
+          <AppModal
             visible={modalVisible}
-            onRequestClose={() => setModalVisible(false)}>
-            <View className="flex-1 items-center justify-center bg-black/70">
-              <View
-                style={modalbg}
-                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
-                <View className="mb-6 items-center">
-                  <Text
-                    allowFontScaling={false}
-                    style={open}
-                    className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'}`}>
-                    Open{' '}
-                    {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
-                  </Text>
-
-                  {selectedApp?.icon && (
-                    <Image
-                      source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                      className="mb-6 h-16 w-16"
-                      resizeMode="contain"
-                    />
-                  )}
-
-                  <Text
-                    allowFontScaling={false}
-                    style={select}
-                    className={`text-center text-base font-medium ${isDarkMode ? 'text-[#728099]' : 'text-gray-800'}`}>
-                    Select estimated use time
-                  </Text>
-                </View>
-               {/* number */}
-                <View className="mb-6 flex-row flex-wrap justify-between">
-                  {[2, 5, 10, 20].map((mins) => (
-                    <TouchableOpacity
-                      key={mins}
-                      style={numberbg}
-                      className={`mb-3 w-[48%] items-center rounded-xl ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#5B8BDF]'} py-3 active:opacity-80`}
-                      onPress={() => handleLaunchApp(mins)}>
-                      <Text
-                        allowFontScaling={false}
-                        style={number}
-                        className={`text-base font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-white'}`}>
-                        {mins} min
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
-                {/* Toggle Icon */}
-                <TouchableOpacity
-                  onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
-                  className="mb-2 self-center p-2">
-                  <Ionicons
-                    style={toggle}
-                    name={showTimeOverSettings ? 'chevron-up' : 'chevron-down'}
-                    size={24}
-                    color={isDarkMode ? '#94A3B8' : '#64748B'}
-                  />
-                </TouchableOpacity>
-
-                {showTimeOverSettings && (
-                  <View className="mb-4 w-full">
-                    <Text
-                      allowFontScaling={false}
-                      style={when}
-                      className={`mb-4 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-gray-800'}`}>
-                      When time is over
-                    </Text>
-
-                    {/* Mindful Delay */}
-                    <TouchableOpacity
-                      className="mb-3 flex-row items-center"
-                      onPress={() => setTimeOverAction('mindful')}>
-                      <View
-                        style={[{ borderColor: togglei?.color || (timeOverAction === 'mindful' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'mindful' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
-                        {timeOverAction === 'mindful' && (
-                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
-                        )}
-                      </View>
-                      <Text
-                        allowFontScaling={false}
-                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                        Mindful Delay
-                      </Text>
-                    </TouchableOpacity>
-
-                    {/* Remind Me */}
-                    <View className="mb-3 flex-row items-center justify-between">
-                      <TouchableOpacity
-                        className="flex-row items-center"
-                        onPress={() => setTimeOverAction('remind')}>
-                        <View
-                          style={[{ borderColor: togglei?.color || (timeOverAction === 'remind' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
-                          className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'remind' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
-                          {timeOverAction === 'remind' && (
-                            <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
-                          )}
-                        </View>
-                        <Text
-                          allowFontScaling={false}
-                          style={remind}
-                          className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                          Remind Me
-                        </Text>
-                      </TouchableOpacity>
-
-                      {/* 2nd Warning Checkbox */}
-                      <TouchableOpacity
-                        className="flex-row items-center"
-                        onPress={() => setSecondWarning(!secondWarning)}
-                        disabled={timeOverAction !== 'remind'}
-                        style={{ opacity: timeOverAction === 'remind' ? 1 : 0.5 }}>
-                        <View
-                          style={[{ borderColor: togglei?.color || (secondWarning ? '#5B8BDF' : '#9CA3AF'), backgroundColor: secondWarning ? (togglei?.color || '#5B8BDF') : 'transparent' }, togglei]}
-                          className={`mr-2 h-4 w-4 items-center justify-center rounded border ${secondWarning ? (togglei ? '' : 'border-[#5B8BDF] bg-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
-                          {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
-                        </View>
-                        <Text
-                          allowFontScaling={false}
-                          className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
-                          2nd Warning
-                        </Text>
-                      </TouchableOpacity>
-                    </View>
-
-                    {/* Quit */}
-                    <TouchableOpacity
-                      className="mb-3 flex-row items-center"
-                      onPress={() => setTimeOverAction('quit')}>
-                      <View
-                        style={[{ borderColor: togglei?.color || (timeOverAction === 'quit' ? '#5B8BDF' : '#9CA3AF') }, togglei]}
-                        className={`mr-3 h-5 w-5 items-center justify-center rounded-full border ${timeOverAction === 'quit' ? (togglei ? '' : 'border-[#5B8BDF]') : (togglei ? '' : 'border-gray-400')}`}>
-                        {timeOverAction === 'quit' && (
-                          <View style={{ backgroundColor: togglei?.color || '#5B8BDF' }} className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`} />
-                        )}
-                      </View>
-                      <Text
-                        allowFontScaling={false}
-                        style={remind}
-                        className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
-                        Quit
-                      </Text>
-                    </TouchableOpacity>
-                  </View>
-                )}
-                <View
-                  style={bordert}
-                  className={`mt-2 border-t pt-6 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                  <TouchableOpacity
-                  style={quitbg}
-                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
-                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
-                    }`}
-                    onPress={() => setModalVisible(false)}>
-                    <Text style={quit} allowFontScaling={false} className="text-base font-medium text-white">
-                      Quit
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </View>
-            </View>
-          </Modal>
+            onClose={() => setModalVisible(false)}
+            selectedApp={selectedApp}
+            onLaunch={handleLaunchApp}
+            isDarkMode={isDarkMode}
+            theme={fontConfig}
+          />
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
