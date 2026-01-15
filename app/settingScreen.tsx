@@ -680,7 +680,7 @@ export default function SettingScreen() {
               <Text
                 allowFontScaling={false}
                 className={`mb-6 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                Set Time
+                Time Format
               </Text>
 
               {/* Format Selector */}
@@ -694,62 +694,16 @@ export default function SettingScreen() {
                   <Text
                     allowFontScaling={false}
                     className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
-                    {timeFormat === '12h'
-                      ? 'HH:MM PM'
-                      : timeFormat === '24h'
-                        ? 'HH:MM'
-                        : timeFormat}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-
-              {/* Time Picker */}
-              <View className="mb-8 h-[150px] flex-row items-center justify-center gap-4">
-                <WheelPicker
-                  data={
-                    is12HourFormat(timeFormat)
-                      ? Array.from({ length: 12 }, (_, i) => i + 1)
-                      : Array.from({ length: 24 }, (_, i) => i)
-                  }
-                  selectedValue={tempHour}
-                  onValueChange={setTempHour}
-                />
-                <Text
-                  allowFontScaling={false}
-                  className={`text-3xl font-bold ${isDarkMode ? 'text-slate-600' : 'text-slate-300'}`}>
-                  :
+                  {getCurrentDisplayTime()}
                 </Text>
-                <WheelPicker
-                  data={Array.from({ length: 60 }, (_, i) => i)}
-                  selectedValue={tempMinute}
-                  onValueChange={setTempMinute}
-                />
-                {is12HourFormat(timeFormat) && (
-                  <>
-                    <View className="w-2" />
-                    <WheelPicker
-                      data={['AM', 'PM']}
-                      selectedValue={tempAmPm}
-                      onValueChange={setTempAmPm}
-                    />
-                  </>
-                )}
+                </TouchableOpacity>
               </View>
 
               {/* Footer Actions */}
               <View className="flex-row gap-4">
                 <TouchableOpacity
-                  className={`flex-1 items-center rounded-xl py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
-                  onPress={() => setTimeFormatModalVisible(false)}>
-                  <Text
-                    allowFontScaling={false}
-                    className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
                   className="flex-1 items-center rounded-xl bg-[#7EA6E0] py-3"
-                  onPress={handleTimeSave}>
+                  onPress={() => setTimeFormatModalVisible(false)}>
                   <Text allowFontScaling={false} className="font-semibold text-white">
                     Done
                   </Text>
@@ -767,10 +721,14 @@ export default function SettingScreen() {
           <View className="flex-1 items-center justify-center bg-black/80">
             <View
               className={`relative w-[90%] rounded-3xl p-6 shadow-2xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-              <CalendarPicker selectedDate={tempDate} onDateChange={setTempDate} />
+              <Text
+                allowFontScaling={false}
+                className={`mb-6 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
+                Date Format
+              </Text>
 
               {/* Format Selector */}
-              <View className="mt-6 flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3">
+              <View className="mb-8 w-full flex-row items-center justify-between rounded-xl bg-slate-500/10 p-3">
                 <Text
                   allowFontScaling={false}
                   className={`text-base ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
@@ -780,25 +738,16 @@ export default function SettingScreen() {
                   <Text
                     allowFontScaling={false}
                     className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
-                    {getDateFormatPreview(dateFormat, tempDate)}
+                    {getDateFormatPreview(dateFormat)}
                   </Text>
                 </TouchableOpacity>
               </View>
 
               {/* Footer Actions */}
-              <View className="mt-6 flex-row gap-4">
-                <TouchableOpacity
-                  className={`flex-1 items-center rounded-xl py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-100'}`}
-                  onPress={() => setDateModalVisible(false)}>
-                  <Text
-                    allowFontScaling={false}
-                    className={`font-semibold ${isDarkMode ? 'text-white' : 'text-slate-700'}`}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
+              <View className="flex-row gap-4">
                 <TouchableOpacity
                   className="flex-1 items-center rounded-xl bg-[#7EA6E0] py-3"
-                  onPress={handleDateSave}>
+                  onPress={() => setDateModalVisible(false)}>
                   <Text allowFontScaling={false} className="font-semibold text-white">
                     Done
                   </Text>

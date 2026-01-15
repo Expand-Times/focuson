@@ -854,6 +854,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 </TouchableOpacity>
               </Link>
             )}
+          
           </View>
 
           <View className="flex-1 flex-row">
