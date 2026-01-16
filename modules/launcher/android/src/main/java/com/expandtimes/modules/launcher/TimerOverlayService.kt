@@ -35,6 +35,7 @@ class TimerOverlayService : Service() {
     private var mode: String = "remind"
     private var startUsageToday: Long = 0
     private var usageStatsManager: UsageStatsManager? = null
+    private var themeColors: Map<String, String> = emptyMap()
     
     private val handler = Handler(Looper.getMainLooper())
     private val checkUsageRunnable = object : Runnable {
@@ -74,6 +75,20 @@ class TimerOverlayService : Service() {
         limitMs = intent?.getLongExtra("DURATION_MS", 0L) ?: 0L
         targetPackageName = intent?.getStringExtra("TARGET_PACKAGE")
         mode = intent?.getStringExtra("MODE") ?: "remind"
+        
+        val bundle = intent?.extras
+        if (bundle != null) {
+            val map = mutableMapOf<String, String>()
+            for (key in bundle.keySet()) {
+                if (key.startsWith("THEME_")) {
+                    val value = bundle.getString(key)
+                    if (value != null) {
+                        map[key.removePrefix("THEME_")] = value
+                    }
+                }
+            }
+            themeColors = map
+        }
         
         if (targetPackageName != null) {
             startUsageToday = getUsageToday(targetPackageName!!)
@@ -148,6 +163,19 @@ class TimerOverlayService : Service() {
         }
     }
 
+    private fun getThemeColor(key: String, defaultColor: String): Int {
+        val colorStr = themeColors[key]
+        return if (colorStr != null) {
+            try {
+                Color.parseColor(colorStr)
+            } catch (e: Exception) {
+                Color.parseColor(defaultColor)
+            }
+        } else {
+            Color.parseColor(defaultColor)
+        }
+    }
+
     private fun showTimesUpOverlay(totalUsageToday: Long) {
         // Use a ContextThemeWrapper to ensure widgets (like Button) have a theme
         val context = android.view.ContextThemeWrapper(this, android.R.style.Theme_DeviceDefault_Light)
@@ -164,7 +192,7 @@ class TimerOverlayService : Service() {
             orientation = LinearLayout.VERTICAL
             
             val shape = android.graphics.drawable.GradientDrawable()
-            shape.setColor(Color.WHITE)
+            shape.setColor(getThemeColor("modalBg", "#FFFFFF"))
             shape.cornerRadius = 48f // Rounded corners
             background = shape
             
@@ -176,7 +204,7 @@ class TimerOverlayService : Service() {
         val title = TextView(context).apply {
             text = "Time Up!"
             textSize = 24f
-            setTextColor(Color.parseColor("#111827")) // Gray-900
+            setTextColor(getThemeColor("textColor", "#111827")) // Gray-900
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
         }
@@ -192,7 +220,7 @@ class TimerOverlayService : Service() {
         val timeStart = fullText.indexOf(timeStr)
         if (timeStart >= 0) {
             spannable.setSpan(
-                android.text.style.ForegroundColorSpan(Color.parseColor("#F59E0B")), // Amber-500
+                android.text.style.ForegroundColorSpan(getThemeColor("subtitleColor", "#F59E0B")), // Amber-500 or subtitle color
                 timeStart, timeStart + timeStr.length,
                 android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
@@ -206,7 +234,7 @@ class TimerOverlayService : Service() {
         val subtitle = TextView(context).apply {
             text = spannable
             textSize = 15f
-            setTextColor(Color.parseColor("#6B7280")) // Gray-500
+            setTextColor(getThemeColor("subtitleColor", "#6B7280")) // Gray-500
             gravity = Gravity.CENTER
             setPadding(0, 16, 0, 64)
         }
@@ -229,7 +257,7 @@ class TimerOverlayService : Service() {
         val label = TextView(context).apply {
             text = "Let me use another"
             textSize = 16f
-            setTextColor(Color.parseColor("#374151")) // Gray-700
+            setTextColor(getThemeColor("subtitleColor", "#374151")) // Gray-700
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 24)
         }
@@ -240,11 +268,11 @@ class TimerOverlayService : Service() {
             return Button(context).apply {
                 text = label
                 textSize = 14f
-                setTextColor(Color.WHITE)
+                setTextColor(getThemeColor("buttonTextColor", "#FFFFFF"))
                 isAllCaps = false
                 
                 val btnBg = android.graphics.drawable.GradientDrawable()
-                btnBg.setColor(Color.parseColor("#7EA6E0")) // Soft Blue
+                btnBg.setColor(getThemeColor("buttonBg", "#7EA6E0")) // Soft Blue
                 btnBg.cornerRadius = 16f // Pill shape
                 background = btnBg
                 
@@ -299,10 +327,200 @@ class TimerOverlayService : Service() {
         row2.addView(btn20, btn20Params)
         
         cardLayout.addView(row2)
+         // Toggle
+        val toggleBtn = TextView(context).apply {
+            text = "▼" // Unicode Down Arrow
+            textSize = 24f
+            setTextColor(getThemeColor("toggleColor", "#64748B"))
+            gravity = Gravity.CENTER
+            setPadding(16, 16, 16, 16)
+        }
+        
+        val settingsContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.VERTICAL
+            visibility = View.GONE
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            ).apply {
+                bottomMargin = 32
+            }
+        }
+
+        toggleBtn.setOnClickListener {
+            if (settingsContainer.visibility == View.VISIBLE) {
+                settingsContainer.visibility = View.GONE
+                toggleBtn.text = "▼"
+            } else {
+                settingsContainer.visibility = View.VISIBLE
+                toggleBtn.text = "▲"
+            }
+        }
+        cardLayout.addView(toggleBtn)
+
+        // "When time is over" Text
+        val whenText = TextView(context).apply {
+            text = "When time is over"
+            textSize = 16f
+            setTextColor(getThemeColor("whenTextColor", "#1F2937"))
+            gravity = Gravity.CENTER
+            setPadding(0, 0, 0, 32)
+            typeface = android.graphics.Typeface.DEFAULT_BOLD
+        }
+        settingsContainer.addView(whenText)
+
+        // Helper to update radio state
+        val radioViews = mutableMapOf<String, View>()
+        val radioBgs = mutableMapOf<String, android.graphics.drawable.GradientDrawable>()
+        
+        fun updateRadioSelection(selectedMode: String) {
+            mode = selectedMode
+            for ((key, bg) in radioBgs) {
+                if (key == selectedMode) {
+                    bg.setColor(getThemeColor("toggleIconColor", "#5B8BDF"))
+                } else {
+                    bg.setColor(Color.TRANSPARENT)
+                }
+            }
+        }
+
+        // Helper to create radio option
+        fun createRadioOption(label: String, value: String, isDisabled: Boolean = false): View {
+            val container = LinearLayout(context).apply {
+                orientation = LinearLayout.HORIZONTAL
+                gravity = Gravity.CENTER_VERTICAL
+                setPadding(0, 16, 0, 16)
+                alpha = if (isDisabled) 0.5f else 1.0f
+            }
+
+            val radioCircle = View(context).apply {
+                val size = (20 * resources.displayMetrics.density).toInt()
+                layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                    rightMargin = (12 * resources.displayMetrics.density).toInt()
+                }
+                
+                val bg = android.graphics.drawable.GradientDrawable()
+                bg.shape = android.graphics.drawable.GradientDrawable.OVAL
+                bg.setStroke((2 * resources.displayMetrics.density).toInt(), getThemeColor("toggleIconColor", "#9CA3AF"))
+                bg.setColor(if (mode == value) getThemeColor("toggleIconColor", "#5B8BDF") else Color.TRANSPARENT)
+                
+                background = bg
+                radioBgs[value] = bg
+            }
+            container.addView(radioCircle)
+
+            val text = TextView(context).apply {
+                text = label
+                textSize = 16f
+                setTextColor(getThemeColor("remindTextColor", "#374151"))
+            }
+            container.addView(text)
+            
+            radioViews[value] = container
+
+            container.setOnClickListener {
+                if (!isDisabled) {
+                    updateRadioSelection(value)
+                }
+            }
+
+            return container
+        }
+
+        // Mindful Delay (Disabled)
+        settingsContainer.addView(createRadioOption("Mindful Delay", "mindful", true))
+
+        // Remind Me Row (with 2nd Warning)
+        val remindRow = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+            )
+        }
+        
+        // Remind Me Option
+        val remindContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, 16, 0, 16)
+            layoutParams = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f)
+        }
+        
+        val remindRadio = View(context).apply {
+            val size = (20 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                rightMargin = (12 * resources.displayMetrics.density).toInt()
+            }
+            
+            val bg = android.graphics.drawable.GradientDrawable()
+            bg.shape = android.graphics.drawable.GradientDrawable.OVAL
+            bg.setStroke((2 * resources.displayMetrics.density).toInt(), getThemeColor("toggleIconColor", "#9CA3AF"))
+            bg.setColor(if (mode == "remind") getThemeColor("toggleIconColor", "#5B8BDF") else Color.TRANSPARENT)
+            
+            background = bg
+            radioBgs["remind"] = bg
+        }
+        remindContainer.addView(remindRadio)
+        
+        val remindText = TextView(context).apply {
+            text = "Remind Me"
+            textSize = 16f
+            setTextColor(getThemeColor("remindTextColor", "#374151"))
+        }
+        remindContainer.addView(remindText)
+        
+        remindContainer.setOnClickListener {
+            updateRadioSelection("remind")
+        }
+        remindRow.addView(remindContainer)
+        
+        // 2nd Warning (Static/Disabled look)
+        val warningContainer = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            alpha = 0.5f
+        }
+        
+        val checkIcon = TextView(context).apply {
+            text = "✓" // Simple checkmark
+            textSize = 12f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            
+            val size = (16 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                rightMargin = (8 * resources.displayMetrics.density).toInt()
+            }
+            
+            val bg = android.graphics.drawable.GradientDrawable()
+            bg.cornerRadius = (4 * resources.displayMetrics.density)
+            bg.setColor(getThemeColor("toggleIconColor", "#5B8BDF"))
+            background = bg
+        }
+        warningContainer.addView(checkIcon)
+        
+        val warningText = TextView(context).apply {
+            text = "2nd Warning"
+            textSize = 14f
+            setTextColor(getThemeColor("remindTextColor", "#6B7280")) // Using remind color or fallback gray
+        }
+        warningContainer.addView(warningText)
+        
+        remindRow.addView(warningContainer)
+        
+        settingsContainer.addView(remindRow)
+
+        // Quit
+        settingsContainer.addView(createRadioOption("Quit", "quit"))
+
+        cardLayout.addView(settingsContainer)
+
         
         // Divider
         val divider = View(context).apply {
-            setBackgroundColor(Color.parseColor("#E5E7EB")) // Gray-200
+            setBackgroundColor(getThemeColor("dividerColor", "#E5E7EB")) // Gray-200
         }
         val dividerParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2)
         dividerParams.setMargins(0, 0, 0, 32)
@@ -312,11 +530,11 @@ class TimerOverlayService : Service() {
         val quitBtn = Button(context).apply {
             text = "Quit"
             textSize = 16f
-            setTextColor(Color.WHITE)
+            setTextColor(getThemeColor("quitButtonTextColor", "#FFFFFF"))
             isAllCaps = false
             
             val btnBg = android.graphics.drawable.GradientDrawable()
-            btnBg.setColor(Color.parseColor("#A3B9D8")) // Stronger Blue
+            btnBg.setColor(getThemeColor("quitButtonBg", "#A3B9D8")) // Stronger Blue
             btnBg.cornerRadius = 16f
             background = btnBg
             

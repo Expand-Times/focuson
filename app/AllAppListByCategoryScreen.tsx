@@ -232,7 +232,26 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
 
         // Start the overlay timer
         const durationMs = durationMinutes * 15 * 1000;
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption);
+
+        // Prepare theme colors
+        const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+        const theme = fontConfig || ({} as any);
+        const themeColors = {
+            modalBg: theme.modalbg?.backgroundColor,
+            textColor: theme.open?.color,
+            subtitleColor: theme.select?.color,
+            buttonBg: theme.numberbg?.backgroundColor,
+            buttonTextColor: theme.number?.color,
+            quitButtonBg: theme.quitbg?.backgroundColor,
+            quitButtonTextColor: theme.quit?.color,
+            dividerColor: theme.bordert?.borderColor,
+            toggleColor: theme.toggle?.color,
+            toggleIconColor: theme.togglei?.color,
+            whenTextColor: theme.when?.color,
+            remindTextColor: theme.remind?.color,
+        };
+
+        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption, themeColors);
 
         // Open the app
         openApplication(selectedApp.packageName);

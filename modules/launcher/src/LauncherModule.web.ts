@@ -22,7 +22,7 @@ class LauncherModule extends NativeModule<LauncherModuleEvents> {
   getInstalledApps() { return []; }
   launchApp(packageName: string) { return false; }
   uninstallApp(packageName: string) { console.log("Uninstalling " + packageName); }
-  startTimerOverlay(durationMs: number, targetPackageName?: string, mode?: string) { console.log("Starting timer overlay for " + durationMs + "ms mode: " + mode); }
+  startTimerOverlay(durationMs: number, targetPackageName?: string, mode?: string, themeColors?: Record<string, string>) { console.log("Starting timer overlay for " + durationMs + "ms mode: " + mode); }
 };
 
 export default registerWebModule(LauncherModule, 'LauncherModule');

@@ -18,7 +18,7 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
   getInstalledApps(): AppItem[];
   launchApp(packageName: string): boolean;
   uninstallApp(packageName: string): void;
-  startTimerOverlay(durationMs: number, targetPackageName?: string, mode?: string): void;
+  startTimerOverlay(durationMs: number, targetPackageName?: string, mode?: string, themeColors?: Record<string, string>): void;
   getWeeklyUsageStats(): { averageDailyUsage: number, averageDailyUnlocks: number };
   getTodayUsageStats(): { totalUsageTime: number, unlockCount: number, packageUsage: Record<string, number> };
 }

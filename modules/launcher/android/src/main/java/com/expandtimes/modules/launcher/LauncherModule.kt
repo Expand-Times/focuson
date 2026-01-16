@@ -295,11 +295,18 @@ class LauncherModule : Module() {
         context.startActivity(intent)
     }
 
-    Function("startTimerOverlay") { durationMs: Double, targetPackageName: String?, mode: String? ->
+    Function("startTimerOverlay") { durationMs: Double, targetPackageName: String?, mode: String?, themeColors: Map<String, String>? ->
         val intent = Intent(context, TimerOverlayService::class.java)
         intent.putExtra("DURATION_MS", durationMs.toLong())
         intent.putExtra("TARGET_PACKAGE", targetPackageName)
         intent.putExtra("MODE", mode ?: "remind")
+        
+        if (themeColors != null) {
+            for ((key, value) in themeColors) {
+                intent.putExtra("THEME_" + key, value)
+            }
+        }
+        
         context.startService(intent)
     }
 
