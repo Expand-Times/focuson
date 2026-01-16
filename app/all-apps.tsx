@@ -597,7 +597,13 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
 
   const sidebarChars = useMemo(() => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
-    const hasNonAlpha = apps.some((app) => !/^[a-zA-Z]/.test(app.label));
+    const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
+    
+    const hasNonAlpha = visibleApps.some((app) => {
+      const name = appRenames[app.packageName] || app.label;
+      return !/^[a-zA-Z]/.test(name);
+    });
+
     let result = [...chars];
     if (hasNonAlpha) {
       result.unshift('#');
@@ -606,7 +612,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
       result.unshift('*');
     }
     return result;
-  }, [apps, pinnedPackageNames]);
+  }, [apps, pinnedPackageNames, blockedPackageNames, appRenames]);
 
   const [currentLetter, setCurrentLetter] = useState('');
 
@@ -775,6 +781,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
           </View>
 
           {/* Header */}
+          
           <View className="mb-4 flex-row items-center justify-between px-1">
             <Text
               allowFontScaling={false}

@@ -383,7 +383,8 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
       <GestureDetector gesture={leftSwipeGesture}>
         <KeyboardAvoidingView
           style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View
             className="flex-1 pt-12"
             style={[{
@@ -510,6 +511,7 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
 
               <ScrollView
                 showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
                 contentContainerStyle={{ paddingBottom: 40 }}>
                 {filteredCategories.map((category, index) => {
                   const displayTitle = renamedCategories[category.title] || category.title;

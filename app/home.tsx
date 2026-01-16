@@ -188,7 +188,7 @@ import AppModal from './context/Modal';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState } = useAppContext();
+  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState, pinnedPackageNames, blockedPackageNames } = useAppContext();
   const {
     wallpaper,
     wallpaperIndex,
@@ -208,7 +208,24 @@ export default function Home() {
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
 
   // Sidebar Logic
-  const sidebarChars = useMemo(() => ['#', ...'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')], []);
+  const sidebarChars = useMemo(() => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+    const visibleApps = allApps.filter((app) => !blockedPackageNames.includes(app.packageName));
+    
+    const hasNonAlpha = visibleApps.some((app) => {
+      const name = appRenames[app.packageName] || app.label;
+      return !/^[a-zA-Z]/.test(name);
+    });
+
+    let result = [...chars];
+    if (hasNonAlpha) {
+      result.unshift('#');
+    }
+    if (pinnedPackageNames.length > 0) {
+      result.unshift('*');
+    }
+    return result;
+  }, [allApps, pinnedPackageNames, blockedPackageNames, appRenames]);
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
   const isSidebarActive = useSharedValue(false);
@@ -773,6 +790,7 @@ export default function Home() {
                 </Text>
               </TouchableOpacity>
             </Link>
+            
           </View>
 
           {/* Footer Info */}
