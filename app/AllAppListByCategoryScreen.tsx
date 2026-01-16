@@ -56,7 +56,8 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
     customCategories,
     addCustomCategory,
     reminderOption,
-    setReminderOptionState
+    setReminderOptionState,
+    isExcludedFromTimer
   } = useAppContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
@@ -246,8 +247,12 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
   };
 
   const onAppPress = (app: AppItem) => {
-    setSelectedApp(app);
-    setLaunchModalVisible(true);
+    if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+      openApplication(app.packageName);
+    } else {
+      setSelectedApp(app);
+      setLaunchModalVisible(true);
+    }
   };
 
   const handleAppInfo = () => {

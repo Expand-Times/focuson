@@ -35,7 +35,16 @@ type AppContextType = {
   // Time Over Settings
   reminderOption: 'mindful' | 'remind' | 'quit';
   setReminderOptionState: (option: 'mindful' | 'remind' | 'quit') => Promise<void>;
+
+  // Excluded Apps from Timer
+  isExcludedFromTimer: (label: string) => boolean;
 };
+
+const EXCLUDED_LABELS = [
+  'Phone', 'Camera', 'Message', 'WhatsApp', 'Imo', 'Telegram', 
+  'Meet', 'Zoom', 'Viber', 'Play Store', 'Playstore', 'Calculator', 
+  'Contacts', 'Mail', 'Gmail', 'Settings', 'Clock'
+];
 
 const AppContext = createContext<AppContextType>({
   apps: [],
@@ -65,6 +74,8 @@ const AppContext = createContext<AppContextType>({
 
   reminderOption: 'remind',
   setReminderOptionState: async () => {},
+
+  isExcludedFromTimer: () => false,
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -190,6 +201,10 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.setItem('reminderOption', option);
   };
 
+  const isExcludedFromTimer = (label: string) => {
+    return EXCLUDED_LABELS.some(excluded => label.toLowerCase().includes(excluded.toLowerCase()));
+  };
+
   return (
     <AppContext.Provider value={{
       apps,
@@ -210,7 +225,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       renamedCategories,
       renameCategory,
       reminderOption,
-      setReminderOptionState
+      setReminderOptionState,
+      isExcludedFromTimer
     }}>
       {children}
     </AppContext.Provider>

@@ -211,7 +211,8 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     appRenames,
     renameApp,
     reminderOption,
-    setReminderOptionState
+    setReminderOptionState,
+    isExcludedFromTimer
   } = useAppContext();
   
   const apps = useMemo(() => {
@@ -355,8 +356,12 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         setSelectedPackageNames((prev) => [...prev, app.packageName]);
       }
     } else {
-      setSelectedApp(app);
-      setModalVisible(true);
+      if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+        openApplication(app.packageName);
+      } else {
+        setSelectedApp(app);
+        setModalVisible(true);
+      }
     }
   };
 

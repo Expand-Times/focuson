@@ -188,7 +188,7 @@ import AppModal from './context/Modal';
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState, pinnedPackageNames, blockedPackageNames } = useAppContext();
+  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState, pinnedPackageNames, blockedPackageNames, isExcludedFromTimer } = useAppContext();
   const {
     wallpaper,
     wallpaperIndex,
@@ -728,8 +728,12 @@ export default function Home() {
                     <TouchableOpacity
                       className="w-[40%] ml-auto items-start pl-6"
                       onPress={() => {
-                        setSelectedApp(app);
-                        setModalVisible(true);
+                        if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+                           openApplication(app.packageName);
+                        } else {
+                          setSelectedApp(app);
+                          setModalVisible(true);
+                        }
                       }}>
                       <Text
                         allowFontScaling={false}
@@ -749,8 +753,12 @@ export default function Home() {
                   key={app.packageName}
                   className={`mb-4 w-fulL  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
                   onPress={() => {
-                    setSelectedApp(app);
-                    setModalVisible(true);
+                    if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+                       openApplication(app.packageName);
+                    } else {
+                      setSelectedApp(app);
+                      setModalVisible(true);
+                    }
                   }}>
                   <Text
                     allowFontScaling={false}
