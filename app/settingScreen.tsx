@@ -633,7 +633,7 @@ export default function SettingScreen() {
   };
 
   return (
-    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
+    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0C121B]' : 'bg-[#EBF1F7]'}`}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
@@ -642,7 +642,7 @@ export default function SettingScreen() {
       />
       {/* Header */}
       <View
-        className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#EBF1F7]'}`}>
+        className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[]' : 'bg-[#EBF1F7]'}`}>
         <TouchableOpacity onPress={() => router.replace('/home')}>
           <MaterialCommunityIcons
             name="arrow-left"
@@ -885,17 +885,17 @@ export default function SettingScreen() {
         <View className="mt-4 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : '#2E3B4D'}`}>
             Home Screen
           </Text>
           {/* phone */}
           <View
-            className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#FFFFFF]'}`}>
+            className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-[#FFFFFF]'}`}>
             {/* Phone Dialer */}
             <View className="mb-4 flex-row items-center justify-between">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Phone dialer icon
               </Text>
               <TouchableOpacity
@@ -924,7 +924,7 @@ export default function SettingScreen() {
             <View className="mb-4 flex-row items-center justify-between">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Camera icon
               </Text>
               <TouchableOpacity
@@ -953,7 +953,7 @@ export default function SettingScreen() {
             <View className="mb-4 flex-row items-center justify-between">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Alarm Clock icon
               </Text>
               <TouchableOpacity
@@ -982,7 +982,7 @@ export default function SettingScreen() {
             <View className="mb-4 flex-row items-center justify-between">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Time Format
               </Text>
               <TouchableOpacity
@@ -998,7 +998,7 @@ export default function SettingScreen() {
             <View className="flex-row items-center justify-between">
               <Text
                 allowFontScaling={false}
-                className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Date Format
               </Text>
               <TouchableOpacity
@@ -1016,16 +1016,16 @@ export default function SettingScreen() {
         <View className="mt-6 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
             Display
           </Text>
           <View
-            className={`rounded-2xl py-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+            className={`rounded-2xl py-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
             {/* Select Theme Section */}
             <View className="mb-4">
               <Text
                 allowFontScaling={false}
-                className={`mb-[5%] mt-[4%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`mb-[5%] mt-[4%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Select Theme
               </Text>
               <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
@@ -1045,7 +1045,7 @@ export default function SettingScreen() {
             <View className="mb-[4%] mt-[4%] flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
-                className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Show Status Bar
               </Text>
               <TouchableOpacity
@@ -1074,7 +1074,7 @@ export default function SettingScreen() {
             <View className="mb-[4%] flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
-                className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Show Usage Info
               </Text>
               <TouchableOpacity
@@ -1105,13 +1105,13 @@ export default function SettingScreen() {
         <View className="mt-6 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
             In-app time reminder
           </Text>
-          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+          <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
             <Text
               allowFontScaling={false}
-              className={`mb-[2%] mt-[2%] px-2 text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+              className={`mb-[2%] mt-[2%] px-2 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
               When time is over (Set Default)
             </Text>
 
@@ -1122,11 +1122,11 @@ export default function SettingScreen() {
                 <MaterialCommunityIcons
                   name={reminderOption === 'mindful' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
-                  color="#5C8BCC"
+                  color={isDarkMode ? "#DBDFE5":"#5C8BCC"}
                 />
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#858E9D]'}`}>
+                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#858E9D]'}`}>
                   Mindful delay{' '}
                   <Text allowFontScaling={false} className="text-[12px]">
                     (coming soon)
@@ -1140,11 +1140,11 @@ export default function SettingScreen() {
                 <MaterialCommunityIcons
                   name={reminderOption === 'remind' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
-                  color="#5C8BCC"
+                  color={isDarkMode ? "#DBDFE5":"#5C8BCC"}
                 />
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Remind Me
                 </Text>
               </TouchableOpacity>
@@ -1155,11 +1155,11 @@ export default function SettingScreen() {
                 <MaterialCommunityIcons
                   name={reminderOption === 'quit' ? 'radiobox-marked' : 'radiobox-blank'}
                   size={25}
-                  color="#5C8BCC"
+                  color={isDarkMode ? "#DBDFE5":"#5C8BCC"}
                 />
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular ml-2 text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Quit
                 </Text>
               </TouchableOpacity>
@@ -1172,21 +1172,21 @@ export default function SettingScreen() {
           <View className="flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
-              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-slate-700'}`}>
               More
             </Text>
             <TouchableOpacity onPress={() => setShowMore(!showMore)}>
               <MaterialCommunityIcons
                 name={showMore ? 'chevron-up' : 'chevron-down'}
                 size={24}
-                color="#89A2CA"
+                color={isDarkMode ? "#728099" :"#89A2CA"}
               />
             </TouchableOpacity>
           </View>
 
           {showMore && (
             <View
-              className={`rounded-2xl mb-[4%] mt-[4%] p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              className={`rounded-2xl mb-[4%] mt-[4%] p-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
               {/* signout */}
               <View className="mb-2 rounded-xl ">
                 {/* Header Row with Chevron */}
@@ -1205,7 +1205,7 @@ export default function SettingScreen() {
                     </View> */}
                     <Text
                       allowFontScaling={false}
-                      className={`font-regular text-[16px] ${isDarkMode ? 'text-[#EBF2F0]' : 'text-[#2B2D42]'}`}>
+                      className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2B2D42]'}`}>
                       Sign Out
                     </Text>
                   </View>
@@ -1213,7 +1213,7 @@ export default function SettingScreen() {
                   <Ionicons
                     name={showSignOut ? 'chevron-up' : 'chevron-down'}
                     size={20}
-                    color={isDarkMode ? '#AAB2B0' : '#DFDFDF'}
+                    color={isDarkMode ? '#728099' : '#DFDFDF'}
                   />
                 </TouchableOpacity>
 
@@ -1247,11 +1247,13 @@ export default function SettingScreen() {
               <View className="flex-row items-center justify-between py-2">
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Free Version
                 </Text>
-                <TouchableOpacity className="rounded-xl bg-[#7EA9E5] px-4 py-2">
-                  <Text allowFontScaling={false} className="font-regular text-[12px] text-white">
+                <TouchableOpacity className={`rounded-xl ${isDarkMode ? 'bg-[#7FA8E5]' : 'bg-[#7EA9E5]'} px-4 py-2`}>
+                  <Text
+                    allowFontScaling={false}
+                    className={`font-regular text-[12px] ${isDarkMode ? 'text-[#0C121B]' : 'text-white'}`}>
                     Check Premium
                   </Text>
                 </TouchableOpacity>
@@ -1260,7 +1262,7 @@ export default function SettingScreen() {
               <TouchableOpacity className="py-2">
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Recommend to F&F
                 </Text>
               </TouchableOpacity>
@@ -1273,9 +1275,9 @@ export default function SettingScreen() {
           <View className="mb-2 flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
-              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
               About{' '}
-              <Text allowFontScaling={false} className="text-[18px] font-semibold text-[#2E3B4D]">
+              <Text allowFontScaling={false} className="text-[18px] font-semibold ">
                 Minimal Life
               </Text>
             </Text>
@@ -1283,23 +1285,23 @@ export default function SettingScreen() {
               <MaterialCommunityIcons
                 name={showAbout ? 'chevron-up' : 'chevron-down'}
                 size={24}
-                color="#7EA6E0"
+                color={isDarkMode ? "#728099" : "#7EA6E0"}
               />
             </TouchableOpacity>
           </View>
 
           {showAbout && (
             <View
-              className={`flex-row items-center justify-center rounded-2xl py-8 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              className={`flex-row items-center justify-center rounded-2xl py-8 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
               <TouchableOpacity
-                className="flex-1 items-center border-r border-slate-200"
+                className="flex-1 items-center border-r border-[#728099]"
                 onPress={() => {
                   setInfoModalType('privacy');
                   setInfoModalVisible(true);
                 }}>
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Privacy Policy
                 </Text>
               </TouchableOpacity>
@@ -1311,7 +1313,7 @@ export default function SettingScreen() {
                 }}>
                 <Text
                   allowFontScaling={false}
-                  className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                  className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                   Our Goal
                 </Text>
               </TouchableOpacity>
@@ -1321,9 +1323,9 @@ export default function SettingScreen() {
 
         {/* Support Section */}
         <View
-          className={`mx-4 mb-[5%] mt-[10%] rounded-2xl shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#FFFFFF]'}`}>
+          className={`mx-4 mb-[5%] mt-[10%] rounded-2xl shadow-md ${isDarkMode ? 'bg-[#131B27]' : 'bg-[#FFFFFF]'}`}>
           <View
-            className={`mb-[5%] mt-[5%] flex-row justify-around ${isDarkMode ? 'border-[#121212]' : 'border-[#FFFFFF]'}`}>
+            className={`mb-[5%] mt-[5%] flex-row justify-around ${isDarkMode ? 'border-[#434C59]' : 'border-[#FFFFFF]'}`}>
             {['App Issue', 'Suggestion'].map((option) => {
               const value = option === 'App Issue' ? 'issue' : 'suggestion';
               const isSelected = contactOption === value;
@@ -1335,11 +1337,11 @@ export default function SettingScreen() {
                   <MaterialCommunityIcons
                     name={isSelected ? 'radiobox-marked' : 'radiobox-blank'}
                     size={24}
-                    color={isSelected ? (isDarkMode ? '#637E99' : selectedColor) : '#5C8BCC'}
+                    color={isDarkMode ? '#738099'  : '#5C8BCC'}
                   />
                   <Text
                     allowFontScaling={false}
-                    className={`ml-2 text-[15px] ${isSelected ? 'font-bold' : ''} ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#2E3B4D]'}`}>
+                    className={`ml-2 text-[15px] ${isSelected ? 'font-bold text-[#DBDFE5]' : ''} ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#2E3B4D]'}`}>
                     {option}
                   </Text>
                 </TouchableOpacity>
@@ -1353,18 +1355,18 @@ export default function SettingScreen() {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleEmailPress}
-            className={`mx-[20%] mt-[5%] items-center justify-center rounded-2xl py-5 shadow-lg ${isDarkMode ? 'bg-[#637E99]' : ''}`}
-            style={!isDarkMode ? { backgroundColor: selectedColor } : {}}>
+            className={`mx-[20%] mt-[5%] items-center justify-center rounded-full py-5 shadow-lg ${isDarkMode ? 'bg-[#212C40]' : '#7EA9E5'}`}
+         >
             <Text
               allowFontScaling={false}
-              className={`text-sm font-medium ${isDarkMode ? 'text-black' : 'text-white'}`}>
+              className={`text-sm font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
               Contact Us
             </Text>
           </TouchableOpacity>
 
           <Text
             allowFontScaling={false}
-            className={`font-regular mb-[5%] mt-[5%] text-center text-[12px] ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#8D99AE]'}`}>
+            className={`font-regular mb-[5%] mt-[5%] text-center text-[12px] ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8D99AE]'}`}>
             Please let us know any issue or suggestion.
             {'\n'}Our dedicated developers are ready to fix your issue ASAP.
           </Text>
@@ -1373,8 +1375,8 @@ export default function SettingScreen() {
         {/* Rate on Google Play */}
         <TouchableOpacity
           onPress={openPlayStoreForRating}
-          className="mx-[10%] mb-[10%] mt-[10%] items-center rounded-full bg-[#6087BF] py-4 shadow-sm">
-          <Text allowFontScaling={false} className="font-regular text-[14px] text-white">
+          className={`mx-[10%] mb-[10%] mt-[10%] items-center rounded-full ${isDarkMode ? 'bg-[#6087BF]':'bg-[#6087BF]'} py-4 shadow-sm`}>
+          <Text allowFontScaling={false} className={`font-regular text-[14px] ${isDarkMode ? 'text-[#131B27]':'text-[#FFF]'}`}>
             Rate on Google Play
           </Text>
         </TouchableOpacity>
@@ -1383,13 +1385,13 @@ export default function SettingScreen() {
         <TouchableOpacity className="mb-8 flex-row items-center justify-center">
           <Text
             allowFontScaling={false}
-            className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
             Device Setting
           </Text>
           <MaterialCommunityIcons
             name="cog-outline"
             size={24}
-            color={isDarkMode ? '#CBD5E1' : '#2E3B4D'}
+            color={isDarkMode ? '#728099' : '#2E3B4D'}
           />
         </TouchableOpacity>
       </ScrollView>
