@@ -646,7 +646,7 @@ export default function SettingScreen() {
         <TouchableOpacity onPress={() => router.replace('/home')}>
           <MaterialCommunityIcons
             name="arrow-left"
-            size={24}
+            size={26}
             color={isDarkMode ? '#E2E8F0' : '#8698B2'}
           />
         </TouchableOpacity>
@@ -658,7 +658,7 @@ export default function SettingScreen() {
         <TouchableOpacity>
           <MaterialCommunityIcons
             name="magnify"
-            size={24}
+            size={26}
             color={isDarkMode ? '#94A3B8' : '#8698B2'}
           />
         </TouchableOpacity>
@@ -885,7 +885,7 @@ export default function SettingScreen() {
         <View className="mt-4 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
+            className={`mb-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
             Home Screen
           </Text>
           {/* phone */}
