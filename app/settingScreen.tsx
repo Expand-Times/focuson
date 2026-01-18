@@ -151,13 +151,13 @@ export default function SettingScreen() {
 
   const handleApplyTheme = () => {
     setIsProcessing(true);
-    
+
     // Apply logic here
     const selectedTheme = THEME_DATA[currentThemeIndex];
     if (selectedTheme) {
       setWallpaper(AVAILABLE_WALLPAPERS[selectedTheme.wallpaperIndex]);
     }
-    
+
     setTimeout(() => {
       setIsProcessing(false);
       router.push('/home');
@@ -694,8 +694,8 @@ export default function SettingScreen() {
                   <Text
                     allowFontScaling={false}
                     className={`font-medium ${isDarkMode ? 'text-[#7EA6E0]' : 'text-[#7EA6E0]'}`}>
-                  {getCurrentDisplayTime()}
-                </Text>
+                    {getCurrentDisplayTime()}
+                  </Text>
                 </TouchableOpacity>
               </View>
 
@@ -885,7 +885,7 @@ export default function SettingScreen() {
         <View className="mt-4 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : '#2E3B4D'}`}>
             Home Screen
           </Text>
           {/* phone */}
@@ -986,7 +986,7 @@ export default function SettingScreen() {
                 Time Format
               </Text>
               <TouchableOpacity
-                className="rounded-lg bg-[#7EA9E5] px-3 py-2"
+                className={`rounded-xl px-3 py-2 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                 onPress={() => setTimeFormatModalVisible(true)}>
                 <Text allowFontScaling={false} className="text-sm text-white">
                   {getCurrentDisplayTime()}
@@ -1002,7 +1002,7 @@ export default function SettingScreen() {
                 Date Format
               </Text>
               <TouchableOpacity
-                className="rounded-lg bg-[#7EA9E5] px-3 py-2"
+                className={`rounded-xl ${isDarkMode?'bg-[#7EA9E5]':'bg-[#7EA9E5]'} px-3 py-2`}
                 onPress={() => setDateModalVisible(true)}>
                 <Text allowFontScaling={false} className="text-sm text-white">
                   {getDateFormatPreview(dateFormat)}
@@ -1013,10 +1013,10 @@ export default function SettingScreen() {
         </View>
 
         {/* Display Section */}
-        <View className="mt-6">
+        <View className="mt-6 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-2 px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             Display
           </Text>
           <View
@@ -1025,7 +1025,7 @@ export default function SettingScreen() {
             <View className="mb-4">
               <Text
                 allowFontScaling={false}
-                className={`mb-4 px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+                className={`mb-[5%] mt-[4%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                 Select Theme
               </Text>
               <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
@@ -1034,8 +1034,7 @@ export default function SettingScreen() {
                   style={{
                     width: '100%',
                     height: 100,
-                    borderTopLeftRadius: 12,
-                    borderBottomLeftRadius: 12,
+                   
                   }}
                   resizeMode="cover"
                 />
@@ -1043,7 +1042,7 @@ export default function SettingScreen() {
             </View>
 
             {/* Show Status Bar */}
-            <View className="mb-4 flex-row items-center justify-between px-4">
+            <View className="mb-[4%] mt-[4%] flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
@@ -1072,7 +1071,7 @@ export default function SettingScreen() {
             </View>
 
             {/* Show Usage Info */}
-            <View className="flex-row items-center justify-between px-4">
+            <View className="mb-[4%] flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
@@ -1106,13 +1105,13 @@ export default function SettingScreen() {
         <View className="mt-6 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-2 text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
             In-app time reminder
           </Text>
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
             <Text
               allowFontScaling={false}
-              className={`mb-3 text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+              className={`mb-[2%] mt-[2%] px-2 text-[16px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
               When time is over (Set Default)
             </Text>
 
@@ -1170,10 +1169,10 @@ export default function SettingScreen() {
 
         {/* More */}
         <View className="mt-6 px-4">
-          <View className="mb-2 flex-row items-center justify-between">
+          <View className="flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
-              className={`text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
               More
             </Text>
             <TouchableOpacity onPress={() => setShowMore(!showMore)}>
@@ -1187,7 +1186,7 @@ export default function SettingScreen() {
 
           {showMore && (
             <View
-              className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              className={`rounded-2xl mb-[4%] mt-[4%] p-4 shadow-sm ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
               {/* signout */}
               <View className="mb-2 rounded-xl ">
                 {/* Header Row with Chevron */}
@@ -1251,7 +1250,7 @@ export default function SettingScreen() {
                   className={`font-regular text-[16px] ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
                   Free Version
                 </Text>
-                <TouchableOpacity className="rounded-lg bg-[#7EA9E5] px-4 py-2">
+                <TouchableOpacity className="rounded-xl bg-[#7EA9E5] px-4 py-2">
                   <Text allowFontScaling={false} className="font-regular text-[12px] text-white">
                     Check Premium
                   </Text>
@@ -1274,7 +1273,7 @@ export default function SettingScreen() {
           <View className="mb-2 flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
-              className={`text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
+              className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-slate-300' : 'text-[#2E3B4D]'}`}>
               About{' '}
               <Text allowFontScaling={false} className="text-[18px] font-semibold text-[#2E3B4D]">
                 Minimal Life
@@ -1322,7 +1321,7 @@ export default function SettingScreen() {
 
         {/* Support Section */}
         <View
-          className={`mt-4 mx-4 rounded-2xl   shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#FFFFFF]'}`}>
+          className={`mx-4 mb-[5%] mt-[10%] rounded-2xl shadow-md ${isDarkMode ? 'bg-[#1E1E1E]' : 'bg-[#FFFFFF]'}`}>
           <View
             className={`mb-[5%] mt-[5%] flex-row justify-around ${isDarkMode ? 'border-[#121212]' : 'border-[#FFFFFF]'}`}>
             {['App Issue', 'Suggestion'].map((option) => {
@@ -1374,7 +1373,7 @@ export default function SettingScreen() {
         {/* Rate on Google Play */}
         <TouchableOpacity
           onPress={openPlayStoreForRating}
-          className="mx-[10%] mb-[10%] mt-[10%] items-center rounded-full bg-[#7EA9E5] py-4 shadow-sm">
+          className="mx-[10%] mb-[10%] mt-[10%] items-center rounded-full bg-[#6087BF] py-4 shadow-sm">
           <Text allowFontScaling={false} className="font-regular text-[14px] text-white">
             Rate on Google Play
           </Text>
@@ -1407,11 +1406,9 @@ export default function SettingScreen() {
             <TouchableOpacity
               style={{ position: 'absolute', left: 20, zIndex: 10 }}
               onPress={() => setThemeModalVisible(false)}>
-              <Ionicons name="arrow-back" size={24} color='#132C4D' />
+              <Ionicons name="arrow-back" size={24} color="#132C4D" />
             </TouchableOpacity>
-            <Text
-              allowFontScaling={false}
-              className={`text-xl font-medium text-[#132C4D]`}>
+            <Text allowFontScaling={false} className={`text-xl font-medium text-[#132C4D]`}>
               {THEME_DATA[currentThemeIndex]?.name || 'Theme'}
             </Text>
           </View>
@@ -1481,7 +1478,7 @@ export default function SettingScreen() {
               className={`w-full items-center rounded-2xl bg-[#7EA9E5] py-4 shadow-lg active:opacity-90 ${
                 isProcessing ? 'opacity-70' : ''
               }`}>
-              <Text allowFontScaling={false} className="text-[16px] font-regular text-white">
+              <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
                 {isProcessing ? 'Processing...' : 'Apply this theme'}
               </Text>
             </TouchableOpacity>
@@ -1508,7 +1505,9 @@ export default function SettingScreen() {
                   resizeMode="contain"
                 />
                 <ActivityIndicator size="large" color="#7EA9E5" />
-                <Text allowFontScaling={false} className="mt-4 text-[16px] font-medium text-[#2E3B4D]">
+                <Text
+                  allowFontScaling={false}
+                  className="mt-4 text-[16px] font-medium text-[#2E3B4D]">
                   Processing...
                 </Text>
               </View>
@@ -1519,4 +1518,3 @@ export default function SettingScreen() {
     </SafeAreaView>
   );
 }
-
