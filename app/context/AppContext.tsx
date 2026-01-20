@@ -41,7 +41,7 @@ type AppContextType = {
 };
 
 const EXCLUDED_LABELS = [
-  'Phone', 'Camera', 'Message', 'WhatsApp', 'Imo', 'Telegram', 
+  'Phone', 'Camera', 'Message', 'Imo', 'Telegram', 
   'Meet', 'Zoom', 'Viber', 'Play Store', 'Playstore', 'Calculator', 
   'Contacts', 'Mail', 'Gmail', 'Settings', 'Clock'
 ];

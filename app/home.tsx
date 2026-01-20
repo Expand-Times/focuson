@@ -875,7 +875,7 @@ export default function Home() {
                     size={24}
                     color={
                       wallpaper && typeof wallpaper !== 'string'
-                        ? '#E6EBF2'
+                        ? dialer?.color || '#E6EBF2'
                         : isDarkMode
                           ? '#CBD5E1'
                           : '#2E3A4C'
@@ -900,7 +900,7 @@ export default function Home() {
                     size={24}
                     color={
                       wallpaper && typeof wallpaper !== 'string'
-                        ? '#E6EBF2'
+                        ? dialer?.color || '#E6EBF2'
                         : isDarkMode
                           ? '#CBD5E1'
                           : '#2E3A4C'
