@@ -42,126 +42,11 @@ import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
+import { SidebarItem, BubbleCursor } from './context/Sidebar';
+
 const ITEM_HEIGHT = 20;
 
-const SidebarItem = ({
-  letter,
-  index,
-  touchY,
-  isTouching,
-  onSelect,
-  isDarkMode,
-  currentLetter,
-  isImageWallpaper,
-  alphaside,
-}: {
-  letter: string;
-  index: number;
-  touchY: SharedValue<number>;
-  isTouching: SharedValue<boolean>;
-  onSelect: (letter: string) => void;
-  isDarkMode: boolean;
-  isImageWallpaper?: boolean;
-  currentLetter: string;
-  alphaside?: any;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-    const dist = Math.abs(touchY.value - itemY);
 
-    const translateX = interpolate(dist, [0, 60], [-40, 0], Extrapolation.CLAMP);
-
-    const scale = interpolate(dist, [0, 60], [2, 1], Extrapolation.CLAMP);
-
-    return {
-      transform: [
-        { translateX: withSpring(isTouching.value ? translateX : 0) },
-        { scale: withSpring(isTouching.value ? scale : 1) },
-      ],
-      zIndex: isTouching.value && dist < 30 ? 100 : 1,
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 },
-        animatedStyle,
-      ]}>
-      <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
-        <Text
-          allowFontScaling={false}
-          style={alphaside}
-          className={`text-[12px] font-medium ${
-            currentLetter === letter
-              ? isImageWallpaper
-                ? 'text-[16px] font-bold text-white'
-                : isDarkMode
-                  ? 'text-[16px] font-bold text-[#738099]'
-                  : 'text-[14px] font-extrabold text-[#405B80]'
-              : isImageWallpaper
-                ? 'text-white'
-                : isDarkMode
-                  ? 'text-[#738099]'
-                  : 'text-[#405B80]'
-          }`}>
-          {letter}
-        </Text>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-const BubbleCursor = ({
-  touchY,
-  isTouching,
-  letter,
-  isDarkMode,
-  bubblebg,
-}: {
-  touchY: SharedValue<number>;
-  isTouching: SharedValue<boolean>;
-  letter: string;
-  isDarkMode: boolean;
-  bubblebg?: any;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateY: touchY.value - 25 }, // Center vertically (50/2)
-        { scale: withSpring(isTouching.value ? 1 : 0) },
-        { translateX: withSpring(isTouching.value ? -50 : 0) },
-      ],
-      opacity: withSpring(isTouching.value ? 1 : 0),
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          right: 30, // Position to the left of the sidebar
-          width: 50,
-          height: 50,
-          borderRadius: 25,
-          backgroundColor: isDarkMode ? '#212C40' : '#fff', // Green color like in screenshot
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 100,
-          elevation: 5,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-        },
-        bubblebg,
-        animatedStyle,
-      ]}>
-      <Text style={bubblebg} className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>{letter}</Text>
-    </Animated.View>
-  );
-};
 
 export default function AllApps({ enableGestures = true, initialLetter, showSidebar = true }: { enableGestures?: boolean, initialLetter?: string, showSidebar?: boolean } = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
@@ -852,7 +737,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
               </View>
             ) : (
               <Link href="/settingScreen" asChild>
-                <TouchableOpacity>
+                <TouchableOpacity hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <View
                     style={[
                       {
@@ -862,7 +747,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                       },
                       allappi,
                     ]}
-                    className={`rounded-lg border-2 ${
+                    className={`rounded-lg border-2  ${
                       allappi
                         ? ''
                         : isImageWallpaper
@@ -933,9 +818,12 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                     <BubbleCursor
                       touchY={touchY}
                       isTouching={isTouching}
-                      letter={dragLetter}
+                      alphabet={sidebarChars}
                       isDarkMode={isDarkMode}
-                      bubblebg={bubblebg}
+                      style={bubblebg}
+                      itemHeight={ITEM_HEIGHT}
+                      cursorSize={50}
+                      bubbleColor={isDarkMode ? '#212C40' : '#fff'}
                     />
                     {sidebarChars.map((letter, index) => (
                       <SidebarItem
@@ -948,7 +836,8 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                         isDarkMode={isDarkMode}
                         isImageWallpaper={!!isImageWallpaper}
                         currentLetter={currentLetter}
-                        alphaside={alphaside}
+                        style={alphaside}
+                        itemHeight={ITEM_HEIGHT}
                       />
                     ))}
                   </View>

@@ -36,159 +36,28 @@ import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import AllAppListByCategoryScreen from './AllAppListByCategoryScreen';
 import AllApps from './all-apps';
-
-const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEM_HEIGHT = (height * 0.65) / 28;
-const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
-
-const SidebarItem = ({
-  letter,
-  index,
-  touchY,
-  isTouching,
-  onSelect,
-  isDarkMode,
-  currentLetter,
-  alpha,
-}: {
-  letter: string;
-  index: number;
-  touchY: SharedValue<number>;
-  isTouching: SharedValue<boolean>;
-  onSelect: (letter: string) => void;
-  isDarkMode: boolean;
-  currentLetter: string;
-  alpha?: any;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    const itemY = index * ITEM_HEIGHT + ITEM_HEIGHT / 2;
-    const diff = itemY - touchY.value;
-    const dist = Math.abs(diff);
-    const direction = diff > 0 ? 1 : -1;
-
-    const RANGE = ITEM_HEIGHT * 5;
-    const MAX_SCALE = 2;
-
-    let spreadY = 0;
-    if (isTouching.value) {
-      if (dist < RANGE) {
-        spreadY = (MAX_SCALE - 1) * dist * (1 - dist / (2 * RANGE));
-      } else {
-        spreadY = ((MAX_SCALE - 1) * RANGE) / 2;
-      }
-    }
-
-    const finalTranslateY = direction * spreadY;
-
-    const translateX = interpolate(
-      dist,
-      [0, ITEM_HEIGHT * 5],
-      [-ITEM_HEIGHT * 6, 0],
-      Extrapolation.CLAMP
-    );
-
-    const scale = interpolate(dist, [0, ITEM_HEIGHT * 5], [MAX_SCALE, 1], Extrapolation.CLAMP);
-
-    return {
-      transform: [
-        { translateX: withSpring(isTouching.value ? translateX : 0) },
-        { translateY: withSpring(isTouching.value ? finalTranslateY : 0) },
-        { scale: withSpring(isTouching.value ? scale : 1) },
-      ],
-      zIndex: isTouching.value && dist < ITEM_HEIGHT * 1.5 ? 100 : 1,
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        { height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center', width: 24 },
-        animatedStyle,
-      ]}>
-      <TouchableOpacity onPress={() => onSelect(letter)} activeOpacity={0.7}>
-        <Text
-          allowFontScaling={false}
-
-          style={[{ fontSize: currentLetter === letter ? ITEM_HEIGHT * 0.8 : ITEM_HEIGHT * 0.6 }, alpha]}
-          className={`font-medium ${
-            currentLetter === letter
-              ? isDarkMode
-                ? 'font-bold text-white'
-                : 'font-extrabold text-[#5C8BCC]'
-              : isDarkMode
-                ? 'text-[#738099]'
-                : 'text-[#405B80]'
-          }`}>
-          {letter}
-        </Text>
-      </TouchableOpacity>
-    </Animated.View>
-  );
-};
-
-const BubbleCursor = ({
-  touchY,
-  isTouching,
-  letter,
-  isDarkMode,
-  bubblebg,
-}: {
-  touchY: SharedValue<number>;
-  isTouching: SharedValue<boolean>;
-  letter: string;
-  isDarkMode: boolean;
-  bubblebg?: any;
-}) => {
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        { translateY: touchY.value - CURSOR_SIZE / 2 },
-        { scale: withSpring(isTouching.value ? 1 : 0) },
-        { translateX: withSpring(isTouching.value ? -ITEM_HEIGHT * 6 : 0) },
-      ],
-      opacity: withSpring(isTouching.value ? 1 : 0),
-    };
-  });
-
-  return (
-    <Animated.View
-      style={[
-        {
-          position: 'absolute',
-          right: ITEM_HEIGHT * 1.5,
-          width: CURSOR_SIZE,
-          height: CURSOR_SIZE,
-          borderRadius: CURSOR_SIZE / 2,
-          backgroundColor: isDarkMode ? '#4ADE80' : '#fff',
-          justifyContent: 'center',
-          alignItems: 'center',
-          zIndex: 100,
-          elevation: 5,
-          shadowColor: '#000',
-          shadowOffset: { width: 0, height: 2 },
-          shadowOpacity: 0.25,
-          shadowRadius: 3.84,
-        },bubblebg,
-        animatedStyle,
-      ]}>
-      <Text style={[{ fontSize: CURSOR_SIZE * 0.4 }, bubblebg]} className={`font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}>
-        {letter}
-      </Text>
-    </Animated.View>
-  );
-};
-
+import { SidebarItem, BubbleCursor } from './context/Sidebar';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
-
 import AppModal from './context/Modal';
-
+const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
+const ITEM_HEIGHT = (height * 0.65) / 28;
+const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
 export default function Home() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { apps: allApps, homeApps, appRenames, reminderOption, setReminderOptionState, pinnedPackageNames, blockedPackageNames, isExcludedFromTimer } = useAppContext();
+  const {
+    apps: allApps,
+    homeApps,
+    appRenames,
+    reminderOption,
+    setReminderOptionState,
+    pinnedPackageNames,
+    blockedPackageNames,
+    isExcludedFromTimer,
+  } = useAppContext();
   const {
     wallpaper,
     wallpaperIndex,
@@ -211,7 +80,7 @@ export default function Home() {
   const sidebarChars = useMemo(() => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const visibleApps = allApps.filter((app) => !blockedPackageNames.includes(app.packageName));
-    
+
     const hasNonAlpha = visibleApps.some((app) => {
       const name = appRenames[app.packageName] || app.label;
       return !/^[a-zA-Z]/.test(name);
@@ -238,7 +107,12 @@ export default function Home() {
   const navigateToAllAppsWithLetter = (letter: string) => {
     setDragLetter(letter);
     setAllAppsLetter(letter);
-    translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
+    translateX.value = withSpring(-SCREEN_WIDTH * 2, {
+      damping: 40,
+      stiffness: 1500,
+      overshootClamping: true,
+      mass: 0.3,
+    });
   };
 
   const clearDragLetterState = useCallback(() => {
@@ -246,46 +120,81 @@ export default function Home() {
     lastLetterRef.current = '';
   }, []);
 
-  const handleSidebarInteraction = useCallback((index: number) => {
-    if (index >= 0 && index < sidebarChars.length) {
-      const letter = sidebarChars[index];
-      
-      // Only update if the letter has changed to prevent excessive re-renders
-      if (letter !== lastLetterRef.current) {
-        lastLetterRef.current = letter;
-        setDragLetter(letter);
-        setAllAppsLetter(letter);
-        
-        // Ensure we are on AllApps screen
-        if (translateX.value > -SCREEN_WIDTH * 1.5) {
-          translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
+  const handleSidebarInteraction = useCallback(
+    (index: number) => {
+      if (index >= 0 && index < sidebarChars.length) {
+        const letter = sidebarChars[index];
+
+        // Only update if the letter has changed to prevent excessive re-renders
+        if (letter !== lastLetterRef.current) {
+          lastLetterRef.current = letter;
+          setDragLetter(letter);
+          setAllAppsLetter(letter);
+
+          // Ensure we are on AllApps screen
+          if (translateX.value > -SCREEN_WIDTH * 1.5) {
+            translateX.value = withSpring(-SCREEN_WIDTH * 2, {
+              damping: 40,
+              stiffness: 1500,
+              overshootClamping: true,
+              mass: 0.3,
+            });
+          }
         }
       }
-    }
-  }, [sidebarChars, translateX]);
+    },
+    [sidebarChars, translateX]
+  );
 
-  const sidebarGesture = useMemo(() => Gesture.Pan()
-    .onBegin((e) => {
-      isSidebarActive.value = true;
-      isTouching.value = true;
-      touchY.value = e.y;
-      const index = Math.floor(e.y / ITEM_HEIGHT);
-      runOnJS(handleSidebarInteraction)(index);
-    })
-    .onUpdate((e) => {
-      touchY.value = e.y;
-      const index = Math.floor(e.y / ITEM_HEIGHT);
-      runOnJS(handleSidebarInteraction)(index);
-    })
-    .onEnd(() => {
-       // Logic handled in update
-    })
-    .onFinalize(() => {
-      isSidebarActive.value = false;
-      isTouching.value = false;
-      runOnJS(clearDragLetterState)();
-      translateX.value = withSpring(-SCREEN_WIDTH * 2, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
-    }), [handleSidebarInteraction, clearDragLetterState, isSidebarActive, isTouching, touchY, translateX]);
+  const sidebarGesture = useMemo(
+    () =>
+      Gesture.Pan()
+        .onBegin((e) => {
+          isSidebarActive.value = true;
+          isTouching.value = true;
+          touchY.value = e.y;
+
+          // Start navigation animation immediately on UI thread
+          if (translateX.value > -SCREEN_WIDTH * 1.5) {
+            translateX.value = withSpring(-SCREEN_WIDTH * 2, {
+              damping: 40,
+              stiffness: 1500,
+              overshootClamping: true,
+              mass: 0.3,
+            });
+          }
+
+          const index = Math.floor(e.y / ITEM_HEIGHT);
+          runOnJS(handleSidebarInteraction)(index);
+        })
+        .onUpdate((e) => {
+          touchY.value = e.y;
+          const index = Math.floor(e.y / ITEM_HEIGHT);
+          runOnJS(handleSidebarInteraction)(index);
+        })
+        .onEnd(() => {
+          // Logic handled in update
+        })
+        .onFinalize(() => {
+          isSidebarActive.value = false;
+          isTouching.value = false;
+          runOnJS(clearDragLetterState)();
+          translateX.value = withSpring(-SCREEN_WIDTH * 2, {
+            damping: 40,
+            stiffness: 1500,
+            overshootClamping: true,
+            mass: 0.3,
+          });
+        }),
+    [
+      handleSidebarInteraction,
+      clearDragLetterState,
+      isSidebarActive,
+      isTouching,
+      touchY,
+      translateX,
+    ]
+  );
 
   // Home Apps State
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
@@ -390,26 +299,31 @@ export default function Home() {
 
         // Start the overlay timer
         const durationMs = durationMinutes * 15 * 1000;
-        
+
         // Prepare theme colors
         const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
         const theme = fontConfig || ({} as any);
         const themeColors = {
-            modalBg: theme.modalbg?.backgroundColor,
-            textColor: theme.open?.color,
-            subtitleColor: theme.select?.color,
-            buttonBg: theme.numberbg?.backgroundColor,
-            buttonTextColor: theme.number?.color,
-            quitButtonBg: theme.quitbg?.backgroundColor,
-            quitButtonTextColor: theme.quit?.color,
-            dividerColor: theme.bordert?.borderColor,
-            toggleColor: theme.toggle?.color,
-            toggleIconColor: theme.togglei?.color,
-            whenTextColor: theme.when?.color,
-            remindTextColor: theme.remind?.color,
+          modalBg: theme.modalbg?.backgroundColor,
+          textColor: theme.open?.color,
+          subtitleColor: theme.select?.color,
+          buttonBg: theme.numberbg?.backgroundColor,
+          buttonTextColor: theme.number?.color,
+          quitButtonBg: theme.quitbg?.backgroundColor,
+          quitButtonTextColor: theme.quit?.color,
+          dividerColor: theme.bordert?.borderColor,
+          toggleColor: theme.toggle?.color,
+          toggleIconColor: theme.togglei?.color,
+          whenTextColor: theme.when?.color,
+          remindTextColor: theme.remind?.color,
         };
 
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption, themeColors);
+        Launcher.startTimerOverlay(
+          durationMs,
+          selectedApp.packageName,
+          reminderOption,
+          themeColors
+        );
 
         // Open the app
         openApplication(selectedApp.packageName);
@@ -453,8 +367,6 @@ export default function Home() {
     }
   };
 
- 
-
   // Main Navigation Pan Gesture
   const mainPanGesture = Gesture.Pan()
     .activeOffsetX([-20, 20])
@@ -472,36 +384,41 @@ export default function Home() {
     .onEnd((e) => {
       if (isSidebarActive.value) return;
       const currentPos = translateX.value;
-      
+
       // Determine target position based on velocity and position
       let targetPos = -SCREEN_WIDTH; // Default to Home
-      
+
       if (currentPos > -SCREEN_WIDTH * 0.5) {
         // Closer to Category (0)
         if (e.velocityX < -500) {
-           targetPos = -SCREEN_WIDTH; // Fling left -> Home
+          targetPos = -SCREEN_WIDTH; // Fling left -> Home
         } else {
-           targetPos = 0; // Category
+          targetPos = 0; // Category
         }
       } else if (currentPos < -SCREEN_WIDTH * 1.5) {
-         // Closer to AllApps (-2 * width)
-         if (e.velocityX > 500) {
-            targetPos = -SCREEN_WIDTH; // Fling right -> Home
-         } else {
-            targetPos = -SCREEN_WIDTH * 2; // AllApps
-         }
+        // Closer to AllApps (-2 * width)
+        if (e.velocityX > 500) {
+          targetPos = -SCREEN_WIDTH; // Fling right -> Home
+        } else {
+          targetPos = -SCREEN_WIDTH * 2; // AllApps
+        }
       } else {
         // Middle zone (Home)
         if (e.velocityX > 500) {
-           targetPos = 0; // Fling right -> Category
+          targetPos = 0; // Fling right -> Category
         } else if (e.velocityX < -500) {
-           targetPos = -SCREEN_WIDTH * 2; // Fling left -> AllApps
+          targetPos = -SCREEN_WIDTH * 2; // Fling left -> AllApps
         } else {
-           targetPos = -SCREEN_WIDTH; // Stay Home
+          targetPos = -SCREEN_WIDTH; // Stay Home
         }
       }
 
-      translateX.value = withSpring(targetPos, { damping: 50, stiffness: 1000, overshootClamping: true, mass: 0.8 });
+      translateX.value = withSpring(targetPos, {
+        damping: 50,
+        stiffness: 1000,
+        overshootClamping: true,
+        mass: 0.8,
+      });
     });
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -613,13 +530,45 @@ export default function Home() {
   const timeDisplay = getFormattedTime(currentTime);
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
-  const { clock,time,pm,battery,home,icon,don,footer,leave,bottom,dialer,alpha, date, info, color, fontSize, open, appicon, select, numberbg, number, toggle, togglei, when, remind, quit, modalbg ,quitbg,bordert,dot,camera,bubblebg,} = fontConfig || ({} as any);
-  
+  const {
+    clock,
+    time,
+    pm,
+    battery,
+    home,
+    icon,
+    don,
+    footer,
+    leave,
+    bottom,
+    dialer,
+    alpha,
+    date,
+    info,
+    color,
+    fontSize,
+    open,
+    appicon,
+    select,
+    numberbg,
+    number,
+    toggle,
+    togglei,
+    when,
+    remind,
+    quit,
+    modalbg,
+    quitbg,
+    bordert,
+    dot,
+    camera,
+    bubblebg,
+  } = fontConfig || ({} as any);
 
   const sidebarContainerStyle = useAnimatedStyle(() => {
     const opacity = interpolate(
       translateX.value,
-      [-SCREEN_WIDTH, -SCREEN_WIDTH * 0.8], 
+      [-SCREEN_WIDTH, -SCREEN_WIDTH * 0.8],
       [1, 0],
       Extrapolation.CLAMP
     );
@@ -639,7 +588,11 @@ export default function Home() {
       />
 
       <GestureDetector gesture={mainPanGesture}>
-        <Animated.View style={[{ flexDirection: 'row', width: SCREEN_WIDTH * 3, height: '100%' }, animatedStyle]}>
+        <Animated.View
+          style={[
+            { flexDirection: 'row', width: SCREEN_WIDTH * 3, height: '100%' },
+            animatedStyle,
+          ]}>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
             <AllAppListByCategoryScreen enableGestures={false} autoFocus={false} />
           </View>
@@ -649,106 +602,146 @@ export default function Home() {
             )}
             <View
               className="flex-1 justify-between px-6"
-          style={{
-            paddingTop: 48,
-            paddingBottom: 48 + insets.bottom,
-            backgroundColor: wallpaper
-              ? typeof wallpaper === 'string'
-                ? wallpaper
-                : 'transparent'
-              : isDarkMode
-                ? '#0D121A'
-                : '#E1EAF5',
-          }}>
-          <Stack.Screen options={{ headerShown: false }} />
+              style={{
+                paddingTop: 48,
+                paddingBottom: 48 + insets.bottom,
+                backgroundColor: wallpaper
+                  ? typeof wallpaper === 'string'
+                    ? wallpaper
+                    : 'transparent'
+                  : isDarkMode
+                    ? '#0D121A'
+                    : '#E1EAF5',
+              }}>
+              <Stack.Screen options={{ headerShown: false }} />
 
-          {/* Header: Time, Date, Battery */}
-          <View className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
-            <View className="flex-row items-baseline">
-              <Text
-                allowFontScaling={false}
-                style={time}
-                className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                {timeDisplay.main}
-              </Text>
-              {timeDisplay.suffix && (
+              {/* Header: Time, Date, Battery */}
+              <View
+                className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                <View className="flex-row items-baseline">
+                  <Text
+                    allowFontScaling={false}
+                    style={time}
+                    className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                    {timeDisplay.main}
+                  </Text>
+                  {timeDisplay.suffix && (
+                    <Text
+                      allowFontScaling={false}
+                      style={pm}
+                      className={`font-regular ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                      {timeDisplay.suffix}
+                    </Text>
+                  )}
+                </View>
                 <Text
                   allowFontScaling={false}
-                  style={pm}
-                  className={`ml-1 font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                  {timeDisplay.suffix}
+                  style={date}
+                  className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
+                  {getFormattedDate(currentTime)}
                 </Text>
-              )}
-            </View>
-            <Text
-              allowFontScaling={false}
-              style={date}
-              className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
-              {getFormattedDate(currentTime)}
-            </Text>
-            <View className="mt-3 flex-row items-center gap-2">
-              <Ionicons
-                name={getBatteryIcon()}
-                style={battery}
-                size={24}
-                color={
-                  wallpaper && typeof wallpaper !== 'string'
-                    ? '#E6EBF2'
-                    : isDarkMode
-                      ? '#7FA8E5'
-                      : '#8699B2'
-                }
-              />
-              {batteryLevel !== null && (
-                <Text
-                  allowFontScaling={false}
-                  style={battery}
-                  className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8699B2]'}`}>
-                  {Math.round(batteryLevel * 100)}%
-                </Text>
-              )}
-            </View>
-          </View>
+                <View className="mt-3 flex-row items-center gap-2">
+                  <Ionicons
+                    name={getBatteryIcon()}
+                    style={battery}
+                    size={24}
+                    color={
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? '#E6EBF2'
+                        : isDarkMode
+                          ? '#7FA8E5'
+                          : '#8699B2'
+                    }
+                  />
+                  {batteryLevel !== null && (
+                    <Text
+                      allowFontScaling={false}
+                      style={battery}
+                      className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8699B2]'}`}>
+                      {Math.round(batteryLevel * 100)}%
+                    </Text>
+                  )}
+                </View>
+              </View>
 
-          {/* Main Actions */}
-          <View className="w-full ">
-            {/* Render Home Apps */}
-            {wallpaperIndex === 6 ? (
-              <View className="w-full relative ">
-                {/* Vertical Line */}
-                <View
-                  style={[{
-                    position: 'absolute',
-                    left: '50%',
-                    marginLeft: -0.75,
-                    top: 8,
-                    bottom: 8,
-                    width: 1.5,
-                    backgroundColor: '#4C6C99',
-                    opacity: 0.8,
-                  },dot]}
-                />
-
-                {homeApps.map((app) => (
-                  <View key={app.packageName} className="w-full flex-row items-center mb-4 py-2 relative">
-                    {/* Dot container (Gutter) */}
-                    <View style={{ position: 'absolute', left: '50%', marginLeft: -4.5, zIndex: 10 }}>
-                      <View
-                        style={[{
-                          width: 10,
-                          height: 10,
-                          borderRadius: 4.5,
+              {/* Main Actions */}
+              <View className="w-full ">
+                {/* Render Home Apps */}
+                {wallpaperIndex === 6 ? (
+                  <View className="relative w-full ">
+                    {/* Vertical Line */}
+                    <View
+                      style={[
+                        {
+                          position: 'absolute',
+                          left: '50%',
+                          marginLeft: -0.75,
+                          top: 8,
+                          bottom: 8,
+                          width: 1.5,
                           backgroundColor: '#4C6C99',
-                          zIndex: 10,
-                        }, dot]}
-                      />
-                    </View>
+                          opacity: 0.8,
+                        },
+                        dot,
+                      ]}
+                    />
 
+                    {homeApps.map((app) => (
+                      <View
+                        key={app.packageName}
+                        className="relative mb-4 w-full flex-row items-center py-2">
+                        {/* Dot container (Gutter) */}
+                        <View
+                          style={{
+                            position: 'absolute',
+                            left: '50%',
+                            marginLeft: -4.5,
+                            zIndex: 10,
+                          }}>
+                          <View
+                            style={[
+                              {
+                                width: 10,
+                                height: 10,
+                                borderRadius: 4.5,
+                                backgroundColor: '#4C6C99',
+                                zIndex: 10,
+                              },
+                              dot,
+                            ]}
+                          />
+                        </View>
+
+                        <TouchableOpacity
+                          className="ml-auto w-[40%] items-start pl-6"
+                          onPress={() => {
+                            if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+                              openApplication(app.packageName);
+                            } else {
+                              setSelectedApp(app);
+                              setModalVisible(true);
+                            }
+                          }}>
+                          <Text
+                            allowFontScaling={false}
+                            style={home}
+                            className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                            {(appRenames[app.packageName] || app.label).length > 15
+                              ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
+                              : appRenames[app.packageName] || app.label}
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    ))}
+                  </View>
+                ) : (
+                  homeApps.map((app) => (
                     <TouchableOpacity
-                      className="w-[40%] ml-auto items-start pl-6"
+                      key={app.packageName}
+                      className={`w-fulL mb-4  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
                       onPress={() => {
                         if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
-                           openApplication(app.packageName);
+                          openApplication(app.packageName);
                         } else {
                           setSelectedApp(app);
                           setModalVisible(true);
@@ -763,168 +756,145 @@ export default function Home() {
                           : appRenames[app.packageName] || app.label}
                       </Text>
                     </TouchableOpacity>
-                  </View>
-                ))}
+                  ))
+                )}
+
+                {/* Add Icon */}
+                <Link href="/all-apps?mode=select" asChild>
+                  <TouchableOpacity
+                    className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                    <MaterialCommunityIcons
+                      name="plus-circle-outline"
+                      style={icon}
+                      size={30}
+                      color={
+                        wallpaper && typeof wallpaper !== 'string'
+                          ? '#A3B9D9'
+                          : isDarkMode
+                            ? '#738099'
+                            : '#B8CBE5'
+                      }
+                    />
+
+                    {/* do */}
+                    <Text
+                      allowFontScaling={false}
+                      style={don}
+                      className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
+                      Don't add unnecessary{' '}
+                      {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
+                    </Text>
+                  </TouchableOpacity>
+                </Link>
               </View>
-            ) : (
-              homeApps.map((app) => (
-                <TouchableOpacity
-                  key={app.packageName}
-                  className={`mb-4 w-fulL  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
-                  onPress={() => {
-                    if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
-                       openApplication(app.packageName);
-                    } else {
-                      setSelectedApp(app);
-                      setModalVisible(true);
-                    }
-                  }}>
+
+              {/* Footer Info */}
+              <View className={`w-full ${wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                <View
+                  className={`mb-2 gap-4 ${wallpaperIndex === 15 ? 'flex-col items-start' : 'flex-row items-center'}`}>
                   <Text
                     allowFontScaling={false}
-                    style={home}
-                    className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                    {(appRenames[app.packageName] || app.label).length > 15
-                      ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
-                      : appRenames[app.packageName] || app.label}
+                    style={footer}
+                    className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                    Today Unlock:{' '}
+                    <Text
+                      allowFontScaling={false}
+                      style={footer}
+                      className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                      {todayStats.unlockCount}
+                    </Text>
                   </Text>
-                </TouchableOpacity>
-              ))
-            )}
-
-            {/* Add Icon */}
-            <Link href="/all-apps?mode=select" asChild>
-              <TouchableOpacity className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
-               
-                  <MaterialCommunityIcons
-                    name="plus-circle-outline"
-                    style={icon}
-                    size={30}
-                    color={
-                      wallpaper && typeof wallpaper !== 'string'
-                        ? '#A3B9D9'
-                        : isDarkMode
-                          ? '#738099'
-                          : '#B8CBE5'
-                    }
-                  />
-             
-                {/* do */}
+                  {wallpaperIndex !== 15 && (
+                    <Text
+                      allowFontScaling={false}
+                      style={footer}
+                      className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                      ||
+                    </Text>
+                  )}
+                  <Text
+                    allowFontScaling={false}
+                    style={footer}
+                    className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                    Today Use:{' '}
+                    <Text
+                      allowFontScaling={false}
+                      style={footer}
+                      className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
+                      {formatUsageTime(todayStats.totalUsageTime)}
+                    </Text>
+                  </Text>
+                </View>
                 <Text
                   allowFontScaling={false}
-                  style={don}
-                  className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                  Don't add unnecessary {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
+                  style={leave}
+                  className={`mb-10 text-[12px] font-light  ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
+                  Leave it! Do something{' '}
+                  {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}mindful in real world.
                 </Text>
-              </TouchableOpacity>
-            </Link>
-            
-          </View>
 
-          {/* Footer Info */}
-          <View className={`w-full ${wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
-            <View className={`mb-2 gap-4 ${wallpaperIndex === 15 ? 'flex-col items-start' : 'flex-row items-center'}`}>
-            <Text
-              allowFontScaling={false}
-              style={footer}
-              className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-              Today Unlock:{' '}
-              <Text
-                allowFontScaling={false}
-                style={footer}
-                className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                {todayStats.unlockCount}
-              </Text>
-            </Text>
-            {wallpaperIndex !== 15 && (
-              <Text
-                allowFontScaling={false}
-                style={footer}
-                className={`font-regular ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                || 
-              </Text>
-            )}
-            <Text
-              allowFontScaling={false}
-              style={footer}
-              className={`font-regular text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-              Today Use:{' '}
-              <Text
-                allowFontScaling={false}
-                style={footer}
-                className={`font-bold ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                {formatUsageTime(todayStats.totalUsageTime)}
-              </Text>
-            </Text>
-          </View>
-            <Text
-              allowFontScaling={false}
-              style={leave}
-              className={`mb-10 text-[12px] font-light  ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#A3B9D9]' : isDarkMode ? 'text-[#738099]' : 'text-[#405B80]'}`}>
-              Leave it! Do something {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}mindful in real world.
-            </Text>
-
-            {/* Bottom Actions: Dialer & Camera */}
-            <View className="w-full flex-row gap-1">
-              <TouchableOpacity
-                onPress={openDialer}
-                style={bottom}
-                className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'border-[#131B26] bg-[#131B26]' : 'border-white bg-[#CEDDF2]'}`}>
-                {showPhoneDialer ? (
-                  <Ionicons
-                    name="call-outline"
-                    size={24}
-                    color={
-                      wallpaper && typeof wallpaper !== 'string'
-                        ? dialer?.color || '#E6EBF2'
-                        : isDarkMode
-                          ? '#CBD5E1'
-                          : '#2E3A4C'
-                    }
-                  />
-                ) : (
-                  <Text
-                    allowFontScaling={false}
-                    style={dialer}
-                    className={`font-regula text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
-                    Dialer
-                  </Text>
-                )}
-              </TouchableOpacity>
-              <TouchableOpacity
-                onPress={openCamera}
-                style={bottom}
-                className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'}`}>
-                {showCameraIcon ? (
-                  <Ionicons
-                    name="camera-outline"
-                    size={24}
-                    color={
-                      wallpaper && typeof wallpaper !== 'string'
-                        ? dialer?.color || '#E6EBF2'
-                        : isDarkMode
-                          ? '#CBD5E1'
-                          : '#2E3A4C'
-                    }
-                  />
-                ) : (
-                  <Text
-                    allowFontScaling={false}
-                    style={wallpaperIndex === 15 ? camera : dialer}
-                    className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
-                    Camera
-                  </Text>
-                )}
-              </TouchableOpacity>
-            </View>
-          </View>
-          <AppModal
-            visible={modalVisible}
-            onClose={() => setModalVisible(false)}
-            selectedApp={selectedApp}
-            onLaunch={handleLaunchApp}
-            isDarkMode={isDarkMode}
-            theme={fontConfig}
-          />
+                {/* Bottom Actions: Dialer & Camera */}
+                <View className="w-full flex-row gap-1">
+                  <TouchableOpacity
+                    onPress={openDialer}
+                    style={bottom}
+                    className={`flex-1 items-center justify-center rounded-full rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'border-[#131B26] bg-[#131B26]' : 'border-white bg-[#CEDDF2]'}`}>
+                    {showPhoneDialer ? (
+                      <Ionicons
+                        name="call-outline"
+                        size={24}
+                        color={
+                          wallpaper && typeof wallpaper !== 'string'
+                            ? dialer?.color || '#E6EBF2'
+                            : isDarkMode
+                              ? '#CBD5E1'
+                              : '#2E3A4C'
+                        }
+                      />
+                    ) : (
+                      <Text
+                        allowFontScaling={false}
+                        style={dialer}
+                        className={`font-regula text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
+                        Dialer
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={openCamera}
+                    style={bottom}
+                    className={`flex-1 items-center justify-center rounded-r-[30px] py-3 ${wallpaper && typeof wallpaper !== 'string' ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'}`}>
+                    {showCameraIcon ? (
+                      <Ionicons
+                        name="camera-outline"
+                        size={24}
+                        color={
+                          wallpaper && typeof wallpaper !== 'string'
+                            ? dialer?.color || '#E6EBF2'
+                            : isDarkMode
+                              ? '#CBD5E1'
+                              : '#2E3A4C'
+                        }
+                      />
+                    ) : (
+                      <Text
+                        allowFontScaling={false}
+                        style={wallpaperIndex === 15 ? camera : dialer}
+                        className={`font-regular text-[18px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
+                        Camera
+                      </Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <AppModal
+                visible={modalVisible}
+                onClose={() => setModalVisible(false)}
+                selectedApp={selectedApp}
+                onLaunch={handleLaunchApp}
+                isDarkMode={isDarkMode}
+                theme={fontConfig}
+              />
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
@@ -935,14 +905,17 @@ export default function Home() {
 
       {/* Sidebar Overlay - Moved to Root */}
       <Animated.View
-        style={[{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          justifyContent: 'center',
-          zIndex: 100,
-        }, sidebarContainerStyle]}>
+        style={[
+          {
+            position: 'absolute',
+            right: 0,
+            top: 0,
+            bottom: 0,
+            justifyContent: 'center',
+            zIndex: 100,
+          },
+          sidebarContainerStyle,
+        ]}>
         <GestureDetector gesture={sidebarGesture}>
           <Animated.View style={{ paddingHorizontal: 4 }}>
             {sidebarChars.map((letter, index) => (
@@ -955,15 +928,20 @@ export default function Home() {
                 onSelect={(l) => navigateToAllAppsWithLetter(l)}
                 isDarkMode={isDarkMode}
                 currentLetter={dragLetter}
-                alpha={alpha}
+                style={alpha}
+                itemHeight={ITEM_HEIGHT}
+                enableLiquidEffect={true}
               />
             ))}
             <BubbleCursor
               touchY={touchY}
               isTouching={isTouching}
-              letter={dragLetter}
+              alphabet={sidebarChars}
               isDarkMode={isDarkMode}
-              bubblebg={bubblebg}
+              style={bubblebg}
+              itemHeight={ITEM_HEIGHT}
+              cursorSize={CURSOR_SIZE}
+              enableLiquidEffect={true}
             />
           </Animated.View>
         </GestureDetector>
