@@ -16,6 +16,7 @@ import {
   StatusBar,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
+import * as Haptics from 'expo-haptics';
 import {
   Gesture,
   GestureDetector,
@@ -25,11 +26,7 @@ import {
 import Animated, {
   runOnJS,
   useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  interpolate,
-  Extrapolation,
-  SharedValue,
+  
 } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef } from 'react';
 import Launcher from '../modules/launcher';
@@ -45,8 +42,6 @@ import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { SidebarItem, BubbleCursor } from './context/Sidebar';
 
 const ITEM_HEIGHT = 20;
-
-
 
 export default function AllApps({ enableGestures = true, initialLetter, showSidebar = true }: { enableGestures?: boolean, initialLetter?: string, showSidebar?: boolean } = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
@@ -503,13 +498,21 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   };
 
   const sidebarChars = useMemo(() => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
-    
-    const hasNonAlpha = visibleApps.some((app) => {
+    const presentLetters = new Set<string>();
+    let hasNonAlpha = false;
+
+    visibleApps.forEach((app) => {
       const name = appRenames[app.packageName] || app.label;
-      return !/^[a-zA-Z]/.test(name);
+      const firstChar = name.charAt(0).toUpperCase();
+      if (/^[A-Z]/.test(firstChar)) {
+        presentLetters.add(firstChar);
+      } else {
+        hasNonAlpha = true;
+      }
     });
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(char => presentLetters.has(char));
 
     let result = [...chars];
     if (hasNonAlpha) {
@@ -547,6 +550,9 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     setDragLetter(letter);
     // Optimistically update
     setCurrentLetter(letter);
+    
+    // Haptic feedback
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
 
     // Find section index
     const sectionIndex = sections.findIndex((s) => s.title === letter);

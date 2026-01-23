@@ -15,6 +15,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Battery from 'expo-battery';
 import * as IntentLauncher from 'expo-intent-launcher';
+import * as Haptics from 'expo-haptics';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   Gesture,
@@ -78,13 +79,21 @@ export default function Home() {
 
   // Sidebar Logic
   const sidebarChars = useMemo(() => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
     const visibleApps = allApps.filter((app) => !blockedPackageNames.includes(app.packageName));
+    const presentLetters = new Set<string>();
+    let hasNonAlpha = false;
 
-    const hasNonAlpha = visibleApps.some((app) => {
+    visibleApps.forEach((app) => {
       const name = appRenames[app.packageName] || app.label;
-      return !/^[a-zA-Z]/.test(name);
+      const firstChar = name.charAt(0).toUpperCase();
+      if (/^[A-Z]/.test(firstChar)) {
+        presentLetters.add(firstChar);
+      } else {
+        hasNonAlpha = true;
+      }
     });
+
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(char => presentLetters.has(char));
 
     let result = [...chars];
     if (hasNonAlpha) {
@@ -104,9 +113,10 @@ export default function Home() {
   const translateX = useSharedValue(-SCREEN_WIDTH);
   const context = useSharedValue({ startX: 0 });
 
-  const navigateToAllAppsWithLetter = (letter: string) => {
+ const navigateToAllAppsWithLetter = (letter: string) => {
     setDragLetter(letter);
     setAllAppsLetter(letter);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     translateX.value = withSpring(-SCREEN_WIDTH * 2, {
       damping: 40,
       stiffness: 1500,
@@ -130,6 +140,7 @@ export default function Home() {
           lastLetterRef.current = letter;
           setDragLetter(letter);
           setAllAppsLetter(letter);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
           // Ensure we are on AllApps screen
           if (translateX.value > -SCREEN_WIDTH * 1.5) {

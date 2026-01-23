@@ -3,6 +3,7 @@ import { TouchableOpacity, Text, TextInput, Platform } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withSpring,
+  withTiming,
   interpolate,
   Extrapolation,
   SharedValue,
@@ -94,6 +95,35 @@ export const SidebarItem = ({
     }
   });
 
+  const animatedTextStyle = useAnimatedStyle(() => {
+    const itemStart = index * itemHeight;
+    const itemEnd = itemStart + itemHeight;
+    // Check if touch is strictly within this item's vertical bounds
+    const isSelectedByTouch = isTouching.value && touchY.value >= itemStart && touchY.value < itemEnd;
+
+    // Determine active state: either currently touched OR selected via prop (fallback)
+    // We prioritize touch interaction for instant feedback
+    const isActive = isTouching.value ? isSelectedByTouch : currentLetter === letter;
+
+    // Define colors
+    let activeColor = '#5C8BCC'; // Default light mode active
+    let inactiveColor = '#405B80'; // Default light mode inactive
+
+    if (isImageWallpaper) {
+      activeColor = 'white';
+      inactiveColor = 'white';
+    } else if (isDarkMode) {
+      activeColor = 'white';
+      inactiveColor = '#738099';
+    }
+
+    return {
+      fontSize: withTiming(isActive ? itemHeight * 0.8 : itemHeight * 0.6, { duration: 100 }),
+      color: withTiming(isActive ? activeColor : inactiveColor, { duration: 100 }),
+      fontWeight: isActive ? '700' : '500', // 700 is bold, 500 is medium
+    };
+  }, [currentLetter, isDarkMode, isImageWallpaper, itemHeight, letter, index]);
+
   return (
     <Animated.View
       style={[
@@ -101,29 +131,18 @@ export const SidebarItem = ({
         animatedStyle,
       ]}>
       <TouchableOpacity onPressIn={() => onSelect(letter)} activeOpacity={0.7}>
-        <Text
+        <ReanimatedText
           allowFontScaling={false}
-          style={[{ fontSize: currentLetter === letter ? itemHeight * 0.8 : itemHeight * 0.6 }, style]}
-          className={`font-medium ${
-            currentLetter === letter
-              ? isImageWallpaper
-                ? 'font-bold text-white'
-                : isDarkMode
-                  ? 'font-bold text-white'
-                  : 'font-extrabold text-[#5C8BCC]'
-              : isImageWallpaper
-                ? 'text-white'
-                : isDarkMode
-                  ? 'text-[#738099]'
-                  : 'text-[#405B80]'
-          }`}>
+          style={[style, animatedTextStyle]}
+        >
           {letter}
-        </Text>
+        </ReanimatedText>
       </TouchableOpacity>
     </Animated.View>
   );
 };
 
+const ReanimatedText = Animated.createAnimatedComponent(Text);
 const ReanimatedTextInput = Animated.createAnimatedComponent(TextInput);
 
 interface BubbleCursorProps {
