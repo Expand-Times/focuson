@@ -162,7 +162,7 @@ export default function SettingScreen() {
       setIsProcessing(false);
       router.push('/home');
       setThemeModalVisible(false);
-    }, 1000);
+    }, );
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {

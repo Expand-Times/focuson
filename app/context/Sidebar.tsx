@@ -206,12 +206,12 @@ export const BubbleCursor = ({
           width: size,
           height: size,
           borderRadius: size / 2,
-          backgroundColor: bubbleColor ? bubbleColor : (isDarkMode ? '#4ADE80' : '#fff'),
+          backgroundColor: bubbleColor ? bubbleColor : (isDarkMode ? '#DADFE5' : '#FFFFFF'),
           justifyContent: 'center',
           alignItems: 'center',
           zIndex: 100,
           elevation: 5,
-          shadowColor: '#000',
+          shadowColor: isDarkMode ? '#FFFFFF33' : '#0000001A',
           shadowOffset: { width: 0, height: 2 },
           shadowOpacity: 0.25,
           shadowRadius: 3.84,
@@ -234,7 +234,7 @@ export const BubbleCursor = ({
           }, 
           style
         ]} 
-        className={`font-bold ${isDarkMode ? 'text-white' : 'text-black'}`}
+        className={`font-bold ${isDarkMode ? 'text-[#131B26]' : 'text-[#4D6D99]'}`}
         animatedProps={animatedProps}
       />
     </Animated.View>

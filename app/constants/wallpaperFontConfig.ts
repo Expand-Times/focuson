@@ -49,7 +49,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {color: '#1A2B33'}, 
     alphaside: {color: '#1A2B33'}, 
     tikbg: {backgroundColor: '#434C59'},
-    bubblebg: {backgroundColor: '#df0a15ff',color: '#fff'},
+    bubblebg: {backgroundColor: '#B8E9F9',color: '#192B33', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF26'}, 
     searchCi: {color: '#5C8BCC'}, 
@@ -101,6 +101,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'Codystar-Regular', fontSize: 10,color: '#fff'}, 
     alphaside: {color: '#738099'}, 
     tikbg: {backgroundColor: '#434C59'},
+    bubblebg: {backgroundColor: '#697F9E',color: '#C3D2E5', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: ''}, 
     searchCi: {color: '#434C59'},
@@ -152,6 +153,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#fff'}, 
     alphaside: {fontFamily: 'Poppins-Regular',color: '#DADFE5'}, 
     tikbg: {backgroundColor: '#FFFFFF40'},
+    bubblebg: {backgroundColor: '#008EB2',color: '#FFFFFF', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF20'}, 
     searchCi: {color: '#FFFFFF40'},
@@ -203,6 +205,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#738099'}, 
     alphaside: {fontFamily: 'Poppins-Regular',color: '#DADFE5'}, 
     tikbg: {backgroundColor: '#FFFFFF40'},
+    bubblebg: {backgroundColor: '#D9908D',color: '#FFFFFF', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF10'}, 
     searchCi: {color: '#FFFFFF40'},
@@ -255,6 +258,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'RobotoMono-Regular', fontSize: 10,color: '#132C4D'}, 
     alphaside: {color: '#405B7F'}, 
     tikbg: {backgroundColor: '#FFFFFF26'},
+    bubblebg: {backgroundColor: '#CBCEFF',color: '#132C4D', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF26'}, 
     searchCi: {color: '#985C9940'}, 
@@ -306,6 +310,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#6ba397'}, 
     alphaside: {fontFamily: 'Poppins-Regular',color: '#DADFE5'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
+    bubblebg: {backgroundColor: '#8DBBBB',color: '#192B33', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF1A'}, 
     searchCi: {color: '#A2B9D940'}, 
@@ -357,6 +362,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'GreatVibes-Regular', fontSize: 12,color: '#fff'}, 
     alphaside: {fontFamily: 'Poppins-Regular',color: '#FF4D79'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
+    bubblebg: {backgroundColor: '#FF4C79',color: '#000000', shadowColor: '#00000080'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF05'}, 
     searchCi: {color: '#FF668C66'}, 
@@ -408,6 +414,7 @@ const wallpaperFontConfig: Record<number, {
     appdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#FFFFFF85'}, 
     alphaside: {fontFamily: 'Poppins-Regular',color: '#DADFE5'}, 
     tikbg: {backgroundColor: '#FFFFFF26'},
+    bubblebg: {backgroundColor: '#EFD897',color: '#192B33', shadowColor: '#000000'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF15'}, 
     searchCi: {color: '#A2B9D940'}, 
@@ -460,6 +467,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#DADFE5'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: '#132C4D99'},
+    bubblebg: {backgroundColor: '#C1CBD9',color: '#FF007F', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF1A'}, 
     searchCi: {color: '#E6EBF260'}, 
@@ -512,6 +520,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#FFFFFF'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: '#0C121BBF'},
+    bubblebg: {backgroundColor: '#93FF80',color: '#192B33', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF10'}, 
     searchCi: {color: '#26E50033'}, 
@@ -564,6 +573,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#FF59A5'}, 
     tikbg: {backgroundColor: '#FFFFFF40'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#FE57A5',color: '#192B33', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF10'}, 
     searchCi: {color: '#FF59A533'}, 
@@ -616,6 +626,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#A37ACC'}, 
     tikbg: {backgroundColor: '#FFFFFF40'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#F8EDFF',color: '#192B33', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF40'}, 
     searchCi: {color: '#B781CF40'}, 
@@ -669,6 +680,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#FFFFFF'}, 
     tikbg: {backgroundColor: '#FF000140'},
     wallbg: {backgroundColor: '#0C121B80'},
+    bubblebg: {backgroundColor: '#FF8082',color: '#000000', shadowColor: '#0000004D'},
 // category
     searchCbg: {backgroundColor: '#FF000120'}, 
     searchCi: {color: '#FFFFFF40'}, 
@@ -722,6 +734,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#132C4D'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#FFA754',color: '#FFFFFF', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: '#FFFFFF10'}, 
     searchCi: {color: '#A2B9D9'}, 
@@ -774,6 +787,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'CourierPrime-Regular',color: '#949494'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#FFFFFF',color: '#192B33', shadowColor: '#FFFFFF40'},
 // category
     searchCbg: {backgroundColor: ''}, 
     searchCi: {color: '#FFFFFF80'}, 
@@ -827,6 +841,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'CourierPrime-Regular',color: '#949494'}, 
     tikbg: {backgroundColor: '#0000001A'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#000000',color: '#FFFFFF', shadowColor: '#0000004D'},
 // category
     searchCbg: {borderColor: '#00000080',backgroundColor: ''}, 
     searchCi: {color: '#00000080'}, 
@@ -879,6 +894,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#738099'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#7A90A7',color: '#000000', shadowColor: '#FFFFFF33'},
 // category
     searchCbg: {backgroundColor: ''}, 
     searchCi: {color: '#434C59'}, 
@@ -931,6 +947,7 @@ const wallpaperFontConfig: Record<number, {
     alphaside: {fontFamily: 'Poppins-Regular',color: '#738099'}, 
     tikbg: {backgroundColor: '#FFFFFF1A'},
     wallbg: {backgroundColor: ''},
+    bubblebg: {backgroundColor: '#044879',color: '#728099', shadowColor: '#0000001A'},
 // category
     searchCbg: {backgroundColor: ''}, 
     searchCi: {color: '#DBDFE440'}, 
