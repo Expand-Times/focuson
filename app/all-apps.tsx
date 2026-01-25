@@ -130,7 +130,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
       // Small timeout to ensure list is rendered and ref is available
       const timer = setTimeout(() => {
         scrollToLetter(initialLetter);
-      }, 100);
+      }, );
       return () => clearTimeout(timer);
     }
   }, [initialLetter]);
