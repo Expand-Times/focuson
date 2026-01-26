@@ -130,14 +130,12 @@ export const SidebarItem = ({
         { height: itemHeight, justifyContent: 'center', alignItems: 'center', width: 24 },
         animatedStyle,
       ]}>
-      <TouchableOpacity onPressIn={() => onSelect(letter)} activeOpacity={0.7}>
-        <ReanimatedText
-          allowFontScaling={false}
-          style={[style, animatedTextStyle]}
-        >
-          {letter}
-        </ReanimatedText>
-      </TouchableOpacity>
+      <ReanimatedText
+        allowFontScaling={false}
+        style={[style, animatedTextStyle]}
+      >
+        {letter}
+      </ReanimatedText>
     </Animated.View>
   );
 };

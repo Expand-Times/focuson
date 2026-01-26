@@ -572,13 +572,36 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const isTouching = useSharedValue(false);
   const lastScrolledLetter = useRef('');
   const [dragLetter, setDragLetter] = useState('');
+  const [isSidebarTouching, setIsSidebarTouching] = useState(false);
+
+  useEffect(() => {
+    if (!isSidebarTouching && lastScrolledLetter.current && sections.length > 0) {
+      const letter = lastScrolledLetter.current;
+      const sectionIndex = sections.findIndex((s) => s.title === letter);
+      if (sectionIndex !== -1 && sectionListRef.current) {
+        sectionListRef.current.scrollToLocation({
+          sectionIndex,
+          itemIndex: 0,
+          animated: false,
+          viewOffset: 0,
+          viewPosition: 0,
+        });
+      }
+    }
+  }, [isSidebarTouching, sections]);
 
   const handleGestureScroll = (letter: string) => {
     setDragLetter(letter);
+    setIsSidebarTouching(true);
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
-      scrollToLetter(letter);
+      setCurrentLetter(letter);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     }
+  };
+
+  const handleGestureEnd = () => {
+    setIsSidebarTouching(false);
   };
 
   const sidebarGesture = Gesture.Pan()
@@ -600,7 +623,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     .onFinalize(() => {
       isTouching.value = false;
       touchY.value = -100;
-      runOnJS(handleGestureScroll)(''); // Reset last scrolled
+      runOnJS(handleGestureEnd)();
     });
 
   const rightSwipeGesture = Gesture.Fling()
