@@ -552,7 +552,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     setCurrentLetter(letter);
     
     // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
     // Find section index
     const sectionIndex = sections.findIndex((s) => s.title === letter);
@@ -596,7 +596,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
       setCurrentLetter(letter);
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
 
