@@ -170,10 +170,14 @@ export const BubbleCursor = ({
 
   const animatedStyle = useAnimatedStyle(() => {
     const translateXTarget = enableLiquidEffect ? -itemHeight * 6 : -itemHeight * 2.5; // -50 vs -120 roughly
+    const totalHeight = alphabet.length * itemHeight;
+    const halfItem = itemHeight / 2;
+    const maxDist = totalHeight - halfItem;
+    const clampedY = Math.max(halfItem, Math.min(touchY.value, maxDist));
 
     return {
       transform: [
-        { translateY: touchY.value - size / 2 },
+        { translateY: clampedY - size / 2 },
         { scale: withSpring(isTouching.value ? 1 : 0) },
         { translateX: withSpring(isTouching.value ? translateXTarget : 0) },
       ],

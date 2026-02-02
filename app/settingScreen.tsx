@@ -16,10 +16,13 @@ import {
   useColorScheme,
   Animated,
   ActivityIndicator,
+  Platform,
+  Share,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import * as IntentLauncher from 'expo-intent-launcher';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
 import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -93,6 +96,24 @@ export default function SettingScreen() {
       await AsyncStorage.setItem('reminderOption', option);
     } catch (e) {
       console.error('Failed to save reminder option', e);
+    }
+  };
+
+  const openDeviceSettings = () => {
+    if (Platform.OS === 'android') {
+      IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.SETTINGS);
+    } else {
+      Linking.openSettings();
+    }
+  };
+
+  const handleRecommend = async () => {
+    try {
+      await Share.share({
+        message: 'I\'m using MinimalLife. Really helps reducing screen time and mobile addiction. I\'ll say It\'s one of the must have app. Check out: https://play.google.com/store/apps/developer?id=Expand+Times+IT&hl=en',
+      });
+    } catch (error: any) {
+      console.error(error.message);
     }
   };
 
@@ -892,7 +913,7 @@ export default function SettingScreen() {
           <View
             className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-[#FFFFFF]'}`}>
             {/* Phone Dialer */}
-            <View className="mb-4 flex-row items-center justify-between">
+            <View className="mb-4 flex-row items-center justify-between mt-[6%]">
               <Text
                 allowFontScaling={false}
                 className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
@@ -995,7 +1016,7 @@ export default function SettingScreen() {
             </View>
 
             {/* Date Format */}
-            <View className="flex-row items-center justify-between">
+            <View className="flex-row items-center justify-between mb-[6%]">
               <Text
                 allowFontScaling={false}
                 className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
@@ -1025,7 +1046,7 @@ export default function SettingScreen() {
             <View className="mb-4">
               <Text
                 allowFontScaling={false}
-                className={`mb-[5%] mt-[4%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                className={`mb-[5%] mt-[6%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Select Theme
               </Text>
               <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
@@ -1071,7 +1092,7 @@ export default function SettingScreen() {
             </View>
 
             {/* Show Usage Info */}
-            <View className="mb-[4%] flex-row items-center justify-between px-4">
+            <View className="mb-[6%] flex-row items-center justify-between px-4">
               <Text
                 allowFontScaling={false}
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
@@ -1111,7 +1132,7 @@ export default function SettingScreen() {
           <View className={`rounded-2xl p-4 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
             <Text
               allowFontScaling={false}
-              className={`mb-[2%] mt-[2%] px-2 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+              className={`mb-[2%] mt-[6%] px-2 text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
               When time is over (Set Default)
             </Text>
 
@@ -1150,7 +1171,7 @@ export default function SettingScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="flex-row items-center"
+                className="flex-row items-center mb-[6%]"
                 onPress={() => handleSetReminderOption('quit')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'quit' ? 'radiobox-marked' : 'radiobox-blank'}
@@ -1191,7 +1212,7 @@ export default function SettingScreen() {
               <View className="mb-2 rounded-xl ">
                 {/* Header Row with Chevron */}
                 <TouchableOpacity
-                  className="flex-row items-center justify-between "
+                  className="flex-row items-center justify-between mt-[6%]"
                   onPress={() => setShowSignOut(!showSignOut)} // Toggle show/hide
                 >
                   <View className="flex-row items-center">
@@ -1259,7 +1280,9 @@ export default function SettingScreen() {
                 </TouchableOpacity>
               </View>
 
-              <TouchableOpacity className="py-2">
+              <TouchableOpacity
+                className="py-2 mb-[6%]"
+                onPress={handleRecommend}>
                 <Text
                   allowFontScaling={false}
                   className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
@@ -1292,9 +1315,9 @@ export default function SettingScreen() {
 
           {showAbout && (
             <View
-              className={`flex-row items-center justify-center rounded-2xl py-8 shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
+              className={`flex-row items-center justify-center rounded-2xl py-8  shadow-sm ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
               <TouchableOpacity
-                className="flex-1 items-center border-r border-[#728099]"
+                className="flex-1 items-center border-r border-[#728099] mt-[6%] mb-[6%]"
                 onPress={() => {
                   setInfoModalType('privacy');
                   setInfoModalVisible(true);
@@ -1306,7 +1329,7 @@ export default function SettingScreen() {
                 </Text>
               </TouchableOpacity>
               <TouchableOpacity
-                className="flex-1 items-center"
+                className="flex-1 items-center mt-[6%] mb-[6%]"
                 onPress={() => {
                   setInfoModalType('goal');
                   setInfoModalVisible(true);
@@ -1325,7 +1348,7 @@ export default function SettingScreen() {
         <View
           className={`mx-4 mb-[5%] mt-[10%] rounded-2xl shadow-md ${isDarkMode ? 'bg-[#131B27]' : 'bg-[#FFFFFF]'}`}>
           <View
-            className={`mb-[5%] mt-[5%] flex-row justify-around ${isDarkMode ? 'border-[#434C59]' : 'border-[#FFFFFF]'}`}>
+            className={`mb-[5%] mt-[10%] flex-row justify-around ${isDarkMode ? 'border-[#434C59]' : 'border-[#FFFFFF]'}`}>
             {['App Issue', 'Suggestion'].map((option) => {
               const value = option === 'App Issue' ? 'issue' : 'suggestion';
               const isSelected = contactOption === value;
@@ -1366,7 +1389,7 @@ export default function SettingScreen() {
 
           <Text
             allowFontScaling={false}
-            className={`font-regular mb-[5%] mt-[5%] text-center text-[12px] ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8D99AE]'}`}>
+            className={`font-regular mb-[10%] mt-[5%] text-center text-[12px] ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8D99AE]'}`}>
             Please let us know any issue or suggestion.
             {'\n'}Our dedicated developers are ready to fix your issue ASAP.
           </Text>
@@ -1382,7 +1405,9 @@ export default function SettingScreen() {
         </TouchableOpacity>
 
         {/* Device Setting */}
-        <TouchableOpacity className="mb-8 flex-row items-center justify-center">
+        <TouchableOpacity
+          className="mb-8 flex-row items-center justify-center"
+          onPress={openDeviceSettings}>
           <Text
             allowFontScaling={false}
             className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
