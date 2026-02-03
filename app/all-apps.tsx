@@ -641,7 +641,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
         translucent
-        hidden={false}
+        hidden={!showStatusBar}
       />
       {isImageWallpaper && (
         <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />

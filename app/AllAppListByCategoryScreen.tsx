@@ -41,9 +41,15 @@ type Category = {
   data: AppItem[];
 };
 
-export default function AllAppListByCategoryScreen({ enableGestures = true, autoFocus = true }: { enableGestures?: boolean, autoFocus?: boolean }) {
+export default function AllAppListByCategoryScreen({
+  enableGestures = true,
+  autoFocus = true,
+}: {
+  enableGestures?: boolean;
+  autoFocus?: boolean;
+}) {
   const router = useRouter();
-  const { isDarkMode, wallpaper, wallpaperIndex, showUsageInfo } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showUsageInfo, showStatusBar } = useColorContext();
   const {
     apps,
     loading: appsLoading,
@@ -57,13 +63,13 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
     addCustomCategory,
     reminderOption,
     setReminderOptionState,
-    isExcludedFromTimer
+    isExcludedFromTimer,
   } = useAppContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
   const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  
+
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [tempCategoryName, setTempCategoryName] = useState('');
 
@@ -237,21 +243,26 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
         const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
         const theme = fontConfig || ({} as any);
         const themeColors = {
-            modalBg: theme.modalbg?.backgroundColor,
-            textColor: theme.open?.color,
-            subtitleColor: theme.select?.color,
-            buttonBg: theme.numberbg?.backgroundColor,
-            buttonTextColor: theme.number?.color,
-            quitButtonBg: theme.quitbg?.backgroundColor,
-            quitButtonTextColor: theme.quit?.color,
-            dividerColor: theme.bordert?.borderColor,
-            toggleColor: theme.toggle?.color,
-            toggleIconColor: theme.togglei?.color,
-            whenTextColor: theme.when?.color,
-            remindTextColor: theme.remind?.color,
+          modalBg: theme.modalbg?.backgroundColor,
+          textColor: theme.open?.color,
+          subtitleColor: theme.select?.color,
+          buttonBg: theme.numberbg?.backgroundColor,
+          buttonTextColor: theme.number?.color,
+          quitButtonBg: theme.quitbg?.backgroundColor,
+          quitButtonTextColor: theme.quit?.color,
+          dividerColor: theme.bordert?.borderColor,
+          toggleColor: theme.toggle?.color,
+          toggleIconColor: theme.togglei?.color,
+          whenTextColor: theme.when?.color,
+          remindTextColor: theme.remind?.color,
         };
 
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption, themeColors);
+        Launcher.startTimerOverlay(
+          durationMs,
+          selectedApp.packageName,
+          reminderOption,
+          themeColors
+        );
 
         // Open the app
         openApplication(selectedApp.packageName);
@@ -394,7 +405,7 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
         translucent
-        hidden={false}
+        hidden={!showStatusBar}
       />
       {isImageWallpaper && (
         <Image
@@ -411,15 +422,18 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
           keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View
             className="flex-1 pt-12"
-            style={[{
-              backgroundColor: wallpaper
-                ? typeof wallpaper === 'string'
-                  ? wallpaper
-                  : 'transparent'
-                : isDarkMode
-                  ? '#0D121A'
-                  : '#EBF1F7',
-            },wallbg]}>
+            style={[
+              {
+                backgroundColor: wallpaper
+                  ? typeof wallpaper === 'string'
+                    ? wallpaper
+                    : 'transparent'
+                  : isDarkMode
+                    ? '#0D121A'
+                    : '#EBF1F7',
+              },
+              wallbg,
+            ]}>
             <View className="flex-1 px-4">
               {/* Search Bar */}
               <View
@@ -559,7 +573,7 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
                             autoFocus
                             onSubmitEditing={handleSaveCategoryName}
                           />
-                          <TouchableOpacity onPress={handleSaveCategoryName} className="mr-6 ml-4">
+                          <TouchableOpacity onPress={handleSaveCategoryName} className="ml-4 mr-6">
                             <MaterialCommunityIcons name="check" size={20} color="#4ADE80" />
                           </TouchableOpacity>
                           <TouchableOpacity onPress={handleCancelEditing}>
@@ -624,11 +638,11 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
                                 ? 'bg-black/40'
                                 : isDarkMode
                                   ? 'bg-[#131B27]'
-                              : 'bg-[#CEDDF2]'
-                        }`}
-                        onPress={() => onAppPress(app)}
-                        onLongPress={() => handleLongPress(app)}>
-                            <View className="flex-row items-center flex-1 mr-2">
+                                  : 'bg-[#CEDDF2]'
+                            }`}
+                            onPress={() => onAppPress(app)}
+                            onLongPress={() => handleLongPress(app)}>
+                            <View className="mr-2 flex-1 flex-row items-center">
                               {wallpaperIndex === 6 && (
                                 <View
                                   style={{
@@ -733,85 +747,104 @@ export default function AllAppListByCategoryScreen({ enableGestures = true, auto
 
                             {/* Options Grid */}
                             {!showCategorySelector && !showAppRenamer ? (
-                              <View className="w-full flex-row flex-wrap justify-between gap-y-4">
-                                {/* Move to */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={() => setShowCategorySelector(true)}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    Move to
-                                  </Text>
-                                </TouchableOpacity>
+                              <>
+                                <View className="flex-row flex-wrap justify-between gap-y-4">
+                                  {/* Move to */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={() => setShowCategorySelector(true)}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      Move to
+                                    </Text>
+                                  </TouchableOpacity>
 
-                                {/* Copy to */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={() => console.log('Copy to')}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    Copy to
-                                  </Text>
-                                </TouchableOpacity>
+                                  {/* Copy to */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={() => console.log('Copy to')}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      Copy to
+                                    </Text>
+                                  </TouchableOpacity>
 
-                                {/* Block */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={() => console.log('Block')}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    Block
-                                  </Text>
-                                </TouchableOpacity>
+                                  {/* Block */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={() => console.log('Block')}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      Block
+                                    </Text>
+                                  </TouchableOpacity>
 
-                                {/* Rename */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={startAppRenaming}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    Rename
-                                  </Text>
-                                </TouchableOpacity>
+                                  {/* Rename */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={startAppRenaming}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      Rename
+                                    </Text>
+                                  </TouchableOpacity>
 
-                                {/* App Info */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={handleAppInfo}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    App Info
-                                  </Text>
-                                </TouchableOpacity>
+                                  {/* App Info */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={handleAppInfo}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      App Info
+                                    </Text>
+                                  </TouchableOpacity>
 
-                                {/* Uninstall */}
-                                <TouchableOpacity
-                                  style={numberbg}
-                                  className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                  onPress={handleUninstall}>
-                                  <Text
-                                    style={number}
-                                    allowFontScaling={false}
-                                    className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                    Uninstall
-                                  </Text>
-                                </TouchableOpacity>
-                              </View>
+                                  {/* Uninstall */}
+                                  <TouchableOpacity
+                                    style={numberbg}
+                                    className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
+                                    onPress={handleUninstall}>
+                                    <Text
+                                      style={number}
+                                      allowFontScaling={false}
+                                      className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
+                                      Uninstall
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+
+                                <View
+                                  style={bordert}
+                                  className={`mt-6 w-full border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                                  <TouchableOpacity
+                                    style={quitbg}
+                                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
+                                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                                    }`}
+                                    onPress={closeModal}>
+                                    <Text
+                                      style={quit}
+                                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                      Cancel
+                                    </Text>
+                                  </TouchableOpacity>
+                                </View>
+                              </>
                             ) : showAppRenamer ? (
                               <View className="w-full">
                                 <Text

@@ -316,3 +316,4 @@ const useColorContext = () => {
 };
 
 export {ColorContext, ColorProvider, useColorContext};
+export default ColorProvider;

@@ -659,7 +659,7 @@ export default function SettingScreen() {
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
         translucent
-        hidden={false}
+        hidden={!showStatusBar}
       />
       {/* Header */}
       <View
@@ -684,7 +684,7 @@ export default function SettingScreen() {
           />
         </TouchableOpacity>
       </View>
-      <View className="border-b border-[#A3B9D9]"></View>
+      <View className="border-b border-[#A3B9D940]"></View>
       <ScrollView
         className="flex-1"
         contentContainerStyle={{ paddingBottom: 40 }}
@@ -1138,7 +1138,7 @@ export default function SettingScreen() {
 
             <View className=" ml-[5%]">
               <TouchableOpacity
-                className="mb-2 flex-row items-center"
+                className="mb-[4%] flex-row items-center"
                 onPress={() => handleSetReminderOption('mindful')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'mindful' ? 'radiobox-marked' : 'radiobox-blank'}
@@ -1156,7 +1156,7 @@ export default function SettingScreen() {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="mb-2 flex-row items-center"
+                className="mb-[4%] flex-row items-center"
                 onPress={() => handleSetReminderOption('remind')}>
                 <MaterialCommunityIcons
                   name={reminderOption === 'remind' ? 'radiobox-marked' : 'radiobox-blank'}
@@ -1372,7 +1372,7 @@ export default function SettingScreen() {
             })}
           </View>
           {/* border */}
-          <View className="border-b border-[#A3B9D9]"></View>
+          <View className="border-b border-[#A3B9D940]"></View>
 
           {/* Contact Us button centered */}
           <TouchableOpacity
