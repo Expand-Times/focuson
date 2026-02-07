@@ -242,3 +242,5 @@ export const BubbleCursor = ({
     </Animated.View>
   );
 };
+
+export default SidebarItem;

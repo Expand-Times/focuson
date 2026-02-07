@@ -14,6 +14,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   StatusBar,
+  Dimensions,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Haptics from 'expo-haptics';
@@ -28,7 +29,7 @@ import Animated, {
   useSharedValue,
   
 } from 'react-native-reanimated';
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, useLocalSearchParams } from 'expo-router';
@@ -41,7 +42,8 @@ import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { SidebarItem, BubbleCursor } from './context/Sidebar';
 
-const ITEM_HEIGHT = 20;
+const { height } = Dimensions.get('window');
+const ITEM_HEIGHT = (height * 0.65) / 28;
 
 export default function AllApps({ enableGestures = true, initialLetter, showSidebar = true }: { enableGestures?: boolean, initialLetter?: string, showSidebar?: boolean } = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
@@ -222,7 +224,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
 
-  const handleAppPress = (app: AppItem) => {
+  const handleAppPress = useCallback((app: AppItem) => {
     if (isSelectMode) {
       if (selectedPackageNames.includes(app.packageName)) {
         // Deselect
@@ -243,14 +245,14 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         setModalVisible(true);
       }
     }
-  };
+  }, [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames]);
 
-  const handleAppLongPress = (app: AppItem) => {
+  const handleAppLongPress = useCallback((app: AppItem) => {
     if (!isSelectMode) {
       setSelectedApp(app);
       setOptionsModalVisible(true);
     }
-  };
+  }, [isSelectMode]);
 
   const handleLaunchApp = (durationMinutes: number) => {
     if (selectedApp) {
@@ -423,79 +425,22 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     }
   };
 
-  const renderItem = ({ item }: { item: AppItem }) => {
-    const formatUsageTime = (millis?: number) => {
-      if (!millis) return '0 min';
-      const hours = Math.floor(millis / (1000 * 60 * 60));
-      const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
-
-      if (hours > 0) {
-        return `${hours}h ${minutes}m`;
-      }
-      return `${minutes} min`;
-    };
-
-    const usageText = formatUsageTime(item.usageTime);
-    const isSelected = selectedPackageNames.includes(item.packageName);
-
+  const renderItem = useCallback(({ item }: { item: AppItem }) => {
     return (
-      <TouchableOpacity
-        style={applistbg}
-        className={`mb-[2%] w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-          isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
-        } ${isSelectMode && isSelected ? '' : ''}`}
-        onPress={() => handleAppPress(item)}
-        onLongPress={() => handleAppLongPress(item)}
-        delayLongPress={300}>
-        <View className="flex-1 flex-row items-center">
-          {isSelectMode && (
-            <Ionicons
-              name={isSelected ? 'checkbox' : 'square-outline'}
-              size={20}
-              color={
-                applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')
-              }
-              style={[{ marginRight: 8 }, applist]}
-            />
-          )}
-          {wallpaperIndex === 6 && (
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 5,
-                backgroundColor: '#132C4D',
-                marginRight: 8,
-                opacity: 0.8,
-              }}
-            />
-          )}
-          <Text
-            allowFontScaling={false}
-            style={applist}
-            className={`font-regular text-[16px] ${
-              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
-            }`}
-            numberOfLines={1}>
-            {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
-          </Text>
-        </View>
-
-        {showUsageInfo && (
-          <View className="flex-row items-center">
-            <Text
-              allowFontScaling={false}
-              style={appdu}
-              className={`text-[10px] font-light ${
-                isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
-              } opacity-90`}>
-              TO: {item.launchCount || 0} times || TU: {usageText}
-            </Text>
-          </View>
-        )}
-      </TouchableOpacity>
+      <AppListItem
+        item={item}
+        isSelectMode={isSelectMode}
+        isSelected={selectedPackageNames.includes(item.packageName)}
+        onPress={handleAppPress}
+        onLongPress={handleAppLongPress}
+        isImageWallpaper={isImageWallpaper}
+        isDarkMode={isDarkMode}
+        theme={fontConfig}
+        showUsageInfo={showUsageInfo}
+        wallpaperIndex={wallpaperIndex}
+      />
     );
-  };
+  }, [isSelectMode, selectedPackageNames, handleAppPress, handleAppLongPress, isImageWallpaper, isDarkMode, fontConfig, showUsageInfo, wallpaperIndex]);
 
   const sidebarChars = useMemo(() => {
     const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
@@ -802,7 +747,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
 
           <View className="flex-1 flex-row">
             {/* Apps List */}
-            <View className="w-[95%] ">
+            <View className="w-full px-3 ">
               <SectionList
                 ref={sectionListRef}
                 sections={sections}
@@ -810,7 +755,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
                     style={header}
-                    className={` mt-[4%] text-lg ${header ? '' : 'font-bold'} ${
+                    className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
                       isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
@@ -892,7 +837,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
             <View className="flex-1 items-center justify-center bg-black/70">
               <View
                 style={modalbg}
-                className={`w-[85%] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                className={`w-[320px] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <View className="mb-6 items-center">
                   <Text
                     style={open}
@@ -912,7 +857,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                 <View className="flex-row flex-wrap justify-between gap-y-4">
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleAddToHome}>
                     <Text style={number} className="font-medium text-white">
                       Add to Home
@@ -920,7 +865,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handlePinToTop}>
                     <Text style={number} className="font-medium text-white">
                       {pinnedPackageNames.includes(selectedApp?.packageName || '')
@@ -930,7 +875,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleBlock}>
                     <Text style={number} className="font-medium text-white">
                       Block
@@ -938,7 +883,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleRename}>
                     <Text style={number} className="font-medium text-white">
                       Rename
@@ -946,7 +891,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleAppInfo}>
                     <Text style={number} className="font-medium text-white">
                       App Info
@@ -954,7 +899,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   </TouchableOpacity>
                   <TouchableOpacity
                     style={numberbg}
-                    className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleUninstall}>
                     <Text style={number} className="font-medium text-white">
                       Uninstall
@@ -995,7 +940,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   <TouchableWithoutFeedback>
                     <View
                       style={modalbg}
-                      className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                      className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                       <Text
                         style={appC}
                         allowFontScaling={false}
@@ -1046,3 +991,89 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
     </RootContainer>
   );
 }
+
+const AppListItem = memo(({
+  item,
+  isSelectMode,
+  isSelected,
+  onPress,
+  onLongPress,
+  isImageWallpaper,
+  isDarkMode,
+  theme,
+  showUsageInfo,
+  wallpaperIndex
+}: any) => {
+  const { applist, applistbg, appdu } = theme || {};
+
+  const formatUsageTime = (millis?: number) => {
+    if (!millis) return '0 min';
+    const hours = Math.floor(millis / (1000 * 60 * 60));
+    const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m`;
+    }
+    return `${minutes} min`;
+  };
+
+  const usageText = formatUsageTime(item.usageTime);
+
+  return (
+    <TouchableOpacity
+      style={applistbg}
+      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
+        isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
+      } ${isSelectMode && isSelected ? '' : ''}`}
+      onPress={() => onPress(item)}
+      onLongPress={() => onLongPress(item)}
+      delayLongPress={300}>
+      <View className="flex-1 flex-row items-center">
+        {isSelectMode && (
+          <Ionicons
+            name={isSelected ? 'checkbox' : 'square-outline'}
+            size={20}
+            color={
+              applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')
+            }
+            style={[{ marginRight: 8 }, applist]}
+          />
+        )}
+        {wallpaperIndex === 6 && (
+          <View
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: 5,
+              backgroundColor: '#132C4D',
+              marginRight: 8,
+              opacity: 0.8,
+            }}
+          />
+        )}
+        <Text
+          allowFontScaling={false}
+          style={applist}
+          className={`font-regular text-[16px] ${
+            isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
+          }`}
+          numberOfLines={1}>
+          {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
+        </Text>
+      </View>
+
+      {showUsageInfo && (
+        <View className="flex-row items-center">
+          <Text
+            allowFontScaling={false}
+            style={appdu}
+            className={`text-[10px] font-light ${
+              isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
+            } opacity-90`}>
+            TO: {item.launchCount || 0} times || TU: {usageText}
+          </Text>
+        </View>
+      )}
+    </TouchableOpacity>
+  );
+});
