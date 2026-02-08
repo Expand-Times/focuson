@@ -204,7 +204,7 @@ export default function IntroTen() {
               } catch (e) {
                 console.error('Failed to set intro flag', e);
               }
-              router.push('/intro/PermissionAccessScreen');
+              router.push('/home');
             }}>
             <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
               Got It!
