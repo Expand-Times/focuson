@@ -6,6 +6,9 @@ const withLauncher = (config) => {
     
     // Get the main activity
     const mainActivity = AndroidConfig.Manifest.getMainActivityOrThrow(androidManifest);
+
+    // Set launchMode to singleTask to avoid multiple instances
+    mainActivity.$['android:launchMode'] = 'singleTask';
     
     // Define the intent filter we want to add
     const launcherIntentFilter = {

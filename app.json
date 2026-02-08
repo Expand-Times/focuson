@@ -42,7 +42,8 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.expandtimes.minimallife",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "launchMode": "singleTask"
     }
   }
 }

@@ -1,4 +1,4 @@
-import { Redirect } from 'expo-router';
+import { useRouter, useRootNavigationState } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -6,6 +6,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
+  const router = useRouter();
+  const rootNavigationState = useRootNavigationState();
 
   useEffect(() => {
     checkIntro();
@@ -24,13 +26,15 @@ export default function Index() {
     }
   };
 
-  if (isLoading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
-        <ActivityIndicator size="large" color="#5C8BCC" />
-      </View>
-    );
-  }
+  useEffect(() => {
+    if (!isLoading && rootNavigationState?.key) {
+      router.replace(hasSeenIntro ? "/home" : "/intro/one");
+    }
+  }, [isLoading, hasSeenIntro, rootNavigationState?.key]);
 
-  return <Redirect href={hasSeenIntro ? "/home" : "/intro/one"} />;
+  return (
+    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
+      <ActivityIndicator size="large" color="#5C8BCC" />
+    </View>
+  );
 }
