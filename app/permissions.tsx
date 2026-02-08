@@ -16,6 +16,7 @@ export default function Permissions() {
     notification: false,
     accessibility: false,
     battery: false,
+    defaultLauncher: false,
   });
 
   const packageName = Constants.expoConfig?.android?.package || "com.expandtimes.minimallife";
@@ -29,6 +30,7 @@ export default function Permissions() {
           notification: Launcher.checkNotificationPermission(),
           accessibility: Launcher.isAccessibilityServiceEnabled(),
           battery: Launcher.isIgnoringBatteryOptimizations(),
+          defaultLauncher: Launcher.isDefaultLauncher(),
         });
       } catch (e) {
         console.error("Error checking permissions:", e);
@@ -165,18 +167,12 @@ export default function Permissions() {
           onPress={requestBattery}
         />
 
-        <View className={`mb-6 p-4 rounded-lg border ${isDarkMode ? 'bg-[#131B26] border-[#2E3B4D]' : 'bg-gray-100 border-gray-200'}`}>
-            <View className="mb-2">
-                <Text className={`text-lg font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-gray-800'}`}>Default Home App</Text>
-            </View>
-             <Text className={`mb-4 ${isDarkMode ? 'text-[#738099]' : 'text-gray-600'}`}>Set MinimalLife as your default home launcher.</Text>
-             <TouchableOpacity 
-              onPress={openHomeSettings}
-              className={`${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-indigo-500'} py-3 rounded-lg items-center active:opacity-80`}
-            >
-              <Text className={`${isDarkMode ? 'text-[#0D121A]' : 'text-white'} font-semibold`}>Open Home Settings</Text>
-            </TouchableOpacity>
-        </View>
+        <PermissionItem 
+          title="Default Home App" 
+          description="Set MinimalLife as your default home launcher."
+          hasPermission={permissions.defaultLauncher}
+          onPress={openHomeSettings}
+        />
         
         <TouchableOpacity 
           onPress={() => router.replace('/home')}

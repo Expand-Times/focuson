@@ -14,6 +14,7 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
   openNotificationSettings(): void;
   isAccessibilityServiceEnabled(): boolean;
   isIgnoringBatteryOptimizations(): boolean;
+  isDefaultLauncher(): boolean;
 
   getInstalledApps(): AppItem[];
   launchApp(packageName: string): boolean;

@@ -16,9 +16,13 @@ class LauncherModule extends NativeModule<LauncherModuleEvents> {
   }
 
   checkUsageStatsPermission() { return true; }
+  openUsageAccessSettings() {}
   checkOverlayPermission() { return true; }
+  checkNotificationPermission() { return true; }
+  openNotificationSettings() {}
   isAccessibilityServiceEnabled() { return true; }
   isIgnoringBatteryOptimizations() { return true; }
+  isDefaultLauncher() { return true; }
   getInstalledApps() { return []; }
   launchApp(packageName: string) { return false; }
   uninstallApp(packageName: string) { console.log("Uninstalling " + packageName); }

@@ -1404,17 +1404,17 @@ export default function SettingScreen() {
           </Text>
         </TouchableOpacity>
 
-        {/* Device Setting */}
+        {/* App Permissions */}
         <TouchableOpacity
           className="mb-8 flex-row items-center justify-center"
-          onPress={openDeviceSettings}>
+          onPress={() => router.push('/permissions')}>
           <Text
             allowFontScaling={false}
             className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-            Device Setting
+            App Permissions
           </Text>
           <MaterialCommunityIcons
-            name="cog-outline"
+            name="shield-check-outline"
             size={24}
             color={isDarkMode ? '#728099' : '#2E3B4D'}
           />

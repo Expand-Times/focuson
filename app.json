@@ -14,7 +14,8 @@
     },
     "plugins": [
       "expo-router",
-      "expo-font"
+      "expo-font",
+      "./modules/launcher/plugin/withLauncher"
     ],
     "experiments": {
       "typedRoutes": true,

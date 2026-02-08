@@ -274,6 +274,13 @@ class LauncherModule : Module() {
         return@Function true
     }
 
+    Function("isDefaultLauncher") {
+        val intent = Intent(Intent.ACTION_MAIN)
+        intent.addCategory(Intent.CATEGORY_HOME)
+        val resolveInfo = context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)
+        return@Function resolveInfo?.activityInfo?.packageName == context.packageName
+    }
+
     Function("getInstalledApps") {
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN, null)
