@@ -298,7 +298,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
         const durationMs = durationMinutes * 15 * 1000;
         
         const theme = fontConfig || ({} as any);
-        const themeColors = {
+        const rawThemeColors = {
             modalBg: theme.modalbg?.backgroundColor,
             textColor: theme.open?.color,
             subtitleColor: theme.select?.color,
@@ -312,6 +312,14 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
             whenTextColor: theme.when?.color,
             remindTextColor: theme.remind?.color,
         };
+        
+        // Filter out undefined/null values and ensure strings
+        const themeColors: Record<string, string> = {};
+        Object.entries(rawThemeColors).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            themeColors[key] = String(value);
+          }
+        });
         
         Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption, themeColors);
 

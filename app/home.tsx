@@ -314,7 +314,8 @@ export default function Home() {
         // Prepare theme colors
         const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
         const theme = fontConfig || ({} as any);
-        const themeColors = {
+        
+        const rawThemeColors = {
           modalBg: theme.modalbg?.backgroundColor,
           textColor: theme.open?.color,
           subtitleColor: theme.select?.color,
@@ -328,6 +329,14 @@ export default function Home() {
           whenTextColor: theme.when?.color,
           remindTextColor: theme.remind?.color,
         };
+
+        // Filter out undefined/null values and ensure strings
+        const themeColors: Record<string, string> = {};
+        Object.entries(rawThemeColors).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            themeColors[key] = String(value);
+          }
+        });
 
         Launcher.startTimerOverlay(
           durationMs,
