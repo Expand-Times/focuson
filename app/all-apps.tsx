@@ -7,9 +7,7 @@ import {
   TextInput,
   Modal,
   Alert,
-  ScrollView,
   useColorScheme,
-  Keyboard,
   Platform,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
@@ -24,7 +22,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import Animated, {
+import {
   runOnJS,
   useSharedValue,
   
@@ -32,10 +30,9 @@ import Animated, {
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { Link } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
@@ -45,7 +42,19 @@ import { SidebarItem, BubbleCursor } from './context/Sidebar';
 const { height } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
 
-export default function AllApps({ enableGestures = true, initialLetter, showSidebar = true }: { enableGestures?: boolean, initialLetter?: string, showSidebar?: boolean } = {}) {
+export type AllAppsProps = {
+  enableGestures?: boolean;
+  initialLetter?: string;
+  showSidebar?: boolean;
+  autoFocus?: boolean;
+};
+
+export default function AllApps({
+  enableGestures = true,
+  initialLetter,
+  showSidebar = true,
+  autoFocus = false,
+}: AllAppsProps = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
@@ -53,27 +62,18 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const {
     searchbg,
     searchi,
-    appdu,
-    applist,
     alphaside,
-    applistbg,
     header,
-    select,
     numberbg,
     number,
-    toggle,
-    when,
-    remind,
     quit,
     modalbg,
     quitbg,
     bordert,
     open,
-    togglei,
     appC,
     applistCbg,
     allappt,
-    tikbg,
     allappi,
     searchCt,
     searchCi,
@@ -102,7 +102,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   }, [rawApps]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [isKeyboardEnabled, setIsKeyboardEnabled] = useState(false);
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
@@ -147,8 +146,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
       console.error('Failed to save selection', e);
     }
   };
-
-  // loadApps removed, using AppContext
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
@@ -500,7 +497,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   }).current;
 
   const scrollToLetter = (letter: string) => {
-    setDragLetter(letter);
     // Optimistically update
     setCurrentLetter(letter);
     
@@ -524,7 +520,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
   const lastScrolledLetter = useRef('');
-  const [dragLetter, setDragLetter] = useState('');
   const [isSidebarTouching, setIsSidebarTouching] = useState(false);
 
   useEffect(() => {
@@ -544,7 +539,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   }, [isSidebarTouching, sections]);
 
   const handleGestureScroll = (letter: string) => {
-    setDragLetter(letter);
     setIsSidebarTouching(true);
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
@@ -613,13 +607,6 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
           }, wallbg]}>
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center ">
-            {/* Back Button (small) */}
-            {/* <TouchableOpacity
-          onPress={() => router.back()}
-          className="rounded-full bg-white p-2 shadow-sm">
-          <Ionicons name="arrow-back" size={20} color="#94A3B8" />
-        </TouchableOpacity> */}
-
             <View
               style={searchbg}
               className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${
@@ -662,9 +649,7 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
                   (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#434C59' : '#A3B9D9')
                 }
                 autoCorrect={false}
-                autoFocus={true}
-                showSoftInputOnFocus={isKeyboardEnabled}
-                onTouchStart={() => setIsKeyboardEnabled(true)}
+                autoFocus={autoFocus}
               />
             </View>
           </View>
@@ -1000,6 +985,17 @@ export default function AllApps({ enableGestures = true, initialLetter, showSide
   );
 }
 
+const formatUsageTime = (millis?: number) => {
+  if (!millis) return '0 min';
+  const hours = Math.floor(millis / (1000 * 60 * 60));
+  const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
+
+  if (hours > 0) {
+    return `${hours}h ${minutes}m`;
+  }
+  return `${minutes} min`;
+};
+
 const AppListItem = memo(({
   item,
   isSelectMode,
@@ -1013,17 +1009,6 @@ const AppListItem = memo(({
   wallpaperIndex
 }: any) => {
   const { applist, applistbg, appdu } = theme || {};
-
-  const formatUsageTime = (millis?: number) => {
-    if (!millis) return '0 min';
-    const hours = Math.floor(millis / (1000 * 60 * 60));
-    const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
-
-    if (hours > 0) {
-      return `${hours}h ${minutes}m`;
-    }
-    return `${minutes} min`;
-  };
 
   const usageText = formatUsageTime(item.usageTime);
 

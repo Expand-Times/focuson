@@ -1,4 +1,4 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useEffect, useContext, useMemo, useCallback } from 'react';
 import Launcher from '../../modules/launcher';
 import { AppItem } from '../../modules/launcher/src/Launcher.types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -201,33 +201,46 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.setItem('reminderOption', option);
   };
 
-  const isExcludedFromTimer = (label: string) => {
+  const isExcludedFromTimer = useCallback((label: string) => {
     return EXCLUDED_LABELS.some(excluded => label.toLowerCase().includes(excluded.toLowerCase()));
-  };
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    apps,
+    loading,
+    refreshApps,
+    homeApps,
+    updateHomeApps,
+    pinnedPackageNames,
+    togglePinApp,
+    blockedPackageNames,
+    toggleBlockApp,
+    appRenames,
+    renameApp,
+    customCategories,
+    addCustomCategory,
+    categoryOverrides,
+    setCategoryOverride,
+    renamedCategories,
+    renameCategory,
+    reminderOption,
+    setReminderOptionState,
+    isExcludedFromTimer
+  }), [
+    apps,
+    loading,
+    homeApps,
+    pinnedPackageNames,
+    blockedPackageNames,
+    appRenames,
+    customCategories,
+    categoryOverrides,
+    renamedCategories,
+    reminderOption
+  ]);
 
   return (
-    <AppContext.Provider value={{
-      apps,
-      loading,
-      refreshApps,
-      homeApps,
-      updateHomeApps,
-      pinnedPackageNames,
-      togglePinApp,
-      blockedPackageNames,
-      toggleBlockApp,
-      appRenames,
-      renameApp,
-      customCategories,
-      addCustomCategory,
-      categoryOverrides,
-      setCategoryOverride,
-      renamedCategories,
-      renameCategory,
-      reminderOption,
-      setReminderOptionState,
-      isExcludedFromTimer
-    }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
