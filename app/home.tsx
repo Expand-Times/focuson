@@ -13,7 +13,7 @@ import {
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import * as Battery from 'expo-battery';
+
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
@@ -70,10 +70,7 @@ export default function Home() {
     isDarkMode,
     showStatusBar,
   } = useColorContext();
-  const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
-  const [batteryState, setBatteryState] = useState<Battery.BatteryState>(
-    Battery.BatteryState.UNKNOWN
-  );
+
   const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
 
@@ -245,28 +242,7 @@ export default function Home() {
     return `${mins}m`;
   };
 
-  useEffect(() => {
-    async function getBatteryStatus() {
-      const level = await Battery.getBatteryLevelAsync();
-      const state = await Battery.getBatteryStateAsync();
-      setBatteryLevel(level);
-      setBatteryState(state);
-    }
 
-    getBatteryStatus();
-
-    const subscriptionLevel = Battery.addBatteryLevelListener(({ batteryLevel }) => {
-      setBatteryLevel(batteryLevel);
-    });
-    const subscriptionState = Battery.addBatteryStateListener(({ batteryState }) => {
-      setBatteryState(batteryState);
-    });
-
-    return () => {
-      subscriptionLevel.remove();
-      subscriptionState.remove();
-    };
-  }, []);
 
   const handleLaunchApp = (durationMinutes: number) => {
     if (selectedApp) {
@@ -357,18 +333,7 @@ export default function Home() {
     }
   };
 
-  const getBatteryIcon = () => {
-    if (
-      batteryState === Battery.BatteryState.CHARGING ||
-      batteryState === Battery.BatteryState.FULL
-    ) {
-      return 'battery-charging';
-    }
-    if (batteryLevel === null) return 'battery-full';
-    if (batteryLevel >= 0.9) return 'battery-full';
-    if (batteryLevel >= 0.4) return 'battery-half';
-    return 'battery-dead';
-  };
+
 
   const openDialer = () => {
     if (Platform.OS === 'android') {
@@ -554,7 +519,7 @@ export default function Home() {
     clock,
     time,
     pm,
-    battery,
+
     home,
     icon,
     don,
@@ -635,7 +600,7 @@ export default function Home() {
               }}>
               <Stack.Screen options={{ headerShown: false }} />
 
-              {/* Header: Time, Date, Battery */}
+              {/* Header: Time, Date */}
               <View
                 className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
                 <View className="flex-row items-baseline">
@@ -660,28 +625,7 @@ export default function Home() {
                   className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
                   {getFormattedDate(currentTime)}
                 </Text>
-                <View className="mt-3 flex-row items-center gap-2">
-                  <Ionicons
-                    name={getBatteryIcon()}
-                    style={battery}
-                    size={24}
-                    color={
-                      wallpaper && typeof wallpaper !== 'string'
-                        ? '#E6EBF2'
-                        : isDarkMode
-                          ? '#7FA8E5'
-                          : '#8699B2'
-                    }
-                  />
-                  {batteryLevel !== null && (
-                    <Text
-                      allowFontScaling={false}
-                      style={battery}
-                      className={`text-sm font-medium ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-slate-400' : 'text-[#8699B2]'}`}>
-                      {Math.round(batteryLevel * 100)}%
-                    </Text>
-                  )}
-                </View>
+
               </View>
 
               {/* Main Actions */}
