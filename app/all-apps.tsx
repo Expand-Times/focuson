@@ -131,7 +131,7 @@ export default function AllApps({
       // Small timeout to ensure list is rendered and ref is available
       const timer = setTimeout(() => {
         scrollToLetter(initialLetter);
-      }, );
+      },0.1 );
       return () => clearTimeout(timer);
     }
   }, [initialLetter]);
@@ -527,13 +527,7 @@ export default function AllApps({
       const letter = lastScrolledLetter.current;
       const sectionIndex = sections.findIndex((s) => s.title === letter);
       if (sectionIndex !== -1 && sectionListRef.current) {
-        sectionListRef.current.scrollToLocation({
-          sectionIndex,
-          itemIndex: 0,
-          animated: false,
-          viewOffset: 0,
-          viewPosition: 0,
-        });
+        // Scroll logic disabled as per user request
       }
     }
   }, [isSidebarTouching, sections]);
@@ -799,7 +793,7 @@ export default function AllApps({
                         index={index}
                         touchY={touchY}
                         isTouching={isTouching}
-                        onSelect={scrollToLetter}
+                        onSelect={() => {}}
                         isDarkMode={isDarkMode}
                         isImageWallpaper={!!isImageWallpaper}
                         currentLetter={currentLetter}
