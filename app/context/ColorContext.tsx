@@ -77,13 +77,13 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [wallpaper, setWallpaperState] = useState<WallpaperItem | null>(null);
   const [wallpaperIndex, setWallpaperIndex] = useState<number>(-1);
-  const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(false);
-  const [showCameraIcon, setShowCameraIconState] = useState<boolean>(false);
+  const [showPhoneDialer, setShowPhoneDialerState] = useState<boolean>(true);
+  const [showCameraIcon, setShowCameraIconState] = useState<boolean>(true);
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
   const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
   const [timeOffset, setTimeOffsetState] = useState<number>(0);
   const [showStatusBar, setShowStatusBarState] = useState<boolean>(true);
-  const [showUsageInfo, setShowUsageInfoState] = useState<boolean>(true);
+  const [showUsageInfo, setShowUsageInfoState] = useState<boolean>(false);
 
   useEffect(() => {
     if (wallpaper === '#0D121A') {

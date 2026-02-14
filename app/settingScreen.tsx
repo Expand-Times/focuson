@@ -4,9 +4,7 @@ import {
   Text,
   TouchableOpacity,
   ScrollView,
-  Switch,
   Image,
-  TextInput,
   Modal,
   FlatList,
   NativeSyntheticEvent,
@@ -32,15 +30,7 @@ import { Dimensions } from 'react-native';
 import { StatusBar } from 'react-native';
 const { width } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
-const ITEM_SIZE = width * 0.047;
-const SIZE = width * 0.08;
-type ColorOptionProps = {
-  color: string;
-  onPress: () => void;
-  isPremium?: boolean;
-  isSelected?: boolean;
-  isDarkMode?: boolean;
-};
+
 // Define type for user metadata
 type UserMetadata = {
   picture?: string;
@@ -57,11 +47,9 @@ export default function SettingScreen() {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
   // State for toggles
-  const [alarmClock, setAlarmClock] = useState(false);
+  const [alarmClock, setAlarmClock] = useState(true);
   const [showMore, setShowMore] = useState(true);
   const [showAbout, setShowAbout] = useState(true);
-  const [showThemes, setShowThemes] = useState(false);
-  const [homeWallpaper, setHomeWallpaper] = useState(true);
   const [timeFormatModalVisible, setTimeFormatModalVisible] = useState(false);
   const [dateModalVisible, setDateModalVisible] = useState(false);
   const [infoModalVisible, setInfoModalVisible] = useState(false);
@@ -1364,7 +1352,7 @@ export default function SettingScreen() {
                   />
                   <Text
                     allowFontScaling={false}
-                    className={`ml-2 text-[15px] ${isSelected ? 'font-bold text-[#DBDFE5]' : ''} ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#2E3B4D]'}`}>
+                    className={`ml-2 text-[15px] ${isSelected ? 'font-bold text-[#2E3B4D]' : ''} ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#2E3B4D]'}`}>
                     {option}
                   </Text>
                 </TouchableOpacity>
@@ -1378,7 +1366,7 @@ export default function SettingScreen() {
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={handleEmailPress}
-            className={`mx-[20%] mt-[5%] items-center justify-center rounded-full py-5 shadow-lg ${isDarkMode ? 'bg-[#212C40]' : '#7EA9E5'}`}
+            className={`mx-[20%] mt-[5%] items-center justify-center rounded-full py-5 shadow-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA9E5]'}`}
          >
             <Text
               allowFontScaling={false}

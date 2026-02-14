@@ -1,3 +1,4 @@
+import { useAppLauncher } from './hooks/useAppLauncher';
 import {
   View,
   Text,
@@ -251,83 +252,14 @@ export default function AllApps({
     }
   }, [isSelectMode]);
 
+  const { launchAppWithTimer } = useAppLauncher();
+
   const handleLaunchApp = (durationMinutes: number) => {
     if (selectedApp) {
-      try {
-        // Check permission
-        const hasUsagePermission = Launcher.checkUsageStatsPermission();
-        if (!hasUsagePermission) {
-          Alert.alert(
-            'Permission Required',
-            'To track usage limits, please grant Usage Access permission.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Open Settings',
-                onPress: () => {
-                  Launcher.openUsageAccessSettings();
-                },
-              },
-            ]
-          );
-          return;
-        }
-
-        const hasNotificationPermission = Launcher.checkNotificationPermission();
-        if (!hasNotificationPermission) {
-          Alert.alert(
-            'Permission Required',
-            'To show the usage monitor notification, please grant Notification permission.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              {
-                text: 'Open Settings',
-                onPress: () => {
-                  Launcher.openNotificationSettings();
-                },
-              },
-            ]
-          );
-          return;
-        }
-
-        // Start the overlay timer
-        const durationMs = durationMinutes * 15 * 1000;
-        
-        const theme = fontConfig || ({} as any);
-        const rawThemeColors = {
-            modalBg: theme.modalbg?.backgroundColor,
-            textColor: theme.open?.color,
-            subtitleColor: theme.select?.color,
-            buttonBg: theme.numberbg?.backgroundColor,
-            buttonTextColor: theme.number?.color,
-            quitButtonBg: theme.quitbg?.backgroundColor,
-            quitButtonTextColor: theme.quit?.color,
-            dividerColor: theme.bordert?.borderColor,
-            toggleColor: theme.toggle?.color,
-            toggleIconColor: theme.togglei?.color,
-            whenTextColor: theme.when?.color,
-            remindTextColor: theme.remind?.color,
-        };
-        
-        // Filter out undefined/null values and ensure strings
-        const themeColors: Record<string, string> = {};
-        Object.entries(rawThemeColors).forEach(([key, value]) => {
-          if (value !== undefined && value !== null) {
-            themeColors[key] = String(value);
-          }
-        });
-        
-        Launcher.startTimerOverlay(durationMs, selectedApp.packageName, reminderOption, themeColors);
-
-        // Open the app
-        openApplication(selectedApp.packageName);
-
-        // Close modal
+      const success = launchAppWithTimer(selectedApp, durationMinutes);
+      if (success) {
         setModalVisible(false);
         setSelectedApp(null);
-      } catch (error) {
-        console.error('Failed to launch app:', error);
       }
     }
   };
