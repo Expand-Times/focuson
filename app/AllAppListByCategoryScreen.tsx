@@ -12,10 +12,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   Platform,
-  useColorScheme,
-  Keyboard,
   Dimensions,
-  Alert,
   StatusBar,
 } from 'react-native';
 import {
@@ -25,9 +22,8 @@ import {
   Directions,
 } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
-import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
+import { MaterialCommunityIcons} from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
-import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { openApplication } from 'expo-intent-launcher';
@@ -62,8 +58,6 @@ export default function AllAppListByCategoryScreen({
     renameApp,
     customCategories,
     addCustomCategory,
-    reminderOption,
-    setReminderOptionState,
     isExcludedFromTimer,
   } = useAppContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
@@ -101,18 +95,12 @@ export default function AllAppListByCategoryScreen({
     open,
     numberbg,
     number,
-    allappt,
     appi,
     searchCt,
     wallbg,
-    toggle,
-    when,
-    remind,
     quit,
     quitbg,
     bordert,
-    togglei,
-    select,
   } = fontConfig || ({} as any);
 
   // Removed load... functions and initial useEffect

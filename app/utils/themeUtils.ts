@@ -1,4 +1,3 @@
-import { ColorValue } from 'react-native';
 
 export const getFilteredThemeColors = (theme: any): Record<string, string> => {
   const rawThemeColors = {

@@ -5,15 +5,13 @@ import {
   TouchableOpacity,
   Linking,
   Platform,
-  Modal,
   Image,
-  Alert,
   StatusBar,
-  useColorScheme,
+  
 } from 'react-native';
 import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Haptics from 'expo-haptics';
@@ -22,7 +20,6 @@ import {
   Gesture,
   GestureDetector,
   GestureHandlerRootView,
-  Directions,
 } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -31,7 +28,7 @@ import Animated, {
   withSpring,
   interpolate,
   Extrapolation,
-  SharedValue,
+  
 } from 'react-native-reanimated';
 import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
@@ -48,14 +45,12 @@ const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
 const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
 export default function Home() {
-  const router = useRouter();
+  
   const insets = useSafeAreaInsets();
   const {
     apps: allApps,
     homeApps,
     appRenames,
-    reminderOption,
-    setReminderOptionState,
     pinnedPackageNames,
     blockedPackageNames,
     isExcludedFromTimer,
@@ -440,10 +435,8 @@ export default function Home() {
 
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
   const {
-    clock,
     time,
     pm,
-
     home,
     icon,
     don,
@@ -453,22 +446,6 @@ export default function Home() {
     dialer,
     alpha,
     date,
-    info,
-    color,
-    fontSize,
-    open,
-    appicon,
-    select,
-    numberbg,
-    number,
-    toggle,
-    togglei,
-    when,
-    remind,
-    quit,
-    modalbg,
-    quitbg,
-    bordert,
     dot,
     camera,
     bubblebg,

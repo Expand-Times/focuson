@@ -6,12 +6,8 @@ import {
   ScrollView,
   Image,
   Modal,
-  FlatList,
-  NativeSyntheticEvent,
-  NativeScrollEvent,
   Pressable,
   BackHandler,
-  useColorScheme,
   Animated,
   ActivityIndicator,
   Platform,
@@ -87,13 +83,7 @@ export default function SettingScreen() {
     }
   };
 
-  const openDeviceSettings = () => {
-    if (Platform.OS === 'android') {
-      IntentLauncher.startActivityAsync(IntentLauncher.ActivityAction.SETTINGS);
-    } else {
-      Linking.openSettings();
-    }
-  };
+ 
 
   const handleRecommend = async () => {
     try {
@@ -113,22 +103,17 @@ export default function SettingScreen() {
   }
   const {
     isDarkMode,
-    wallpaper,
     setWallpaper,
     selectedColor,
-    setSelectedColor,
-    isPremium,
     showPhoneDialer,
     setShowPhoneDialer,
     showCameraIcon,
     setShowCameraIcon,
     timeFormat,
     setTimeFormat,
-    toggleTimeFormat,
     dateFormat,
     setDateFormat,
     timeOffset,
-    setTimeOffset,
     showStatusBar,
     setShowStatusBar,
     showUsageInfo,
@@ -252,45 +237,8 @@ export default function SettingScreen() {
     }
   }, [dateModalVisible, timeOffset]);
 
-  const handleTimeSave = () => {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-    const currentDay = now.getDate();
-
-    let targetHour = tempHour;
-
-    if (is12HourFormat(timeFormat)) {
-      if (tempAmPm === 'PM' && targetHour < 12) targetHour += 12;
-      if (tempAmPm === 'AM' && targetHour === 12) targetHour = 0;
-    }
-
-    const targetTime = new Date(currentYear, currentMonth, currentDay, targetHour, tempMinute);
-    const offset = targetTime.getTime() - now.getTime();
-
-    setTimeOffset(offset);
-    setTimeFormatModalVisible(false);
-  };
-
-  const handleDateSave = () => {
-    const now = new Date();
-    const currentVirtualTime = new Date(now.getTime() + (timeOffset || 0));
-
-    const targetDate = new Date(
-      tempDate.getFullYear(),
-      tempDate.getMonth(),
-      tempDate.getDate(),
-      currentVirtualTime.getHours(),
-      currentVirtualTime.getMinutes(),
-      currentVirtualTime.getSeconds()
-    );
-
-    const newOffset = targetDate.getTime() - now.getTime();
-    setTimeOffset(newOffset);
-    setDateModalVisible(false);
-  };
   // app issue
-  const [selectedOption, setSelectedOption] = useState<'App Issue' | 'Suggestion'>('App Issue');
+  const [selectedOption] = useState<'App Issue' | 'Suggestion'>('App Issue');
   // Mailto handler function
   const handleEmailPress = () => {
     const email = 'info@expandtimes.com';
@@ -304,199 +252,7 @@ export default function SettingScreen() {
     Linking.openURL(url).catch((err) => console.error('Failed to open email client:', err));
   };
 
-  const ITEM_HEIGHT = 50;
-
-  const WheelPicker = ({
-    data,
-    selectedValue,
-    onValueChange,
-  }: {
-    data: (string | number)[];
-    selectedValue: string | number;
-    onValueChange: (val: any) => void;
-  }) => {
-    const flatListRef = useRef<FlatList>(null);
-
-    // Scroll to selection when modal becomes visible or value changes externally (though value changes mostly come from scroll)
-    useEffect(() => {
-      if (timeFormatModalVisible && flatListRef.current) {
-        const index = data.indexOf(selectedValue);
-        if (index !== -1) {
-          // Small delay to ensure layout
-          setTimeout(() => {
-            flatListRef.current?.scrollToIndex({ index, animated: false });
-          }, 100);
-        }
-      }
-    }, [timeFormatModalVisible]);
-
-    const handleScrollEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const offsetY = event.nativeEvent.contentOffset.y;
-      const index = Math.round(offsetY / ITEM_HEIGHT);
-      if (index >= 0 && index < data.length) {
-        onValueChange(data[index]);
-      }
-    };
-
-    return (
-      <View style={{ height: ITEM_HEIGHT * 3, width: 80, overflow: 'hidden' }}>
-        {/* Selection Highlight */}
-        <View
-          pointerEvents="none"
-          className={`absolute top-[50px] h-[50px] w-full border-b border-t ${isDarkMode ? 'border-slate-600' : 'border-slate-200'} bg-slate-500/10`}
-        />
-        <FlatList
-          ref={flatListRef}
-          data={data}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={({ item }) => (
-            <View style={{ height: ITEM_HEIGHT, justifyContent: 'center', alignItems: 'center' }}>
-              <Text
-                allowFontScaling={false}
-                className={`text-2xl font-bold ${item === selectedValue ? (isDarkMode ? 'text-white' : 'text-slate-800') : isDarkMode ? 'text-slate-600' : 'text-slate-300'}`}>
-                {typeof item === 'number' ? item.toString().padStart(2, '0') : item}
-              </Text>
-            </View>
-          )}
-          snapToInterval={ITEM_HEIGHT}
-          decelerationRate="fast"
-          showsVerticalScrollIndicator={false}
-          contentContainerStyle={{ paddingVertical: ITEM_HEIGHT }}
-          onMomentumScrollEnd={handleScrollEnd}
-          onScrollEndDrag={handleScrollEnd}
-          getItemLayout={(_, index) => ({
-            length: ITEM_HEIGHT,
-            offset: ITEM_HEIGHT * index,
-            index,
-          })}
-          initialScrollIndex={data.indexOf(selectedValue) !== -1 ? data.indexOf(selectedValue) : 0}
-        />
-      </View>
-    );
-  };
-
-  const CalendarPicker = ({
-    selectedDate,
-    onDateChange,
-  }: {
-    selectedDate: Date;
-    onDateChange: (date: Date) => void;
-  }) => {
-    const [viewDate, setViewDate] = useState(new Date(selectedDate));
-
-    useEffect(() => {
-      setViewDate(new Date(selectedDate));
-    }, []);
-
-    const year = viewDate.getFullYear();
-    const month = viewDate.getMonth();
-
-    const monthNames = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    const weekDays = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
-
-    const days: (number | null)[] = [];
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(null);
-    }
-    for (let i = 1; i <= daysInMonth; i++) {
-      days.push(i);
-    }
-
-    const changeMonth = (increment: number) => {
-      const newDate = new Date(year, month + increment, 1);
-      setViewDate(newDate);
-    };
-
-    return (
-      <View className="w-full">
-        <View className="mb-6 flex-row items-center justify-between px-2">
-          <TouchableOpacity onPress={() => changeMonth(-1)} className="p-2">
-            <MaterialCommunityIcons
-              name="chevron-left"
-              size={28}
-              color={isDarkMode ? '#E2E8F0' : '#475569'}
-            />
-          </TouchableOpacity>
-          <Text
-            allowFontScaling={false}
-            className={`text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-            {monthNames[month]} {year}
-          </Text>
-          <TouchableOpacity onPress={() => changeMonth(1)} className="p-2">
-            <MaterialCommunityIcons
-              name="chevron-right"
-              size={28}
-              color={isDarkMode ? '#E2E8F0' : '#475569'}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <View className="mb-4 flex-row justify-between">
-          {weekDays.map((day) => (
-            <Text
-              allowFontScaling={false}
-              key={day}
-              className={`w-[14%] text-center text-xs font-bold tracking-widest ${isDarkMode ? 'text-slate-500' : 'text-slate-400'}`}>
-              {day}
-            </Text>
-          ))}
-        </View>
-
-        <View className="flex-row flex-wrap">
-          {days.map((day, index) => {
-            if (day === null) {
-              return <View key={`empty-${index}`} className="aspect-square w-[14%]" />;
-            }
-
-            const isSelected =
-              selectedDate.getDate() === day &&
-              selectedDate.getMonth() === month &&
-              selectedDate.getFullYear() === year;
-            const isToday =
-              new Date().getDate() === day &&
-              new Date().getMonth() === month &&
-              new Date().getFullYear() === year;
-
-            return (
-              <TouchableOpacity
-                key={day}
-                className="mb-2 aspect-square w-[14%] items-center justify-center"
-                onPress={() => {
-                  const newDate = new Date(year, month, day);
-                  onDateChange(newDate);
-                }}>
-                <View
-                  className={`h-9 w-9 items-center justify-center rounded-full ${isSelected ? 'bg-[#7EA6E0]' : isToday ? 'border border-[#7EA6E0]' : ''}`}>
-                  <Text
-                    allowFontScaling={false}
-                    className={`text-base font-medium ${isSelected ? 'text-white' : isDarkMode ? 'text-slate-200' : 'text-slate-700'}`}>
-                    {day}
-                  </Text>
-                </View>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </View>
-    );
-  };
-
+  
   const cycleTimeFormat = () => {
     const formats = ['HH:MM', 'HH:MM PM', 'HH:MM:SS', 'HH:MM:SS PM'];
     // Normalize current format if it's legacy
@@ -595,15 +351,7 @@ export default function SettingScreen() {
   };
 
   // Define theme colors
-  const freeColors = ['#7EA9E5', '#27282A', '#20BAD9'];
-  const premiumColors = ['#F2247A', '#29CC5F', '#F2C66D', '#7441D9', '#E58439'];
-  const handleThemeSelect = (color: string) => {
-    if (freeColors.includes(color) || isPremium) {
-      setSelectedColor(color);
-    } else {
-      setModalVisible(true);
-    }
-  };
+  
 
   const getCurrentDisplayTime = () => {
     const now = new Date(Date.now() + (timeOffset || 0));
@@ -674,7 +422,7 @@ export default function SettingScreen() {
       </View>
       <View className="border-b border-[#A3B9D940]"></View>
       <ScrollView
-        className="flex-1"
+        className="flex-"
         contentContainerStyle={{ paddingBottom: 40 }}
         showsVerticalScrollIndicator={false}>
         {/* Time Settings Modal */}

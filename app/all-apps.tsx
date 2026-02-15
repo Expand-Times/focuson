@@ -8,7 +8,6 @@ import {
   TextInput,
   Modal,
   Alert,
-  useColorScheme,
   Platform,
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
@@ -23,13 +22,8 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import {
-  runOnJS,
-  useSharedValue,
-  
-} from 'react-native-reanimated';
+import { runOnJS, useSharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
-import Launcher from '../modules/launcher';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
@@ -79,10 +73,9 @@ export default function AllApps({
     searchCt,
     searchCi,
     wallbg,
-    bubblebg
+    bubblebg,
   } = fontConfig || ({} as any);
 
-  const colorScheme = useColorScheme();
   const {
     apps: rawApps,
     homeApps,
@@ -93,13 +86,11 @@ export default function AllApps({
     toggleBlockApp,
     appRenames,
     renameApp,
-    reminderOption,
-    setReminderOptionState,
-    isExcludedFromTimer
+    isExcludedFromTimer,
   } = useAppContext();
-  
+
   const apps = useMemo(() => {
-     return [...rawApps].sort((a, b) => a.label.localeCompare(b.label));
+    return [...rawApps].sort((a, b) => a.label.localeCompare(b.label));
   }, [rawApps]);
 
   const [searchQuery, setSearchQuery] = useState('');
@@ -123,7 +114,7 @@ export default function AllApps({
   useEffect(() => {
     if (isSelectMode) {
       // Initialize selection with current home apps
-      setSelectedPackageNames(homeApps.map(a => a.packageName));
+      setSelectedPackageNames(homeApps.map((a) => a.packageName));
     }
   }, [isSelectMode, homeApps]);
 
@@ -132,7 +123,7 @@ export default function AllApps({
       // Small timeout to ensure list is rendered and ref is available
       const timer = setTimeout(() => {
         scrollToLetter(initialLetter);
-      },0.1 );
+      }, 0.1);
       return () => clearTimeout(timer);
     }
   }, [initialLetter]);
@@ -222,35 +213,41 @@ export default function AllApps({
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
 
-  const handleAppPress = useCallback((app: AppItem) => {
-    if (isSelectMode) {
-      if (selectedPackageNames.includes(app.packageName)) {
-        // Deselect
-        setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
-      } else {
-        // Select
-        if (selectedPackageNames.length >= 6) {
-          Alert.alert('Limit Reached', 'You cannot add more than 6 apps.');
-          return;
+  const handleAppPress = useCallback(
+    (app: AppItem) => {
+      if (isSelectMode) {
+        if (selectedPackageNames.includes(app.packageName)) {
+          // Deselect
+          setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
+        } else {
+          // Select
+          if (selectedPackageNames.length >= 6) {
+            Alert.alert('Limit Reached', 'You cannot add more than 6 apps.');
+            return;
+          }
+          setSelectedPackageNames((prev) => [...prev, app.packageName]);
         }
-        setSelectedPackageNames((prev) => [...prev, app.packageName]);
-      }
-    } else {
-      if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
-        openApplication(app.packageName);
       } else {
-        setSelectedApp(app);
-        setModalVisible(true);
+        if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+          openApplication(app.packageName);
+        } else {
+          setSelectedApp(app);
+          setModalVisible(true);
+        }
       }
-    }
-  }, [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames]);
+    },
+    [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames]
+  );
 
-  const handleAppLongPress = useCallback((app: AppItem) => {
-    if (!isSelectMode) {
-      setSelectedApp(app);
-      setOptionsModalVisible(true);
-    }
-  }, [isSelectMode]);
+  const handleAppLongPress = useCallback(
+    (app: AppItem) => {
+      if (!isSelectMode) {
+        setSelectedApp(app);
+        setOptionsModalVisible(true);
+      }
+    },
+    [isSelectMode]
+  );
 
   const { launchAppWithTimer } = useAppLauncher();
 
@@ -362,22 +359,35 @@ export default function AllApps({
     }
   };
 
-  const renderItem = useCallback(({ item }: { item: AppItem }) => {
-    return (
-      <AppListItem
-        item={item}
-        isSelectMode={isSelectMode}
-        isSelected={selectedPackageNames.includes(item.packageName)}
-        onPress={handleAppPress}
-        onLongPress={handleAppLongPress}
-        isImageWallpaper={isImageWallpaper}
-        isDarkMode={isDarkMode}
-        theme={fontConfig}
-        showUsageInfo={showUsageInfo}
-        wallpaperIndex={wallpaperIndex}
-      />
-    );
-  }, [isSelectMode, selectedPackageNames, handleAppPress, handleAppLongPress, isImageWallpaper, isDarkMode, fontConfig, showUsageInfo, wallpaperIndex]);
+  const renderItem = useCallback(
+    ({ item }: { item: AppItem }) => {
+      return (
+        <AppListItem
+          item={item}
+          isSelectMode={isSelectMode}
+          isSelected={selectedPackageNames.includes(item.packageName)}
+          onPress={handleAppPress}
+          onLongPress={handleAppLongPress}
+          isImageWallpaper={isImageWallpaper}
+          isDarkMode={isDarkMode}
+          theme={fontConfig}
+          showUsageInfo={showUsageInfo}
+          wallpaperIndex={wallpaperIndex}
+        />
+      );
+    },
+    [
+      isSelectMode,
+      selectedPackageNames,
+      handleAppPress,
+      handleAppLongPress,
+      isImageWallpaper,
+      isDarkMode,
+      fontConfig,
+      showUsageInfo,
+      wallpaperIndex,
+    ]
+  );
 
   const sidebarChars = useMemo(() => {
     const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
@@ -394,7 +404,7 @@ export default function AllApps({
       }
     });
 
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(char => presentLetters.has(char));
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter((char) => presentLetters.has(char));
 
     let result = [...chars];
     if (hasNonAlpha) {
@@ -407,6 +417,7 @@ export default function AllApps({
   }, [apps, pinnedPackageNames, blockedPackageNames, appRenames]);
 
   const [currentLetter, setCurrentLetter] = useState('');
+  const [dragLetter, setDragLetter] = useState<string | null>(null);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -429,20 +440,15 @@ export default function AllApps({
   }).current;
 
   const scrollToLetter = (letter: string) => {
-    // Optimistically update
     setCurrentLetter(letter);
-    
-    // Haptic feedback
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
 
-    // Find section index
     const sectionIndex = sections.findIndex((s) => s.title === letter);
 
     if (sectionIndex !== -1 && sectionListRef.current) {
       sectionListRef.current.scrollToLocation({
         sectionIndex,
         itemIndex: 0,
-        animated: false, // Smooth scrolling can be buggy with large lists during drag
+        animated: false,
         viewOffset: 0,
         viewPosition: 0,
       });
@@ -454,27 +460,32 @@ export default function AllApps({
   const lastScrolledLetter = useRef('');
   const [isSidebarTouching, setIsSidebarTouching] = useState(false);
 
-  useEffect(() => {
-    if (!isSidebarTouching && lastScrolledLetter.current && sections.length > 0) {
-      const letter = lastScrolledLetter.current;
-      const sectionIndex = sections.findIndex((s) => s.title === letter);
-      if (sectionIndex !== -1 && sectionListRef.current) {
-        // Scroll logic disabled as per user request
+  const filteredSections = useMemo(() => {
+    if (isSidebarTouching && dragLetter) {
+      const target = sections.find((s) => s.title === dragLetter);
+      if (target) {
+        return [target];
       }
     }
-  }, [isSidebarTouching, sections]);
+    return sections;
+  }, [sections, isSidebarTouching, dragLetter]);
 
   const handleGestureScroll = (letter: string) => {
     setIsSidebarTouching(true);
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
       setCurrentLetter(letter);
+      setDragLetter(letter);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     }
   };
 
   const handleGestureEnd = () => {
     setIsSidebarTouching(false);
+    if (lastScrolledLetter.current) {
+      scrollToLetter(lastScrolledLetter.current);
+    }
+    setDragLetter(null);
   };
 
   const sidebarGesture = Gesture.Pan()
@@ -522,15 +533,18 @@ export default function AllApps({
       <GestureDetector gesture={rightSwipeGesture}>
         <View
           className="flex-1 px-4 pt-12"
-          style={[{
-            backgroundColor: wallpaper
-              ? typeof wallpaper === 'string'
-                ? wallpaper
-                : 'transparent'
-              : isDarkMode
-                ? '#0D121A'
-                : '#EBF0F7',
-          }, wallbg]}>
+          style={[
+            {
+              backgroundColor: wallpaper
+                ? typeof wallpaper === 'string'
+                  ? wallpaper
+                  : 'transparent'
+                : isDarkMode
+                  ? '#0D121A'
+                  : '#EBF0F7',
+            },
+            wallbg,
+          ]}>
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center ">
             <View
@@ -581,8 +595,7 @@ export default function AllApps({
           </View>
 
           {/* Header */}
-          
-          <View className="mb-4 flex-row items-center justify-between px-1">
+          <View className="w-full mb-4 flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
               style={allappt}
@@ -630,38 +643,37 @@ export default function AllApps({
               </View>
             ) : (
               <Link href="/settingScreen" asChild>
-                <TouchableOpacity hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                <TouchableOpacity
+                  className="p-2"
+                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
                   <View
                     style={[
+                      allappi,
                       {
                         borderColor:
                           allappi?.color ||
-                          (isImageWallpaper ? '#ffffff80' : isDarkMode ? '#94a3b8' : '#858E9D'),
+                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
                       },
-                      allappi,
                     ]}
-                    className={`rounded-lg border-2  ${
-                      allappi
-                        ? ''
-                        : isImageWallpaper
-                          ? 'border-white/50'
-                          : isDarkMode
-                            ? 'border-slate-400'
-                            : 'border-[#858E9D]'
+                    className={`rounded-lg border border-2 ${
+                      isImageWallpaper
+                        ? 'border-white/50'
+                        : isDarkMode
+                          ? 'border-[#858E9D]'
+                          : 'border-[#858E9D]'
                     }`}>
                     <MaterialCommunityIcons
                       name="tune-variant"
-                      size={22}
+                      size={25}
                       color={
                         allappi?.color ||
-                        (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#94A3B8' : '#858E9D')
+                        (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
                       }
                     />
                   </View>
                 </TouchableOpacity>
               </Link>
             )}
-          
           </View>
 
           <View className="flex-1 flex-row">
@@ -669,7 +681,7 @@ export default function AllApps({
             <View className="w-full px-3 ">
               <SectionList
                 ref={sectionListRef}
-                sections={sections}
+                sections={filteredSections}
                 renderItem={renderItem}
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
@@ -922,77 +934,83 @@ const formatUsageTime = (millis?: number) => {
   return `${minutes} min`;
 };
 
-const AppListItem = memo(({
-  item,
-  isSelectMode,
-  isSelected,
-  onPress,
-  onLongPress,
-  isImageWallpaper,
-  isDarkMode,
-  theme,
-  showUsageInfo,
-  wallpaperIndex
-}: any) => {
-  const { applist, applistbg, appdu } = theme || {};
+const AppListItem = memo(
+  ({
+    item,
+    isSelectMode,
+    isSelected,
+    onPress,
+    onLongPress,
+    isImageWallpaper,
+    isDarkMode,
+    theme,
+    showUsageInfo,
+    wallpaperIndex,
+  }: any) => {
+    const { applist, applistbg, appdu } = theme || {};
 
-  const usageText = formatUsageTime(item.usageTime);
+    const usageText = formatUsageTime(item.usageTime);
 
-  return (
-    <TouchableOpacity
-      style={applistbg}
-      className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-        isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
-      } ${isSelectMode && isSelected ? '' : ''}`}
-      onPress={() => onPress(item)}
-      onLongPress={() => onLongPress(item)}
-      delayLongPress={300}>
-      <View className="flex-1 flex-row items-center">
-        {isSelectMode && (
-          <Ionicons
-            name={isSelected ? 'checkbox' : 'square-outline'}
-            size={20}
-            color={
-              applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')
-            }
-            style={[{ marginRight: 8 }, applist]}
-          />
-        )}
-        {wallpaperIndex === 6 && (
-          <View
-            style={{
-              width: 10,
-              height: 10,
-              borderRadius: 5,
-              backgroundColor: '#132C4D',
-              marginRight: 8,
-              opacity: 0.8,
-            }}
-          />
-        )}
-        <Text
-          allowFontScaling={false}
-          style={applist}
-          className={`font-regular text-[16px] ${
-            isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
-          }`}
-          numberOfLines={1}>
-          {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
-        </Text>
-      </View>
-
-      {showUsageInfo && (
-        <View className="flex-row items-center">
+    return (
+      <TouchableOpacity
+        style={applistbg}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
+          isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
+        } ${isSelectMode && isSelected ? '' : ''}`}
+        onPress={() => onPress(item)}
+        onLongPress={() => onLongPress(item)}
+        delayLongPress={300}>
+        <View className="flex-1 flex-row items-center">
+          {isSelectMode && (
+            <Ionicons
+              name={isSelected ? 'checkbox' : 'square-outline'}
+              size={20}
+              color={
+                applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')
+              }
+              style={[{ marginRight: 8 }, applist]}
+            />
+          )}
+          {wallpaperIndex === 6 && (
+            <View
+              style={{
+                width: 10,
+                height: 10,
+                borderRadius: 5,
+                backgroundColor: '#132C4D',
+                marginRight: 8,
+                opacity: 0.8,
+              }}
+            />
+          )}
           <Text
             allowFontScaling={false}
-            style={appdu}
-            className={`text-[10px] font-light ${
-              isImageWallpaper ? 'text-slate-300' : isDarkMode ? 'text-[#728099]' : 'text-[#4D6D99]'
-            } opacity-90`}>
-            TO: {item.launchCount || 0} times || TU: {usageText}
+            style={applist}
+            className={`font-regular text-[16px] ${
+              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
+            }`}
+            numberOfLines={1}>
+            {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
           </Text>
         </View>
-      )}
-    </TouchableOpacity>
-  );
-});
+
+        {showUsageInfo && (
+          <View className="flex-row items-center">
+            <Text
+              allowFontScaling={false}
+              style={appdu}
+              className={`text-[10px] font-light ${
+                isImageWallpaper
+                  ? 'text-slate-300'
+                  : isDarkMode
+                    ? 'text-[#728099]'
+                    : 'text-[#4D6D99]'
+              } opacity-90`}>
+              TO: {item.launchCount || 0} times || TU: {usageText}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    );
+  }
+);
