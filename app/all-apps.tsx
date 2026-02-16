@@ -417,7 +417,6 @@ export default function AllApps({
   }, [apps, pinnedPackageNames, blockedPackageNames, appRenames]);
 
   const [currentLetter, setCurrentLetter] = useState('');
-  const [dragLetter, setDragLetter] = useState<string | null>(null);
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
     if (viewableItems.length > 0) {
@@ -448,7 +447,7 @@ export default function AllApps({
       sectionListRef.current.scrollToLocation({
         sectionIndex,
         itemIndex: 0,
-        animated: false,
+        animated: true,
         viewOffset: 0,
         viewPosition: 0,
       });
@@ -458,34 +457,16 @@ export default function AllApps({
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
   const lastScrolledLetter = useRef('');
-  const [isSidebarTouching, setIsSidebarTouching] = useState(false);
-
-  const filteredSections = useMemo(() => {
-    if (isSidebarTouching && dragLetter) {
-      const target = sections.find((s) => s.title === dragLetter);
-      if (target) {
-        return [target];
-      }
-    }
-    return sections;
-  }, [sections, isSidebarTouching, dragLetter]);
-
   const handleGestureScroll = (letter: string) => {
-    setIsSidebarTouching(true);
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
-      setCurrentLetter(letter);
-      setDragLetter(letter);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      scrollToLetter(letter);
     }
   };
 
   const handleGestureEnd = () => {
-    setIsSidebarTouching(false);
-    if (lastScrolledLetter.current) {
-      scrollToLetter(lastScrolledLetter.current);
-    }
-    setDragLetter(null);
+    // No-op
   };
 
   const sidebarGesture = Gesture.Pan()
@@ -494,27 +475,27 @@ export default function AllApps({
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
       if (index >= 0 && index < sidebarChars.length) {
-        runOnJS(handleGestureScroll)(sidebarChars[index]);
+        handleGestureScroll(sidebarChars[index]);
       }
     })
     .onUpdate((e) => {
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
       if (index >= 0 && index < sidebarChars.length) {
-        runOnJS(handleGestureScroll)(sidebarChars[index]);
+        handleGestureScroll(sidebarChars[index]);
       }
     })
     .onFinalize(() => {
       isTouching.value = false;
       touchY.value = -100;
-      runOnJS(handleGestureEnd)();
+      handleGestureEnd();
     });
 
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
     .enabled(enableGestures)
     .onEnd(() => {
-      runOnJS(router.back)();
+      router.back();
     });
 
   const RootContainer = enableGestures ? GestureHandlerRootView : View;
@@ -681,7 +662,7 @@ export default function AllApps({
             <View className="w-full px-3 ">
               <SectionList
                 ref={sectionListRef}
-                sections={filteredSections}
+                sections={sections}
                 renderItem={renderItem}
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
@@ -705,13 +686,7 @@ export default function AllApps({
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={viewabilityConfig}
                 stickySectionHeadersEnabled={false}
-                onScrollToIndexFailed={(info) => {
-                  // SectionList doesn't use onScrollToIndexFailed quite the same, but keeping basic handling
-                  const wait = new Promise((resolve) => setTimeout(resolve, 500));
-                  wait.then(() => {
-                    // sectionListRef.current?.scrollToLocation(...) - difficult to retry without section info
-                  });
-                }}
+                onScrollToIndexFailed={(info) => {false}}
               />
             </View>
 
