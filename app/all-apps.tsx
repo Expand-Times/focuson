@@ -22,7 +22,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import { runOnJS, useSharedValue } from 'react-native-reanimated';
+import {  useSharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';

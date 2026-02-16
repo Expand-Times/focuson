@@ -219,6 +219,14 @@ class LauncherModule : Module() {
   override fun definition() = ModuleDefinition {
     Name("Launcher")
 
+    Function("lockScreen") {
+        val service = LauncherAccessibilityService.instance?.get()
+        if (service != null) {
+            return@Function service.lockScreen()
+        }
+        return@Function false
+    }
+
     Function("checkUsageStatsPermission") {
         val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName)
@@ -262,6 +270,12 @@ class LauncherModule : Module() {
     Function("openNotificationSettings") {
         val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
         intent.putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
+    Function("openAccessibilitySettings") {
+        val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
     }

@@ -7,12 +7,11 @@ import {
   Platform,
   Image,
   StatusBar,
-  
+  Alert,
 } from 'react-native';
-import { Stack, Link, useRouter, useFocusEffect } from 'expo-router';
+import { Stack, Link,  useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import {  useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import * as IntentLauncher from 'expo-intent-launcher';
 import * as Haptics from 'expo-haptics';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
@@ -271,6 +270,38 @@ export default function Home() {
     }
   };
 
+  const handleLockScreen = useCallback(() => {
+    const success = Launcher.lockScreen();
+    if (!success) {
+      Alert.alert(
+        'Permission Required',
+        'To use double-tap to lock, please enable the Accessibility Service for Minimal Life Launcher.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Launcher.openAccessibilitySettings();
+            },
+          },
+        ]
+      );
+    }
+  }, []);
+
+  // Double Tap Gesture
+  const doubleTap = Gesture.Tap()
+    .numberOfTaps(2)
+    .maxDelay(250)
+    .maxDistance(10)
+    .runOnJS(true)
+    .onEnd(() => {
+      const isHome = Math.abs(translateX.value - (-SCREEN_WIDTH)) < 10;
+      if (isHome) {
+        handleLockScreen();
+      }
+    });
+
   // Main Navigation Pan Gesture
   const mainPanGesture = Gesture.Pan()
     .activeOffsetX([-20, 20])
@@ -324,6 +355,8 @@ export default function Home() {
         mass: 0.8,
       });
     });
+
+  const composedGesture = Gesture.Race(mainPanGesture, doubleTap);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -473,7 +506,7 @@ export default function Home() {
         hidden={!showStatusBar}
       />
 
-      <GestureDetector gesture={mainPanGesture}>
+      <GestureDetector gesture={composedGesture}>
         <Animated.View
           style={[
             { flexDirection: 'row', width: SCREEN_WIDTH * 3, height: '100%' },
