@@ -447,7 +447,7 @@ export default function AllApps({
       sectionListRef.current.scrollToLocation({
         sectionIndex,
         itemIndex: 0,
-        animated: true,
+        animated: false,
         viewOffset: 0,
         viewPosition: 0,
       });
@@ -469,26 +469,34 @@ export default function AllApps({
     // No-op
   };
 
+  const activeIndex = useSharedValue(-1);
+
   const sidebarGesture = Gesture.Pan()
     .onBegin((e) => {
+      'worklet';
       isTouching.value = true;
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length) {
-        handleGestureScroll(sidebarChars[index]);
+      if (index >= 0 && index < sidebarChars.length && index !== activeIndex.value) {
+        activeIndex.value = index;
+        runOnJS(handleGestureScroll)(sidebarChars[index]);
       }
     })
     .onUpdate((e) => {
+      'worklet';
       touchY.value = e.y;
       const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length) {
-        handleGestureScroll(sidebarChars[index]);
+      if (index >= 0 && index < sidebarChars.length && index !== activeIndex.value) {
+        activeIndex.value = index;
+        runOnJS(handleGestureScroll)(sidebarChars[index]);
       }
     })
     .onFinalize(() => {
+      'worklet';
       isTouching.value = false;
       touchY.value = -100;
-      handleGestureEnd();
+      activeIndex.value = -1;
+      runOnJS(handleGestureEnd)();
     });
 
   const rightSwipeGesture = Gesture.Fling()
@@ -530,13 +538,12 @@ export default function AllApps({
           <View className="mb-6 flex-row items-center ">
             <View
               style={searchbg}
-              className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${
-                isImageWallpaper
+              className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${isImageWallpaper
                   ? 'border-white/20 '
                   : isDarkMode
                     ? 'border-[#212D41] bg-[]'
                     : 'border-slate-100 bg-white'
-              }`}>
+                }`}>
               <Ionicons
                 name="search"
                 size={20}
@@ -548,15 +555,14 @@ export default function AllApps({
               />
               <TextInput
                 style={searchCt}
-                className={`ml-2 flex-1 text-[16px] ${
-                  searchCt
+                className={`ml-2 flex-1 text-[16px] ${searchCt
                     ? ''
                     : isImageWallpaper
                       ? 'text-white'
                       : isDarkMode
                         ? 'text-[#fff]'
                         : 'text-[#A3B9D9]'
-                }`}
+                  }`}
                 placeholder="Search app here"
                 placeholderTextColor={
                   searchCt?.color ||
@@ -580,13 +586,12 @@ export default function AllApps({
             <Text
               allowFontScaling={false}
               style={allappt}
-              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
-                isImageWallpaper
+              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${isImageWallpaper
                   ? 'text-white decoration-white'
                   : isDarkMode
                     ? 'text-[#DADFE5] decoration-[#DADFE5]'
                     : 'text-[#858E9D] decoration-[#858E9D]'
-              }`}>
+                }`}>
               {isSelectMode ? 'Select Apps' : 'All Apps'}
             </Text>
             {isSelectMode ? (
@@ -596,13 +601,12 @@ export default function AllApps({
                   onPress={() => router.back()}>
                   <Text
                     allowFontScaling={false}
-                    className={`text-[14px] font-medium ${
-                      isImageWallpaper
+                    className={`text-[14px] font-medium ${isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
                           ? 'text-[#DADFE5]'
                           : 'text-[#858E9D]'
-                    }`}>
+                      }`}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -611,13 +615,12 @@ export default function AllApps({
                   onPress={handleSaveSelection}>
                   <Text
                     allowFontScaling={false}
-                    className={`text-[14px] font-bold ${
-                      isImageWallpaper
+                    className={`text-[14px] font-bold ${isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
                           ? 'text-[#DADFE5]'
                           : 'text-[#FFFFFF]'
-                    }`}>
+                      }`}>
                     Add
                   </Text>
                 </TouchableOpacity>
@@ -636,13 +639,12 @@ export default function AllApps({
                           (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
                       },
                     ]}
-                    className={`rounded-lg border border-2 ${
-                      isImageWallpaper
+                    className={`rounded-lg border border-2 ${isImageWallpaper
                         ? 'border-white/50'
                         : isDarkMode
                           ? 'border-[#858E9D]'
                           : 'border-[#858E9D]'
-                    }`}>
+                      }`}>
                     <MaterialCommunityIcons
                       name="tune-variant"
                       size={25}
@@ -667,26 +669,34 @@ export default function AllApps({
                 renderSectionHeader={({ section: { title } }) => (
                   <Text
                     style={header}
-                    className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
-                      isImageWallpaper
+                    className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
                           ? 'text-[#728099]'
                           : 'text-[#142C4D]'
-                    }`}>
+                      }`}>
                     {title}
                   </Text>
                 )}
                 keyExtractor={(item) => item.packageName}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={15}
-                maxToRenderPerBatch={20}
-                windowSize={10}
+                initialNumToRender={100}
+                maxToRenderPerBatch={100}
+                windowSize={21}
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={viewabilityConfig}
                 stickySectionHeadersEnabled={false}
-                onScrollToIndexFailed={(info) => {false}}
+                onScrollToIndexFailed={(info) => {
+                  const wait = new Promise((resolve) => setTimeout(resolve, 50));
+                  wait.then(() => {
+                    sectionListRef.current?.scrollToLocation({
+                      sectionIndex: info.index,
+                      itemIndex: 0,
+                      animated: false,
+                    });
+                  });
+                }}
               />
             </View>
 
@@ -712,7 +722,7 @@ export default function AllApps({
                         index={index}
                         touchY={touchY}
                         isTouching={isTouching}
-                        onSelect={() => {}}
+                        onSelect={() => { }}
                         isDarkMode={isDarkMode}
                         isImageWallpaper={!!isImageWallpaper}
                         currentLetter={currentLetter}
@@ -818,9 +828,8 @@ export default function AllApps({
                   className={`mt-6 border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                   <TouchableOpacity
                     style={quitbg}
-                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
-                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
-                    }`}
+                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                      }`}
                     onPress={() => setOptionsModalVisible(false)}>
                     <Text
                       style={quit}
@@ -858,13 +867,12 @@ export default function AllApps({
                         value={newName}
                         onChangeText={setNewName}
                         style={[appC, applistCbg]}
-                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
-                          isImageWallpaper
+                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isImageWallpaper
                             ? 'border-white/20 text-white'
                             : isDarkMode
                               ? 'border-slate-600 bg-slate-800 text-slate-300'
                               : 'border-slate-300 bg-slate-50 text-slate-700'
-                        }`}
+                          }`}
                         selectTextOnFocus
                       />
 
@@ -929,9 +937,8 @@ const AppListItem = memo(
     return (
       <TouchableOpacity
         style={applistbg}
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-          isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
-        } ${isSelectMode && isSelected ? '' : ''}`}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
+          } ${isSelectMode && isSelected ? '' : ''}`}
         onPress={() => onPress(item)}
         onLongPress={() => onLongPress(item)}
         delayLongPress={300}>
@@ -961,9 +968,8 @@ const AppListItem = memo(
           <Text
             allowFontScaling={false}
             style={applist}
-            className={`font-regular text-[16px] ${
-              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
-            }`}
+            className={`font-regular text-[16px] ${isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
+              }`}
             numberOfLines={1}>
             {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
           </Text>
@@ -974,13 +980,12 @@ const AppListItem = memo(
             <Text
               allowFontScaling={false}
               style={appdu}
-              className={`text-[10px] font-light ${
-                isImageWallpaper
+              className={`text-[10px] font-light ${isImageWallpaper
                   ? 'text-slate-300'
                   : isDarkMode
                     ? 'text-[#728099]'
                     : 'text-[#4D6D99]'
-              } opacity-90`}>
+                } opacity-90`}>
               TO: {item.launchCount || 0} times || TU: {usageText}
             </Text>
           </View>
