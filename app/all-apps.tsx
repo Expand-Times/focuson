@@ -35,7 +35,7 @@ import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { SidebarItem, BubbleCursor } from './context/Sidebar';
 
 const { height } = Dimensions.get('window');
-const ITEM_HEIGHT = (height * 0.65) / 28;
+const ITEM_HEIGHT = (height * 0.50) / 28;
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -704,7 +704,7 @@ export default function AllApps({
             {showSidebar && (
               <View className="z-50 items-center justify-center py-4">
                 <GestureDetector gesture={sidebarGesture}>
-                  <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 10 }}>
+                  <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 0 }}>
                     <BubbleCursor
                       touchY={touchY}
                       isTouching={isTouching}
@@ -712,7 +712,6 @@ export default function AllApps({
                       isDarkMode={isDarkMode}
                       style={bubblebg}
                       itemHeight={ITEM_HEIGHT}
-                      cursorSize={50}
                       bubbleColor={isDarkMode ? '#212C40' : '#fff'}
                     />
                     {sidebarChars.map((letter, index) => (
