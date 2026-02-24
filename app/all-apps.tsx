@@ -22,7 +22,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import {  useSharedValue } from 'react-native-reanimated';
+import {  runOnJS,useSharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
@@ -42,6 +42,7 @@ export type AllAppsProps = {
   initialLetter?: string;
   showSidebar?: boolean;
   autoFocus?: boolean;
+  activeLetter?: string;
 };
 
 export default function AllApps({
@@ -49,6 +50,7 @@ export default function AllApps({
   initialLetter,
   showSidebar = true,
   autoFocus = false,
+  activeLetter: propActiveLetter,
 }: AllAppsProps = {}) {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
@@ -139,6 +141,9 @@ export default function AllApps({
     }
   };
 
+  const [internalActiveLetter, setInternalActiveLetter] = useState<string | null>(null);
+  const activeLetter = propActiveLetter || internalActiveLetter;
+
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
@@ -210,8 +215,13 @@ export default function AllApps({
         .filter((section) => section.data.length > 0);
     }
 
+    // Filter by activeLetter if present (Sidebar Scroll Optimization)
+    if (activeLetter) {
+      result = result.filter((section) => section.title === activeLetter);
+    }
+
     return result;
-  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
+  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames, activeLetter]);
 
   const handleAppPress = useCallback(
     (app: AppItem) => {
@@ -438,7 +448,7 @@ export default function AllApps({
     itemVisiblePercentThreshold: 10,
   }).current;
 
-  const scrollToLetter = (letter: string) => {
+  const scrollToLetter = useCallback((letter: string) => {
     setCurrentLetter(letter);
 
     const sectionIndex = sections.findIndex((s) => s.title === letter);
@@ -452,26 +462,40 @@ export default function AllApps({
         viewPosition: 0,
       });
     }
-  };
+  }, [sections]);
 
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
   const lastScrolledLetter = useRef('');
-  const handleGestureScroll = (letter: string) => {
+  
+  const handleGestureScroll = useCallback((letter: string) => {
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      scrollToLetter(letter);
+      setInternalActiveLetter(letter);
+      setCurrentLetter(letter);
     }
-  };
+  }, []);
 
-  const handleGestureEnd = () => {
-    // No-op
-  };
+  const handleGestureEnd = useCallback(() => {
+    setInternalActiveLetter(null);
+  }, []);
+
+  // Restore scroll position when sidebar interaction ends
+  useEffect(() => {
+    if (!activeLetter && (lastScrolledLetter.current || initialLetter)) {
+      const target = lastScrolledLetter.current || initialLetter;
+      // Small timeout to ensure SectionList has re-rendered with full data
+      const timer = setTimeout(() => {
+        if(target) scrollToLetter(target);
+      }, 50);
+      return () => clearTimeout(timer);
+    }
+  }, [activeLetter, initialLetter, scrollToLetter]);
 
   const activeIndex = useSharedValue(-1);
 
-  const sidebarGesture = Gesture.Pan()
+  const sidebarGesture = useMemo(() => Gesture.Pan()
     .onBegin((e) => {
       'worklet';
       isTouching.value = true;
@@ -497,7 +521,7 @@ export default function AllApps({
       touchY.value = -100;
       activeIndex.value = -1;
       runOnJS(handleGestureEnd)();
-    });
+    }), [sidebarChars, activeIndex, handleGestureScroll, handleGestureEnd]);
 
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)

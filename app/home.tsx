@@ -796,7 +796,12 @@ export default function Home() {
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
-            <AllApps enableGestures={false} initialLetter={allAppsLetter} showSidebar={false} />
+            <AllApps
+              enableGestures={false}
+              initialLetter={allAppsLetter}
+              showSidebar={false}
+              activeLetter={dragLetter}
+            />
           </View>
         </Animated.View>
       </GestureDetector>

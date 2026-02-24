@@ -16,7 +16,6 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import * as IntentLauncher from 'expo-intent-launcher';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
 import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
