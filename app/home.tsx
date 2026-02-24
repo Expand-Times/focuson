@@ -27,7 +27,7 @@ import Animated, {
   withSpring,
   interpolate,
   Extrapolation,
-  
+  useAnimatedReaction,
 } from 'react-native-reanimated';
 import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
@@ -40,6 +40,7 @@ import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
 const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
@@ -68,6 +69,56 @@ export default function Home() {
 
   const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
+
+  // Tutorial State
+  // 0: Swipe Left (Home -> All Apps)
+  // 1: Wait for return to Home (All Apps -> Home)
+  // 2: Swipe Right (Home -> Category)
+  // 3: Wait for return to Home (Category -> Home)
+  // 4: Sidebar (Home -> Sidebar)
+  // 5: Done
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [tutorialStep, setTutorialStep] = useState(0);
+
+  useEffect(() => {
+    checkTutorialStatus();
+  }, []);
+
+  const checkTutorialStatus = async () => {
+    try {
+      const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
+      if (!hasShown) {
+        // Load saved step if exists
+        const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
+        if (savedStep) {
+          setTutorialStep(parseInt(savedStep));
+        }
+        setShowTutorial(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const updateTutorialStep = (step: number) => {
+    // Only allow moving forward
+    if (step > tutorialStep) {
+      setTutorialStep(step);
+      AsyncStorage.setItem('tutorialStep_v5', step.toString());
+      if (step === 5) {
+        handleTutorialComplete();
+      }
+    }
+  };
+
+  const handleTutorialComplete = async () => {
+    try {
+      await AsyncStorage.setItem('hasShownTutorial_v5', 'true');
+      setShowTutorial(false);
+    } catch (e) {
+      console.error(e);
+    }
+  };
 
   // Sidebar Logic
   const sidebarChars = useMemo(() => {
@@ -104,6 +155,58 @@ export default function Home() {
   const lastLetterRef = useRef('');
   const translateX = useSharedValue(-SCREEN_WIDTH);
   const context = useSharedValue({ startX: 0 });
+  const showTutorialSV = useSharedValue(false);
+  const tutorialStepSV = useSharedValue(0);
+
+  // Sync tutorial state to shared values
+  useEffect(() => {
+    showTutorialSV.value = showTutorial;
+    tutorialStepSV.value = tutorialStep;
+  }, [showTutorial, tutorialStep]);
+
+  // Track Tutorial Progress
+  useAnimatedReaction(
+    () => translateX.value,
+    (currentX) => {
+      if (!showTutorial) return;
+
+      // Step 0: Swipe Left (Home -> All Apps)
+      // Target: translateX approaches -2 * SCREEN_WIDTH
+      if (tutorialStep === 0 && currentX < -SCREEN_WIDTH * 1.5) {
+        runOnJS(updateTutorialStep)(1);
+      }
+
+      // Step 1: Wait for return to Home (All Apps -> Home)
+      // Target: translateX approaches -SCREEN_WIDTH
+      if (tutorialStep === 1 && currentX > -SCREEN_WIDTH * 1.1) {
+        runOnJS(updateTutorialStep)(2);
+      }
+
+      // Step 2: Swipe Right (Home -> Category)
+      // Target: translateX approaches 0
+      if (tutorialStep === 2 && currentX > -SCREEN_WIDTH * 0.5) {
+        runOnJS(updateTutorialStep)(3);
+      }
+
+      // Step 3: Wait for return to Home (Category -> Home)
+      // Target: translateX approaches -SCREEN_WIDTH
+      if (tutorialStep === 3 && currentX < -SCREEN_WIDTH * 0.9) {
+        runOnJS(updateTutorialStep)(4);
+      }
+    },
+    [showTutorial, tutorialStep]
+  );
+
+  // Track Sidebar Usage for Step 4
+  useAnimatedReaction(
+    () => isSidebarActive.value,
+    (isActive) => {
+      if (showTutorial && tutorialStep === 4 && isActive) {
+        runOnJS(updateTutorialStep)(5);
+      }
+    },
+    [showTutorial, tutorialStep]
+  );
 
  const navigateToAllAppsWithLetter = (letter: string) => {
     setDragLetter(letter);
@@ -153,6 +256,10 @@ export default function Home() {
     () =>
       Gesture.Pan()
         .onBegin((e) => {
+          // Disable sidebar if tutorial is active AND on Step 2 (Swipe Right)
+          // Sidebar should work on Step 0 (Swipe Left) and Step 4 (Sidebar)
+          if (showTutorial && tutorialStep === 2) return;
+
           isSidebarActive.value = true;
           isTouching.value = true;
           touchY.value = e.y;
@@ -171,6 +278,8 @@ export default function Home() {
           runOnJS(handleSidebarInteraction)(index);
         })
         .onUpdate((e) => {
+          if (showTutorial && tutorialStep === 2) return;
+          
           touchY.value = e.y;
           const index = Math.floor(e.y / ITEM_HEIGHT);
           runOnJS(handleSidebarInteraction)(index);
@@ -179,6 +288,8 @@ export default function Home() {
           // Logic handled in update
         })
         .onFinalize(() => {
+          if (showTutorial && tutorialStep === 2) return;
+
           isSidebarActive.value = false;
           isTouching.value = false;
           runOnJS(clearDragLetterState)();
@@ -196,6 +307,8 @@ export default function Home() {
       isTouching,
       touchY,
       translateX,
+      showTutorial,
+      tutorialStep
     ]
   );
 
@@ -312,7 +425,24 @@ export default function Home() {
     })
     .onUpdate((e) => {
       if (isSidebarActive.value) return;
-      const nextPos = context.value.startX + e.translationX;
+      let nextPos = context.value.startX + e.translationX;
+      
+      // Tutorial Constraints
+      if (showTutorialSV.value) {
+        if (tutorialStepSV.value <= 1) {
+          // Step 0 & 1: Swipe Left (Home <-> All Apps)
+          // Range: [-2W, -1W]
+          nextPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, nextPos));
+        } else if (tutorialStepSV.value <= 3) {
+          // Step 2 & 3: Swipe Right (Home <-> Category)
+          // Range: [-1W, 0]
+          nextPos = Math.max(-SCREEN_WIDTH, Math.min(0, nextPos));
+        } else if (tutorialStepSV.value === 4) {
+          // Step 4: Sidebar (Lock to Home)
+          nextPos = -SCREEN_WIDTH;
+        }
+      }
+
       // Clamp between -SCREEN_WIDTH * 2 (All Apps) and 0 (Category)
       translateX.value = Math.max(-SCREEN_WIDTH * 2, Math.min(0, nextPos));
     })
@@ -345,6 +475,20 @@ export default function Home() {
           targetPos = -SCREEN_WIDTH * 2; // Fling left -> AllApps
         } else {
           targetPos = -SCREEN_WIDTH; // Stay Home
+        }
+      }
+
+      // Apply Tutorial Constraints to Target
+      if (showTutorialSV.value) {
+        if (tutorialStepSV.value <= 1) {
+          // Lock to [-2W, -1W]
+          targetPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, targetPos));
+        } else if (tutorialStepSV.value <= 3) {
+          // Lock to [-1W, 0]
+          targetPos = Math.max(-SCREEN_WIDTH, Math.min(0, targetPos));
+        } else if (tutorialStepSV.value === 4) {
+          // Lock to Home
+          targetPos = -SCREEN_WIDTH;
         }
       }
 
@@ -520,6 +664,7 @@ export default function Home() {
               <Image source={wallpaper} className="absolute h-full w-full" resizeMode="cover" />
             )}
             <View
+              pointerEvents={showTutorial ? 'box-only' : 'auto'}
               className="flex-1 justify-between px-6"
               style={{
                 paddingTop: 48,
@@ -849,6 +994,76 @@ export default function Home() {
           </Animated.View>
         </GestureDetector>
       </Animated.View>
+
+      {/* Tutorial Overlay */}
+      {showTutorial && (
+        <View
+          pointerEvents="none"
+          className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
+          {/* Step 0: Swipe Left (Show on Home) */}
+          {tutorialStep === 0 && (
+            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
+              <MaterialCommunityIcons 
+                name="gesture-swipe-right" 
+                size={80} 
+                color="#fff" 
+              />
+              <Text 
+                className="mt-4 text-2xl font-bold italic text-white"
+                allowFontScaling={false}>
+                Swipe right
+              </Text>
+              <Text 
+                className="mt-2 text-base font-regular text-gray-200"
+                allowFontScaling={false}>
+                To see All Apps list
+              </Text>
+            </View>
+          )}
+
+          {/* Step 2: Swipe Right (Show on Home) */}
+          {tutorialStep === 2 && (
+            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
+              <MaterialCommunityIcons 
+                name="gesture-swipe-left" 
+                size={80} 
+                color="#fff" 
+              />
+              <Text 
+                className="mt-4 text-2xl font-bold italic text-white"
+                allowFontScaling={false}>
+                Swipe left
+              </Text>
+              <Text 
+                className="mt-2 text-base font-regular text-gray-200"
+                allowFontScaling={false}>
+                To see Apps list by Category
+              </Text>
+            </View>
+          )}
+
+          {/* Step 4: Tap & Scroll (Show on Home) */}
+          {tutorialStep === 4 && (
+            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
+              <MaterialCommunityIcons 
+                name="gesture-tap" 
+                size={80} 
+                color="#fff" 
+              />
+              <Text 
+                className="mt-4 text-2xl font-bold italic text-white"
+                allowFontScaling={false}>
+                Tap and Scroll
+              </Text>
+              <Text 
+                className="mt-2 text-base font-regular text-gray-200"
+                allowFontScaling={false}>
+                Scroll Alphabet bubble to change apps list
+              </Text>
+            </View>
+          )}
+        </View>
+      )}
     </GestureHandlerRootView>
   );
 }

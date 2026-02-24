@@ -707,7 +707,7 @@ export default function AllApps({
                 showsVerticalScrollIndicator={false}
                 initialNumToRender={100}
                 maxToRenderPerBatch={100}
-                windowSize={21}
+                windowSize={5}
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={viewabilityConfig}
                 stickySectionHeadersEnabled={false}
