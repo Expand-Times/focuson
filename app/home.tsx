@@ -1002,19 +1002,19 @@ export default function Home() {
           className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
           {/* Step 0: Swipe Left (Show on Home) */}
           {tutorialStep === 0 && (
-            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
-              <MaterialCommunityIcons 
-                name="gesture-swipe-right" 
-                size={80} 
-                color="#fff" 
+            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
+              <Image 
+                source={require('../assets/Animation/icons8-drag-left.gif')} 
+                className="h-24 w-24"
+                resizeMode="contain"
               />
               <Text 
-                className="mt-4 text-2xl font-bold italic text-white"
+                className="mt-4 text-2xl font-bold italic text-black/40"
                 allowFontScaling={false}>
-                Swipe right
+                Swipe Left
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-gray-200"
+                className="mt-2 text-base font-regular text-black/40"
                 allowFontScaling={false}>
                 To see All Apps list
               </Text>
@@ -1023,19 +1023,19 @@ export default function Home() {
 
           {/* Step 2: Swipe Right (Show on Home) */}
           {tutorialStep === 2 && (
-            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
-              <MaterialCommunityIcons 
-                name="gesture-swipe-left" 
-                size={80} 
-                color="#fff" 
+            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
+              <Image 
+                source={require('../assets/Animation/icons8-drag-right.gif')} 
+                className="h-24 w-24"
+                resizeMode="contain"
               />
               <Text 
-                className="mt-4 text-2xl font-bold italic text-white"
+                className="mt-4 text-2xl font-bold italic text-black/40"
                 allowFontScaling={false}>
-                Swipe left
+                Swipe Right
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-gray-200"
+                className="mt-2 text-base font-regular text-black/40" 
                 allowFontScaling={false}>
                 To see Apps list by Category
               </Text>
@@ -1044,19 +1044,19 @@ export default function Home() {
 
           {/* Step 4: Tap & Scroll (Show on Home) */}
           {tutorialStep === 4 && (
-            <View className="items-center bg-black/40 p-6 rounded-3xl backdrop-blur-md">
-              <MaterialCommunityIcons 
-                name="gesture-tap" 
-                size={80} 
-                color="#fff" 
+            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
+              <Image 
+                source={require('../assets/Animation/icons8-scroll.gif')} 
+                className="h-24 w-24"
+                resizeMode="contain"
               />
               <Text 
-                className="mt-4 text-2xl font-bold italic text-white"
+                className="mt-4 text-2xl font-bold italic text-black/40"
                 allowFontScaling={false}>
                 Tap and Scroll
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-gray-200"
+                className="mt-2 text-base font-regular text-black/40"  
                 allowFontScaling={false}>
                 Scroll Alphabet bubble to change apps list
               </Text>
