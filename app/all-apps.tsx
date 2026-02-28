@@ -55,7 +55,10 @@ export default function AllApps({
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
-  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+  const fontConfig = useMemo(
+    () => (wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null),
+    [wallpaperIndex]
+  );
   const {
     searchbg,
     searchi,
@@ -101,6 +104,7 @@ export default function AllApps({
 
   // Selection Mode State
   const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
+  const selectedSet = useMemo(() => new Set(selectedPackageNames), [selectedPackageNames]);
 
   // New State for Features
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
@@ -375,7 +379,7 @@ export default function AllApps({
         <AppListItem
           item={item}
           isSelectMode={isSelectMode}
-          isSelected={selectedPackageNames.includes(item.packageName)}
+          isSelected={selectedSet.has(item.packageName)}
           onPress={handleAppPress}
           onLongPress={handleAppLongPress}
           isImageWallpaper={isImageWallpaper}
@@ -388,7 +392,7 @@ export default function AllApps({
     },
     [
       isSelectMode,
-      selectedPackageNames,
+      selectedSet,
       handleAppPress,
       handleAppLongPress,
       isImageWallpaper,
@@ -705,9 +709,11 @@ export default function AllApps({
                 keyExtractor={(item) => item.packageName}
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={100}
-                maxToRenderPerBatch={100}
+                initialNumToRender={15}
+                maxToRenderPerBatch={10}
                 windowSize={5}
+                updateCellsBatchingPeriod={50}
+                removeClippedSubviews={true}
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={viewabilityConfig}
                 stickySectionHeadersEnabled={false}
