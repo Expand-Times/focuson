@@ -244,9 +244,9 @@ export default function AllAppListByCategoryScreen({
     return categories
       .map((cat) => ({
         ...cat,
-        data: cat.data.filter((app) => app.label.toLowerCase().includes(searchQuery.toLowerCase())),
+        data: (cat?.data || []).filter((app) => app.label.toLowerCase().includes(searchQuery.toLowerCase())),
       }))
-      .filter((cat) => cat.data.length > 0);
+      .filter((cat) => cat?.data?.length > 0);
   }, [categories, searchQuery]);
 
   const formatUsageTime = (millis?: number) => {

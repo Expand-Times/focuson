@@ -15,7 +15,6 @@ import {
   Dimensions,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
-import * as Haptics from 'expo-haptics';
 import {
   Gesture,
   GestureDetector,
@@ -32,7 +31,7 @@ import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
-import { SidebarItem, BubbleCursor } from './context/Sidebar';
+import { SidebarItem } from './context/Sidebar';
 
 const { height } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.50) / 28;
@@ -212,11 +211,11 @@ export default function AllApps({
       result = result
         .map((section) => ({
           ...section,
-          data: section.data.filter((app) =>
+          data: (section?.data || []).filter((app) =>
             app.label.toLowerCase().includes(searchQuery.toLowerCase())
           ),
         }))
-        .filter((section) => section.data.length > 0);
+        .filter((section) => section?.data?.length > 0);
     }
 
     // Filter by activeLetter if present (Sidebar Scroll Optimization)
@@ -475,7 +474,6 @@ export default function AllApps({
   const handleGestureScroll = useCallback((letter: string) => {
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       setInternalActiveLetter(letter);
       setCurrentLetter(letter);
     }
@@ -735,15 +733,6 @@ export default function AllApps({
               <View className="z-50 items-center justify-center py-4">
                 <GestureDetector gesture={sidebarGesture}>
                   <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 0 }}>
-                    <BubbleCursor
-                      touchY={touchY}
-                      isTouching={isTouching}
-                      alphabet={sidebarChars}
-                      isDarkMode={isDarkMode}
-                      style={bubblebg}
-                      itemHeight={ITEM_HEIGHT}
-                      bubbleColor={isDarkMode ? '#212C40' : '#fff'}
-                    />
                     {sidebarChars.map((letter, index) => (
                       <SidebarItem
                         key={letter}
@@ -757,6 +746,7 @@ export default function AllApps({
                         currentLetter={currentLetter}
                         style={alphaside}
                         itemHeight={ITEM_HEIGHT}
+                        enableLiquidEffect={true}
                       />
                     ))}
                   </View>

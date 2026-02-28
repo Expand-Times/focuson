@@ -13,7 +13,6 @@ import { Stack, Link,  useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import {  useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
-import * as Haptics from 'expo-haptics';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
 import {
   Gesture,
@@ -34,7 +33,7 @@ import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import AllAppListByCategoryScreen from './AllAppListByCategoryScreen';
 import AllApps from './all-apps';
-import { SidebarItem, BubbleCursor } from './context/Sidebar';
+import { SidebarItem } from './context/Sidebar';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
@@ -43,7 +42,6 @@ import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 const ITEM_HEIGHT = (height * 0.65) / 28;
-const CURSOR_SIZE = ITEM_HEIGHT * 2.5;
 export default function Home() {
   
   const insets = useSafeAreaInsets();
@@ -211,7 +209,6 @@ export default function Home() {
  const navigateToAllAppsWithLetter = (letter: string) => {
     setDragLetter(letter);
     setAllAppsLetter(letter);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
     translateX.value = withSpring(-SCREEN_WIDTH * 2, {
       damping: 40,
       stiffness: 1500,
@@ -235,7 +232,6 @@ export default function Home() {
           lastLetterRef.current = letter;
           setDragLetter(letter);
           setAllAppsLetter(letter);
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
           // Ensure we are on AllApps screen
           if (translateX.value > -SCREEN_WIDTH * 1.5) {
@@ -981,16 +977,6 @@ export default function Home() {
                 enableLiquidEffect={true}
               />
             ))}
-            <BubbleCursor
-              touchY={touchY}
-              isTouching={isTouching}
-              alphabet={sidebarChars}
-              isDarkMode={isDarkMode}
-              style={bubblebg}
-              itemHeight={ITEM_HEIGHT}
-              cursorSize={CURSOR_SIZE}
-              enableLiquidEffect={true}
-            />
           </Animated.View>
         </GestureDetector>
       </Animated.View>

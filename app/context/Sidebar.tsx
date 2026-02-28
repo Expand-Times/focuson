@@ -192,7 +192,7 @@ export const BubbleCursor = ({
     const index = Math.floor(touchY.value / itemHeight);
     const clampedIndex = Math.max(0, Math.min(index, alphabet.length - 1));
     const char = alphabet[clampedIndex] || '';
-    
+
     return {
       text: char,
       defaultValue: char,
@@ -226,16 +226,16 @@ export const BubbleCursor = ({
         underlineColorAndroid="transparent"
         editable={false}
         style={[
-          { 
-            fontSize: size * 0.4, 
+          {
+            fontSize: size * 0.4,
             textAlign: 'center',
             padding: 0,
             includeFontPadding: false,
             // Adjust vertical alignment if needed, usually TextInput is centered by default if height is not set, 
             // but here we are inside a centered View.
-          }, 
+          },
           style
-        ]} 
+        ]}
         className={`font-bold ${isDarkMode ? 'text-[#131B26]' : 'text-[#4D6D99]'}`}
         animatedProps={animatedProps}
       />
