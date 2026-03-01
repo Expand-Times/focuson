@@ -457,13 +457,21 @@ export default function AllApps({
     const sectionIndex = sections.findIndex((s) => s.title === letter);
 
     if (sectionIndex !== -1 && sectionListRef.current) {
-      sectionListRef.current.scrollToLocation({
-        sectionIndex,
-        itemIndex: 0,
-        animated: false,
-        viewOffset: 0,
-        viewPosition: 0,
-      });
+      try {
+        // Ensure section exists and has data before scrolling
+        const section = sections[sectionIndex];
+        if (section && section.data && section.data.length > 0) {
+          sectionListRef.current.scrollToLocation({
+            sectionIndex,
+            itemIndex: 0,
+            animated: false,
+            viewOffset: 0,
+            viewPosition: 0,
+          });
+        }
+      } catch (e) {
+        console.warn('Scroll to letter failed', e);
+      }
     }
   }, [sections]);
 
@@ -716,14 +724,9 @@ export default function AllApps({
                 viewabilityConfig={viewabilityConfig}
                 stickySectionHeadersEnabled={false}
                 onScrollToIndexFailed={(info) => {
-                  const wait = new Promise((resolve) => setTimeout(resolve, 50));
-                  wait.then(() => {
-                    sectionListRef.current?.scrollToLocation({
-                      sectionIndex: info.index,
-                      itemIndex: 0,
-                      animated: false,
-                    });
-                  });
+                  console.warn('Scroll to index failed', info);
+                  // Simply ignore failure or retry with more checks, 
+                  // but avoiding the unsafe scrollToLocation in the catch block
                 }}
               />
             </View>
