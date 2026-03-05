@@ -108,6 +108,7 @@ export default function AllApps({
   // New State for Features
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
+  const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [newName, setNewName] = useState('');
 
   const router = useRouter();
@@ -241,7 +242,7 @@ export default function AllApps({
           setSelectedPackageNames((prev) => [...prev, app.packageName]);
         }
       } else {
-        if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+        if (isExcludedFromTimer(app.packageName)) {
           openApplication(app.packageName);
         } else {
           setSelectedApp(app);
@@ -332,12 +333,30 @@ export default function AllApps({
     setNewName(selectedApp.label);
     setRenameModalVisible(true);
     setOptionsModalVisible(false);
+    setSoftInputEnabled(false);
   };
 
   const saveRename = async () => {
     if (!selectedApp) return;
+    
+    const trimmedName = newName.trim();
+    if (!trimmedName) return;
+
+    // Check for duplicate app name
+    const normalizedName = trimmedName.toLowerCase();
+    const isDuplicate = apps.some(app => {
+      if (app.packageName === selectedApp.packageName) return false;
+      const appName = appRenames[app.packageName] || app.label;
+      return appName.toLowerCase() === normalizedName;
+    });
+
+    if (isDuplicate) {
+      Alert.alert('Error', `The app name "${trimmedName}" is already in use.`);
+      return;
+    }
+
     try {
-      await renameApp(selectedApp.packageName, newName);
+      await renameApp(selectedApp.packageName, trimmedName);
       setRenameModalVisible(false);
       setOptionsModalVisible(false);
     } catch (e) {
@@ -855,7 +874,7 @@ export default function AllApps({
                     onPress={() => setOptionsModalVisible(false)}>
                     <Text
                       style={quit}
-                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-white'}`}>
                       Cancel
                     </Text>
                   </TouchableOpacity>
@@ -895,7 +914,9 @@ export default function AllApps({
                               ? 'border-slate-600 bg-slate-800 text-slate-300'
                               : 'border-slate-300 bg-slate-50 text-slate-700'
                           }`}
-                        selectTextOnFocus
+                        autoFocus
+                        showSoftInputOnFocus={softInputEnabled}
+                        onTouchEnd={() => setSoftInputEnabled(true)}
                       />
 
                       <View className="w-full flex-row gap-3">

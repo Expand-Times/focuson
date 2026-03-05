@@ -37,13 +37,17 @@ type AppContextType = {
   setReminderOptionState: (option: 'mindful' | 'remind' | 'quit') => Promise<void>;
 
   // Excluded Apps from Timer
-  isExcludedFromTimer: (label: string) => boolean;
+  isExcludedFromTimer: (packageName: string) => boolean;
 };
 
-const EXCLUDED_LABELS = [
- 'Phone', 'Camera', 'Message', 'Imo', 'Telegram', 
-  'Meet', 'Zoom', 'Viber', 'Play Store', 'Playstore', 'Calculator', 
-  'Contacts', 'Mail', 'Gmail', 'Settings', 'Clock' 
+const ALLOWED_CATEGORIES = [
+  // User provided names
+  'Comics', 'Entertainment', 'Social Media', 'Dating', 'Music & Audio', 'Photography', 'Games', 
+  'Shopping', 'News & Magazines', 'Video Players & Editors', 'Auto & Vehicles', 'Art & Design', 
+  'Sports', 'Messaging', 'Browsing', 'Beauty', 'Lifestyle', 'Food & Drink', 'House & Home', 
+  'Events', 'Libraries & Demo',
+  // Internal mapping names (from LauncherModule.kt)
+  'Social', 'Audio', 'Image', 'Game', 'News', 'Video', 'Communication'
 ];
 
 const AppContext = createContext<AppContextType>({
@@ -75,7 +79,7 @@ const AppContext = createContext<AppContextType>({
   reminderOption: 'remind',
   setReminderOptionState: async () => {},
 
-  isExcludedFromTimer: () => false,
+  isExcludedFromTimer: () => true,
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -201,9 +205,30 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.setItem('reminderOption', option);
   };
 
-  const isExcludedFromTimer = useCallback((label: string) => {
-    return EXCLUDED_LABELS.some(excluded => label.toLowerCase().includes(excluded.toLowerCase()));
-  }, []);
+  const isExcludedFromTimer = useCallback((packageName: string) => {
+    // 1. Find the app
+    const app = apps.find(a => a.packageName === packageName);
+    if (!app) return true; // If app not found, exclude it (safe default)
+
+    // 2. Determine category
+    // ALWAYS use the original category for timer logic, ignoring user overrides.
+    // This ensures that even if a user moves a social app to "Productivity", 
+    // it still triggers the timer because its intrinsic nature hasn't changed.
+    let category = app.category || 'Other';
+    
+    // 3. Check if category is in allowed list
+    // We check if the category name contains any of the allowed keywords or matches exactly
+    // The user provided list has specific names, but internal names might differ slightly.
+    // Let's try exact match or simple inclusion for robustness.
+    
+    // Normalize for comparison
+    const catLower = category.toLowerCase();
+    
+    return !ALLOWED_CATEGORIES.some(allowed => 
+      catLower === allowed.toLowerCase() || 
+      catLower.includes(allowed.toLowerCase())
+    );
+  }, [apps]); // removed categoryOverrides dependency as we don't use it anymore here
 
   const contextValue = useMemo(() => ({
     apps,

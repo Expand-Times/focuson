@@ -14,6 +14,7 @@ import {
   Platform,
   Dimensions,
   StatusBar,
+  Alert,
 } from 'react-native';
 import {
   Gesture,
@@ -74,10 +75,12 @@ export default function AllAppListByCategoryScreen({
   const [modalVisible, setModalVisible] = useState(false);
   const [launchModalVisible, setLaunchModalVisible] = useState(false);
   const [createCategoryModalVisible, setCreateCategoryModalVisible] = useState(false);
+  const [renameCategoryModalVisible, setRenameCategoryModalVisible] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [showCategorySelector, setShowCategorySelector] = useState(false);
   const [showAppRenamer, setShowAppRenamer] = useState(false);
+  const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
 
   // wallpaperFontConfig
@@ -116,14 +119,54 @@ export default function AllAppListByCategoryScreen({
   const handleStartEditing = (originalTitle: string, currentDisplayTitle: string) => {
     setEditingCategory(originalTitle);
     setTempCategoryName(currentDisplayTitle);
+    setRenameCategoryModalVisible(true);
+  };
+
+  const isCategoryNameDuplicate = (name: string, excludeOriginalTitle?: string) => {
+    const normalizedName = name.trim().toLowerCase();
+    
+    // Check against all visible categories (custom + standard)
+    return categories.some(cat => {
+      // If we are renaming, skip the category currently being edited
+      if (excludeOriginalTitle && cat.title === excludeOriginalTitle) return false;
+      
+      const displayTitle = renamedCategories[cat.title] || cat.title;
+      return displayTitle.toLowerCase() === normalizedName;
+    });
+  };
+
+  const isAppNameDuplicate = (name: string, excludePackageName?: string) => {
+    const normalizedName = name.trim().toLowerCase();
+    
+    // Check against all apps
+    return apps.some(app => {
+      if (excludePackageName && app.packageName === excludePackageName) return false;
+      const appName = appRenames[app.packageName] || app.label;
+      return appName.toLowerCase() === normalizedName;
+    });
   };
 
   const handleSaveCategoryName = async () => {
     if (!editingCategory) return;
+    
+    const trimmedName = tempCategoryName.trim();
+    if (!trimmedName) {
+      // Don't save empty names, just cancel or do nothing
+      // Alternatively, revert to original name if user clears it?
+      // For now, let's just do nothing as per existing logic (implicit)
+      return; 
+    }
+
+    // Check for duplicate name
+    if (isCategoryNameDuplicate(trimmedName, editingCategory)) {
+      Alert.alert('Error', `The category name "${trimmedName}" is already in use.`);
+      return;
+    }
 
     try {
-      await renameCategory(editingCategory, tempCategoryName);
+      await renameCategory(editingCategory, trimmedName);
       setEditingCategory(null);
+      setRenameCategoryModalVisible(false);
     } catch (e) {
       console.error('Failed to save category name', e);
     }
@@ -132,6 +175,7 @@ export default function AllAppListByCategoryScreen({
   const handleCancelEditing = () => {
     setEditingCategory(null);
     setTempCategoryName('');
+    setRenameCategoryModalVisible(false);
   };
 
   // loadAndCategorizeApps removed, logic moved to useEffect
@@ -181,10 +225,16 @@ export default function AllAppListByCategoryScreen({
   };
 
   const handleCreateCategory = async () => {
-    if (!newCategoryName.trim()) return;
+    const trimmedName = newCategoryName.trim();
+    if (!trimmedName) return;
+
+    if (isCategoryNameDuplicate(trimmedName)) {
+      Alert.alert('Error', `The category name "${trimmedName}" is already in use.`);
+      return;
+    }
 
     try {
-      await addCustomCategory(newCategoryName.trim());
+      await addCustomCategory(trimmedName);
       setCreateCategoryModalVisible(false);
       setNewCategoryName('');
     } catch (e) {
@@ -205,7 +255,7 @@ export default function AllAppListByCategoryScreen({
   };
 
   const onAppPress = (app: AppItem) => {
-    if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+    if (isExcludedFromTimer(app.packageName)) {
       openApplication(app.packageName);
     } else {
       setSelectedApp(app);
@@ -233,12 +283,22 @@ export default function AllAppListByCategoryScreen({
     if (!selectedApp) return;
     setTempAppName(selectedApp.label);
     setShowAppRenamer(true);
+    setSoftInputEnabled(false);
   };
 
   const saveAppRename = async () => {
     if (!selectedApp) return;
+
+    const trimmedName = tempAppName.trim();
+    if (!trimmedName) return;
+
+    if (isAppNameDuplicate(trimmedName, selectedApp.packageName)) {
+      Alert.alert('Error', `The app name "${trimmedName}" is already in use.`);
+      return;
+    }
+
     try {
-      await renameApp(selectedApp.packageName, tempAppName);
+      await renameApp(selectedApp.packageName, trimmedName);
     } catch (e) {
       console.error('Failed to save app rename', e);
     }
@@ -344,10 +404,6 @@ export default function AllAppListByCategoryScreen({
         />
       )}
       <GestureDetector gesture={leftSwipeGesture}>
-        <KeyboardAvoidingView
-          style={{ flex: 1 }}
-          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 20}>
           <View
             className="flex-1 pt-12"
             style={[
@@ -476,33 +532,10 @@ export default function AllAppListByCategoryScreen({
                 contentContainerStyle={{ paddingBottom: 40 }}>
                 {filteredCategories.map((category, index) => {
                   const displayTitle = renamedCategories[category.title] || category.title;
-                  const isEditing = editingCategory === category.title;
 
                   return (
                     <View key={index} className="">
                       {/* Category Header */}
-                      {isEditing ? (
-                        <View className="mb-2 flex-row items-center justify-end">
-                          <TextInput
-                            value={tempCategoryName}
-                            onChangeText={setTempCategoryName}
-                            className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${isImageWallpaper
-                                ? 'border-white/50 text-white'
-                                : isDarkMode
-                                  ? 'border-slate-500 text-slate-300'
-                                  : 'border-slate-400 text-slate-600'
-                              }`}
-                            autoFocus
-                            onSubmitEditing={handleSaveCategoryName}
-                          />
-                          <TouchableOpacity onPress={handleSaveCategoryName} className="ml-4 mr-6">
-                            <MaterialCommunityIcons name="check" size={20} color="#4ADE80" />
-                          </TouchableOpacity>
-                          <TouchableOpacity onPress={handleCancelEditing}>
-                            <MaterialCommunityIcons name="close" size={20} color="#F87171" />
-                          </TouchableOpacity>
-                        </View>
-                      ) : (
                         <View className="mb-2 flex-row items-center justify-end">
                           <Text
                             allowFontScaling={false}
@@ -545,7 +578,6 @@ export default function AllAppListByCategoryScreen({
                             />
                           </TouchableOpacity>
                         </View>
-                      )}
 
                       {/* App List */}
                       <View className="mb-[6%]">
@@ -755,7 +787,7 @@ export default function AllAppListByCategoryScreen({
                                     onPress={closeModal}>
                                     <Text
                                       style={quit}
-                                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-white'}`}>
                                       Cancel
                                     </Text>
                                   </TouchableOpacity>
@@ -779,14 +811,16 @@ export default function AllAppListByCategoryScreen({
                                         ? 'border-slate-600 bg-slate-800 text-slate-300'
                                         : 'border-slate-300 bg-slate-50 text-slate-700'
                                     }`}
-                                  selectTextOnFocus
+                                  autoFocus
+                                  showSoftInputOnFocus={softInputEnabled}
+                                  onTouchEnd={() => setSoftInputEnabled(true)}
                                 />
                                 <View className="flex-row gap-3">
-                                  <TouchableOpacity
-                                    className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                                    onPress={() => setShowAppRenamer(false)}>
-                                    <Text
-                                      allowFontScaling={false}
+                                <TouchableOpacity
+                                  className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                                  onPress={closeModal}>
+                                  <Text
+                                    allowFontScaling={false}
                                       className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                                       Cancel
                                     </Text>
@@ -860,6 +894,60 @@ export default function AllAppListByCategoryScreen({
               </KeyboardAvoidingView>
             </Modal>
 
+            {/* Rename Category Modal */}
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={renameCategoryModalVisible}
+              onRequestClose={() => setRenameCategoryModalVisible(false)}>
+              <KeyboardAvoidingView
+                behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+                style={{ flex: 1 }}>
+                <TouchableWithoutFeedback onPress={() => setRenameCategoryModalVisible(false)}>
+                  <View className="flex-1 items-center justify-center bg-black/50">
+                    <TouchableWithoutFeedback>
+                      <View
+                        className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                        <Text
+                          allowFontScaling={false}
+                          className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                          Rename Category
+                        </Text>
+
+                        <TextInput
+                          value={tempCategoryName}
+                          onChangeText={setTempCategoryName}
+                          placeholder="Category Name"
+                          placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
+                          className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-50 text-slate-700'}`}
+                          autoFocus
+                        />
+
+                        <View className="w-full flex-row gap-3">
+                          <TouchableOpacity
+                            className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                            onPress={() => setRenameCategoryModalVisible(false)}>
+                            <Text
+                              allowFontScaling={false}
+                              className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                              Cancel
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
+                            onPress={handleSaveCategoryName}>
+                            <Text allowFontScaling={false} className="font-medium text-white">
+                              Save
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </TouchableWithoutFeedback>
+                  </View>
+                </TouchableWithoutFeedback>
+              </KeyboardAvoidingView>
+            </Modal>
+
             {/* Create Category Modal */}
             <Modal
               animationType="fade"
@@ -873,7 +961,7 @@ export default function AllAppListByCategoryScreen({
                   <View className="flex-1 items-center justify-center bg-black/50">
                     <TouchableWithoutFeedback>
                       <View
-                        className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                        className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                         <Text
                           allowFontScaling={false}
                           className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
@@ -914,7 +1002,6 @@ export default function AllAppListByCategoryScreen({
               </KeyboardAvoidingView>
             </Modal>
           </View>
-        </KeyboardAvoidingView>
       </GestureDetector>
     </RootContainer>
   );

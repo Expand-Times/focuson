@@ -754,7 +754,7 @@ export default function Home() {
                         <TouchableOpacity
                           className="ml-auto w-[40%] items-start pl-6"
                           onPress={() => {
-                            if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+                            if (isExcludedFromTimer(app.packageName)) {
                               openApplication(app.packageName);
                             } else {
                               setSelectedApp(app);
@@ -779,7 +779,7 @@ export default function Home() {
                       key={app.packageName}
                       className={`w-fulL mb-4  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
                       onPress={() => {
-                        if (isExcludedFromTimer(appRenames[app.packageName] || app.label)) {
+                        if (isExcludedFromTimer(app.packageName)) {
                           openApplication(app.packageName);
                         } else {
                           setSelectedApp(app);
