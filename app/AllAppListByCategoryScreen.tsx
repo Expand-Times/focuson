@@ -22,7 +22,7 @@ import {
   Directions,
 } from 'react-native-gesture-handler';
 import { runOnJS } from 'react-native-reanimated';
-import { MaterialCommunityIcons} from '@expo/vector-icons';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -159,11 +159,18 @@ export default function AllAppListByCategoryScreen({
       groups[category].push(app);
     });
 
-    // Convert grouped object to array of Category objects
-    const result = Object.keys(groups).map((title) => ({
-      title,
-      data: groups[title],
-    }));
+    // Convert grouped object to array of Category objects, filter out empty categories,
+    // and sort apps within each category alphabetically
+    const result = Object.keys(groups)
+      .filter((title) => groups[title].length > 0)
+      .map((title) => ({
+        title,
+        data: groups[title].sort((a, b) =>
+          (appRenames[a.packageName] || a.label).localeCompare(
+            appRenames[b.packageName] || b.label
+          )
+        ),
+      }));
 
     // Sort categories: "Other" goes to the bottom, rest alphabetical
     return result.sort((a, b) => {
@@ -359,13 +366,12 @@ export default function AllAppListByCategoryScreen({
               {/* Search Bar */}
               <View
                 style={searchCbg}
-                className={`mb-6 flex-row items-center rounded-xl border px-4 py-1  ${
-                  isImageWallpaper
+                className={`mb-6 flex-row items-center rounded-xl border px-4 py-1  ${isImageWallpaper
                     ? 'border-white/20 bg-black/30'
                     : isDarkMode
                       ? 'border-[#212D41] bg-[]'
                       : 'border-slate-100 bg-white'
-                }`}>
+                  }`}>
                 <MaterialCommunityIcons
                   style={searchCi}
                   name="magnify"
@@ -374,9 +380,8 @@ export default function AllAppListByCategoryScreen({
                 />
                 <TextInput
                   style={searchCt}
-                  className={`ml-3 flex-1 text-[16px] ${
-                    isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
-                  }`}
+                  className={`ml-3 flex-1 text-[16px] ${isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#fff]' : 'text-[#A3B9D9]'
+                    }`}
                   placeholder="Search app here"
                   placeholderTextColor={
                     searchCt?.color ||
@@ -399,13 +404,12 @@ export default function AllAppListByCategoryScreen({
                 <Text
                   allowFontScaling={false}
                   style={appC}
-                  className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
-                    isImageWallpaper
+                  className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${isImageWallpaper
                       ? 'text-white decoration-white'
                       : isDarkMode
                         ? 'text-[#DBDFE4] decoration-slate-400'
                         : 'text-[#142C4D] decoration-[#142C4D]'
-                  }`}>
+                    }`}>
                   App Category
                 </Text>
                 <View className="flex-row items-center gap-4">
@@ -419,13 +423,12 @@ export default function AllAppListByCategoryScreen({
                             (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
                         },
                       ]}
-                      className={`rounded-lg border border-2 ${
-                        isImageWallpaper
+                      className={`rounded-lg border border-2 ${isImageWallpaper
                           ? 'border-white/50'
                           : isDarkMode
                             ? 'border-[#728099]'
                             : 'border-[#858E9D]'
-                      }`}>
+                        }`}>
                       <MaterialCommunityIcons
                         name="plus"
                         size={22}
@@ -447,13 +450,12 @@ export default function AllAppListByCategoryScreen({
                               (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
                           },
                         ]}
-                        className={`rounded-lg border border-2 ${
-                          isImageWallpaper
+                        className={`rounded-lg border border-2 ${isImageWallpaper
                             ? 'border-white/50'
                             : isDarkMode
                               ? 'border-[#858E9D]'
                               : 'border-[#858E9D]'
-                        }`}>
+                          }`}>
                         <MaterialCommunityIcons
                           name="tune-variant"
                           size={22}
@@ -484,13 +486,12 @@ export default function AllAppListByCategoryScreen({
                           <TextInput
                             value={tempCategoryName}
                             onChangeText={setTempCategoryName}
-                            className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${
-                              isImageWallpaper
+                            className={`mr-2 min-w-[100px] border-b px-1 text-right text-base ${isImageWallpaper
                                 ? 'border-white/50 text-white'
                                 : isDarkMode
                                   ? 'border-slate-500 text-slate-300'
                                   : 'border-slate-400 text-slate-600'
-                            }`}
+                              }`}
                             autoFocus
                             onSubmitEditing={handleSaveCategoryName}
                           />
@@ -506,14 +507,13 @@ export default function AllAppListByCategoryScreen({
                           <Text
                             allowFontScaling={false}
                             style={appCn}
-                            className={`mr-2 text-[16px] ${
-                              isImageWallpaper
+                            className={`mr-2 text-[16px] ${isImageWallpaper
                                 ? 'text-white'
                                 : isDarkMode
                                   ? 'text-[#728099]'
                                   : 'text-[#142C4D]'
-                            }`}>
-                            {displayTitle}
+                              }`}>
+                            {displayTitle} ({category.data.length})
                           </Text>
                           <TouchableOpacity
                             style={[
@@ -528,13 +528,12 @@ export default function AllAppListByCategoryScreen({
                                       : '#858E9D'),
                               },
                             ]}
-                            className={`border-b ${
-                              isImageWallpaper
+                            className={`border-b ${isImageWallpaper
                                 ? 'border-white/50'
                                 : isDarkMode
                                   ? 'border-slate-400'
                                   : 'border-[#858E9D]'
-                            }`}
+                              }`}
                             onPress={() => handleStartEditing(category.title, displayTitle)}>
                             <MaterialCommunityIcons
                               name="pencil-outline"
@@ -554,13 +553,12 @@ export default function AllAppListByCategoryScreen({
                           <TouchableOpacity
                             key={app.packageName}
                             style={applistCbg}
-                            className={`mb-[2%] w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-                              isImageWallpaper
+                            className={`mb-[2%] w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${isImageWallpaper
                                 ? 'bg-black/40'
                                 : isDarkMode
                                   ? 'bg-[#131B27]'
                                   : 'bg-[#CEDDF2]'
-                            }`}
+                              }`}
                             onPress={() => onAppPress(app)}
                             onLongPress={() => handleLongPress(app)}>
                             <View className="mr-2 flex-1 flex-row items-center">
@@ -579,13 +577,12 @@ export default function AllAppListByCategoryScreen({
                               <Text
                                 allowFontScaling={false}
                                 style={[applistC, { maxWidth: '90%' }]}
-                                className={`font-regular text-[16px] ${
-                                  isImageWallpaper
+                                className={`font-regular text-[16px] ${isImageWallpaper
                                     ? 'text-white'
                                     : isDarkMode
                                       ? 'text-[#DBDFE5]'
                                       : 'text-[#142C4D]'
-                                }`}
+                                  }`}
                                 numberOfLines={1}>
                                 {(appRenames[app.packageName] || app.label).length > 15
                                   ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
@@ -597,13 +594,12 @@ export default function AllAppListByCategoryScreen({
                                 <Text
                                   allowFontScaling={false}
                                   style={applistCdu}
-                                  className={`font-regular text-[10px] opacity-90 ${
-                                    isImageWallpaper
+                                  className={`font-regular text-[10px] opacity-90 ${isImageWallpaper
                                       ? 'text-slate-300'
                                       : isDarkMode
                                         ? 'text-[#728099]'
                                         : 'text-[#4D6D99]'
-                                  }`}>
+                                    }`}>
                                   TO: {app.launchCount || 0} Times || TU:{' '}
                                   {formatUsageTime(app.usageTime)}
                                 </Text>
@@ -754,9 +750,8 @@ export default function AllAppListByCategoryScreen({
                                   className={`mt-6 w-full border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
                                   <TouchableOpacity
                                     style={quitbg}
-                                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${
-                                      isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
-                                    }`}
+                                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                                      }`}
                                     onPress={closeModal}>
                                     <Text
                                       style={quit}
@@ -778,13 +773,12 @@ export default function AllAppListByCategoryScreen({
                                   value={tempAppName}
                                   onChangeText={setTempAppName}
                                   style={[appC, applistCbg]}
-                                  className={`mb-4 rounded-lg border px-4 py-3 text-lg ${
-                                    isImageWallpaper
+                                  className={`mb-4 rounded-lg border px-4 py-3 text-lg ${isImageWallpaper
                                       ? 'border-white/20 text-white'
                                       : isDarkMode
                                         ? 'border-slate-600 bg-slate-800 text-slate-300'
                                         : 'border-slate-300 bg-slate-50 text-slate-700'
-                                  }`}
+                                    }`}
                                   selectTextOnFocus
                                 />
                                 <View className="flex-row gap-3">

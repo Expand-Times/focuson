@@ -159,59 +159,171 @@ class LauncherModule : Module() {
 
   private fun getCategoryLabel(category: Int): String {
       return when (category) {
-          0 -> "Game" // ApplicationInfo.CATEGORY_GAME
-          1 -> "Audio" // ApplicationInfo.CATEGORY_AUDIO
-          2 -> "Video" // ApplicationInfo.CATEGORY_VIDEO
-          3 -> "Image" // ApplicationInfo.CATEGORY_IMAGE
-          4 -> "Social" // ApplicationInfo.CATEGORY_SOCIAL
-          5 -> "News" // ApplicationInfo.CATEGORY_NEWS
-          6 -> "Maps" // ApplicationInfo.CATEGORY_MAPS
-          7 -> "Productivity" // ApplicationInfo.CATEGORY_PRODUCTIVITY
-          8 -> "Accessibility" // ApplicationInfo.CATEGORY_ACCESSIBILITY (API 31+)
-          9 -> "ART_AND_DESIGN" 
-          10 -> "AUTO_AND_VEHICLES" 
-          11 -> "ANDROID_WEAR" 
-          12 -> "BEAUTY" 
-          13 -> "BOOKS_AND_REFERENCE" 
-          14 -> "BUSINESS" 
-          15 -> "COMICS" 
-          16 -> "COMMUNICATION" 
-          17 -> "DATING" 
-          18 -> "EDUCATION" 
-          19 -> "ENTERTAINMENT" 
-          20 -> "EVENTS" 
-          21 -> "FINANCE" 
-          22 -> "FOOD_AND_DRINK" 
-          23 -> "HEALTH_AND_FITNESS" 
-          24 -> "HOUSE_AND_HOME" 
-          25 -> "LIBRARIES_AND_DEMO" 
-          26 -> "LIFESTYLE" 
-          27 -> "MEDICAL" 
-          28 -> "PARENTING" 
-          29 -> "PERSONALIZATION" 
-          30 -> "SHOPPING" 
-          31 -> "SPORTS" 
-          32 -> "TRAVEL_AND_LOCAL" 
-          33 -> "WATCH_FACE" 
-          34 -> "WEATHER" 
-          35 -> "GAME_ACTION" 
-          36 -> "GAME_ADVENTURE" 
-          37 -> "GAME_ARCADE" 
-          38 -> "GAME_BOARD" 
-          39 -> "GAME_CARD" 
-          40 -> "GAME_CASINO" 
-          41 -> "GAME_CASUAL" 
-          42 -> "GAME_EDUCATIONAL" 
-          43 -> "GAME_MUSIC" 
-          44 -> "GAME_PUZZLE" 
-          45 -> "GAME_RACING" 
-          46 -> "GAME_ROLE_PLAYING" 
-          47 -> "GAME_SIMULATION" 
-          48 -> "GAME_SPORTS" 
-          49 -> "GAME_STRATEGY" 
-          50 -> "GAME_TRIVIA" 
-          51 -> "GAME_WORD" 
-          52 -> "FAMILY"
+          0 -> "Game"
+          1 -> "Audio"
+          2 -> "Video"
+          3 -> "Image"
+          4 -> "Social"
+          5 -> "News"
+          6 -> "Maps"
+          7 -> "Productivity"
+          8 -> "Accessibility"
+          9 -> "Art & Design"
+          10 -> "Auto & Vehicles"
+          11 -> "Android Wear"
+          12 -> "Beauty"
+          13 -> "Books & Reference"
+          14 -> "Business"
+          15 -> "Comics"
+          16 -> "Communication"
+          17 -> "Dating"
+          18 -> "Education"
+          19 -> "Entertainment"
+          20 -> "Events"
+          21 -> "Finance"
+          22 -> "Food & Drink"
+          23 -> "Health & Fitness"
+          24 -> "House & Home"
+          25 -> "Libraries & Demo"
+          26 -> "Lifestyle"
+          27 -> "Medical"
+          28 -> "Parenting"
+          29 -> "Personalization"
+          30 -> "Shopping"
+          31 -> "Sports"
+          32 -> "Travel & Local"
+          33 -> "Watch Face"
+          34 -> "Weather"
+          35 -> "Game"
+          36 -> "Game"
+          37 -> "Game"
+          38 -> "Game"
+          39 -> "Game"
+          40 -> "Game"
+          41 -> "Game"
+          42 -> "Game"
+          43 -> "Game"
+          44 -> "Game"
+          45 -> "Game"
+          46 -> "Game"
+          47 -> "Game"
+          48 -> "Game"
+          49 -> "Game"
+          50 -> "Game"
+          51 -> "Game"
+          52 -> "Family"
+          else -> "Other"
+      }
+  }
+
+  // Infer category from package name keywords when Android category is unavailable
+  private fun inferCategoryFromPackage(packageName: String, label: String): String {
+      val pkg = packageName.lowercase()
+      val lbl = label.lowercase()
+
+      return when {
+          // Communication
+          pkg.contains("whatsapp") || pkg.contains("telegram") || pkg.contains("messenger") ||
+          pkg.contains("chat") || pkg.contains("viber") || pkg.contains("signal") ||
+          pkg.contains("discord") || pkg.contains("skype") || pkg.contains("wechat") ||
+          pkg.contains("line.android") || pkg.contains("imo.android") ||
+          pkg.contains("mail") || pkg.contains("email") || pkg.contains("gmail") ||
+          pkg.contains("outlook") -> "Communication"
+
+          // Social
+          pkg.contains("facebook") || pkg.contains("instagram") || pkg.contains("twitter") ||
+          pkg.contains("tiktok") || pkg.contains("snapchat") || pkg.contains("pinterest") ||
+          pkg.contains("reddit") || pkg.contains("linkedin") || pkg.contains("threads") ||
+          pkg.contains("tumblr") || pkg.contains("social") -> "Social"
+
+          // Video
+          pkg.contains("youtube") || pkg.contains("netflix") || pkg.contains("tiktok") ||
+          pkg.contains("video") || pkg.contains("player") || pkg.contains("vlc") ||
+          pkg.contains("primevideo") || pkg.contains("hotstar") || pkg.contains("hulu") ||
+          pkg.contains("disneyplus") || pkg.contains("hbo") -> "Video"
+
+          // Audio / Music
+          pkg.contains("spotify") || pkg.contains("music") || pkg.contains("podcast") ||
+          pkg.contains("radio") || pkg.contains("audible") || pkg.contains("soundcloud") ||
+          pkg.contains("shazam") || pkg.contains("deezer") -> "Audio"
+
+          // Game
+          pkg.contains("game") || pkg.contains("play.games") ||
+          lbl.contains("game") -> "Game"
+
+          // Finance
+          pkg.contains("bank") || pkg.contains("pay") || pkg.contains("wallet") ||
+          pkg.contains("finance") || pkg.contains("money") || pkg.contains("trading") ||
+          pkg.contains("crypto") || pkg.contains("stock") || pkg.contains("invest") ||
+          pkg.contains("bkash") || pkg.contains("nagad") || pkg.contains("gpay") -> "Finance"
+
+          // Shopping
+          pkg.contains("shop") || pkg.contains("store") || pkg.contains("market") ||
+          pkg.contains("amazon") || pkg.contains("ebay") || pkg.contains("alibaba") ||
+          pkg.contains("flipkart") || pkg.contains("daraz") || pkg.contains("wish") -> "Shopping"
+
+          // Maps & Navigation
+          pkg.contains("map") || pkg.contains("navigation") || pkg.contains("uber") ||
+          pkg.contains("grab") || pkg.contains("lyft") || pkg.contains("waze") ||
+          pkg.contains("pathao") || pkg.contains("ride") -> "Maps"
+
+          // Food & Drink
+          pkg.contains("food") || pkg.contains("delivery") || pkg.contains("eat") ||
+          pkg.contains("restaurant") || pkg.contains("zomato") || pkg.contains("swiggy") ||
+          pkg.contains("doordash") || pkg.contains("ubereats") || pkg.contains("grubhub") ||
+          pkg.contains("recipe") || pkg.contains("cook") -> "Food & Drink"
+
+          // Health & Fitness
+          pkg.contains("health") || pkg.contains("fitness") || pkg.contains("workout") ||
+          pkg.contains("exercise") || pkg.contains("step") || pkg.contains("medical") ||
+          pkg.contains("doctor") || pkg.contains("pharmacy") -> "Health & Fitness"
+
+          // Education
+          pkg.contains("learn") || pkg.contains("edu") || pkg.contains("school") ||
+          pkg.contains("course") || pkg.contains("duolingo") || pkg.contains("study") ||
+          pkg.contains("quiz") || pkg.contains("dictionary") || pkg.contains("translate") -> "Education"
+
+          // News
+          pkg.contains("news") || pkg.contains("feed") || pkg.contains("reader") ||
+          pkg.contains("times") || pkg.contains("bbc") || pkg.contains("cnn") -> "News"
+
+          // Image / Photography
+          pkg.contains("camera") || pkg.contains("gallery") || pkg.contains("photo") ||
+          pkg.contains("editor") || pkg.contains("snapseed") || pkg.contains("lightroom") -> "Image"
+
+          // Travel
+          pkg.contains("travel") || pkg.contains("booking") || pkg.contains("flight") ||
+          pkg.contains("hotel") || pkg.contains("airbnb") || pkg.contains("trip") -> "Travel & Local"
+
+          // Weather
+          pkg.contains("weather") || pkg.contains("climate") -> "Weather"
+
+          // Productivity
+          pkg.contains("browser") || pkg.contains("chrome") || pkg.contains("firefox") ||
+          pkg.contains("opera") || pkg.contains("file") || pkg.contains("manager") ||
+          pkg.contains("explorer") || pkg.contains("calendar") || pkg.contains("clock") ||
+          pkg.contains("alarm") || pkg.contains("note") || pkg.contains("office") ||
+          pkg.contains("docs") || pkg.contains("sheets") || pkg.contains("drive") ||
+          pkg.contains("calculator") || pkg.contains("scanner") || pkg.contains("pdf") -> "Productivity"
+
+          // Personalization
+          pkg.contains("wallpaper") || pkg.contains("theme") || pkg.contains("launcher") ||
+          pkg.contains("keyboard") || pkg.contains("ringtone") || pkg.contains("icon") -> "Personalization"
+
+          // Entertainment
+          pkg.contains("entertain") || pkg.contains("comic") || pkg.contains("manga") ||
+          pkg.contains("anime") || pkg.contains("movie") || pkg.contains("tv") ||
+          pkg.contains("stream") -> "Entertainment"
+
+          // Business
+          pkg.contains("business") || pkg.contains("enterprise") || pkg.contains("crm") ||
+          pkg.contains("slack") || pkg.contains("teams") || pkg.contains("zoom") ||
+          pkg.contains("meet") -> "Business"
+
+          // Lifestyle
+          pkg.contains("lifestyle") || pkg.contains("home") || pkg.contains("smart") ||
+          pkg.contains("iot") -> "Lifestyle"
+
           else -> "Other"
       }
   }
@@ -318,10 +430,15 @@ class LauncherModule : Module() {
                 val usageTime = usageMap[packageName] ?: 0L
                 val launchCount = launchCountMap[packageName] ?: 0
                 
-                val category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                var category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     getCategoryLabel(app.activityInfo.applicationInfo.category)
                 } else {
                     "Other"
+                }
+
+                // If category is "Other", try to infer from package name
+                if (category == "Other") {
+                    category = inferCategoryFromPackage(packageName, label)
                 }
 
                 appList.add(mapOf(
