@@ -64,7 +64,7 @@ class LauncherModule : Module() {
   }
 
   private val launcherPackages = listOf(
-    "com.expandtimes.minimallife", // This app
+    "com.expandtimes.focuson.launcher", // This app
     "com.sec.android.app.launcher", // Samsung
     "com.google.android.apps.nexuslauncher", // Pixel
     "com.miui.home", // Xiaomi

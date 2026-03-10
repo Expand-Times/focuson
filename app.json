@@ -1,9 +1,9 @@
 {
   "expo": {
-    "name": "MinimalLife Launcher",
-    "slug": "minimallife",
+    "name": "Focus On: Minimalist Launcher",
+    "slug": "focus-on-launcher",
     "version": "1.0.0",
-    "scheme": "minimallife",
+    "scheme": "focusonlauncher",
     "platforms": [
       "android"
     ],
@@ -34,14 +34,14 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.expandtimes.minimallife"
+      "bundleIdentifier": "com.expandtimes.focuson.launcher"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "com.expandtimes.minimallife",
+      "package": "com.expandtimes.focuson.launcher",
       "edgeToEdgeEnabled": true,
       "launchMode": "singleTask"
     }
