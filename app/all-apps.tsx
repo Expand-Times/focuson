@@ -2,7 +2,6 @@ import { useAppLauncher } from './hooks/useAppLauncher';
 import {
   View,
   Text,
-  SectionList,
   Image,
   TouchableOpacity,
   TextInput,
@@ -14,6 +13,7 @@ import {
   StatusBar,
   Dimensions,
 } from 'react-native';
+import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
   Gesture,
@@ -24,6 +24,10 @@ import {
 import {  runOnJS,useSharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
+
+type FlashListHeader = { type: 'header'; title: string };
+type FlashListItem = { type: 'item'; data: AppItem; sectionTitle: string };
+type FlashListDataItem = FlashListHeader | FlashListItem;
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -77,7 +81,6 @@ export default function AllApps({
     searchCt,
     searchCi,
     wallbg,
-    bubblebg,
   } = fontConfig || ({} as any);
 
   const {
@@ -115,7 +118,7 @@ export default function AllApps({
   const params = useLocalSearchParams();
   const isSelectMode = params.mode === 'select';
 
-  const sectionListRef = useRef<SectionList>(null);
+  const flashListRef = useRef<FlashListRef<FlashListDataItem>>(null);
 
   useEffect(() => {
     if (isSelectMode) {
@@ -226,6 +229,17 @@ export default function AllApps({
 
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames, activeLetter]);
+
+  const flashListData = useMemo(() => {
+    const data: FlashListDataItem[] = [];
+    sections.forEach((section) => {
+      data.push({ type: 'header', title: section.title });
+      section.data.forEach((item) => {
+        data.push({ type: 'item', data: item, sectionTitle: section.title });
+      });
+    });
+    return data;
+  }, [sections]);
 
   const handleAppPress = useCallback(
     (app: AppItem) => {
@@ -392,12 +406,26 @@ export default function AllApps({
   };
 
   const renderItem = useCallback(
-    ({ item }: { item: AppItem }) => {
+    ({ item }: { item: FlashListDataItem }) => {
+      if (item.type === 'header') {
+        return (
+          <Text
+            style={header}
+            className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${isImageWallpaper
+                ? 'text-white'
+                : isDarkMode
+                  ? 'text-[#728099]'
+                  : 'text-[#142C4D]'
+              }`}>
+            {item.title}
+          </Text>
+        );
+      }
       return (
         <AppListItem
-          item={item}
+          item={item.data}
           isSelectMode={isSelectMode}
-          isSelected={selectedSet.has(item.packageName)}
+          isSelected={selectedSet.has(item.data.packageName)}
           onPress={handleAppPress}
           onLongPress={handleAppLongPress}
           isImageWallpaper={isImageWallpaper}
@@ -418,6 +446,7 @@ export default function AllApps({
       fontConfig,
       showUsageInfo,
       wallpaperIndex,
+      header
     ]
   );
 
@@ -450,18 +479,13 @@ export default function AllApps({
 
   const [currentLetter, setCurrentLetter] = useState('');
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FlashListDataItem>[] }) => {
     if (viewableItems.length > 0) {
-      // Find the first section header or item
-      const firstItem = viewableItems[0];
-      if (firstItem.item && firstItem.section) {
-        // It's an item
-        const sectionTitle = firstItem.section.title;
-        setCurrentLetter(sectionTitle);
-      } else if (firstItem.title) {
-        // It's a header (though viewableItems usually returns items)
-        // Actually SectionList viewableItems includes headers if they are items?
-        // Typically it's safer to check item.section.title
+      const firstItem = viewableItems[0].item;
+      if (firstItem.type === 'header') {
+        setCurrentLetter(firstItem.title);
+      } else {
+        setCurrentLetter(firstItem.sectionTitle);
       }
     }
   }).current;
@@ -473,26 +497,18 @@ export default function AllApps({
   const scrollToLetter = useCallback((letter: string) => {
     setCurrentLetter(letter);
 
-    const sectionIndex = sections.findIndex((s) => s.title === letter);
+    const index = flashListData.findIndex(
+      (item) => item.type === 'header' && item.title === letter
+    );
 
-    if (sectionIndex !== -1 && sectionListRef.current) {
+    if (index !== -1 && flashListRef.current) {
       try {
-        // Ensure section exists and has data before scrolling
-        const section = sections[sectionIndex];
-        if (section && section.data && section.data.length > 0) {
-          sectionListRef.current.scrollToLocation({
-            sectionIndex,
-            itemIndex: 0,
-            animated: false,
-            viewOffset: 0,
-            viewPosition: 0,
-          });
-        }
+        flashListRef.current.scrollToIndex({ index, animated: false });
       } catch (e) {
         console.warn('Scroll to letter failed', e);
       }
     }
-  }, [sections]);
+  }, [flashListData]);
 
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
@@ -715,38 +731,18 @@ export default function AllApps({
           <View className="flex-1 flex-row">
             {/* Apps List */}
             <View className="w-full px-3 ">
-              <SectionList
-                ref={sectionListRef}
-                sections={sections}
+              <FlashList
+                ref={flashListRef}
+                data={flashListData}
                 renderItem={renderItem}
-                renderSectionHeader={({ section: { title } }) => (
-                  <Text
-                    style={header}
-                    className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${isImageWallpaper
-                        ? 'text-white'
-                        : isDarkMode
-                          ? 'text-[#728099]'
-                          : 'text-[#142C4D]'
-                      }`}>
-                    {title}
-                  </Text>
-                )}
-                keyExtractor={(item) => item.packageName}
+                getItemType={(item) => item.type}
+                keyExtractor={(item) =>
+                  item.type === 'header' ? `header-${item.title}` : item.data.packageName
+                }
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={15}
-                maxToRenderPerBatch={10}
-                windowSize={5}
-                updateCellsBatchingPeriod={50}
-                removeClippedSubviews={true}
                 onViewableItemsChanged={onViewableItemsChanged}
                 viewabilityConfig={viewabilityConfig}
-                stickySectionHeadersEnabled={false}
-                onScrollToIndexFailed={(info) => {
-                  console.warn('Scroll to index failed', info);
-                  // Simply ignore failure or retry with more checks, 
-                  // but avoiding the unsafe scrollToLocation in the catch block
-                }}
               />
             </View>
 
