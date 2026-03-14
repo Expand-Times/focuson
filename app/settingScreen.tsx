@@ -38,6 +38,71 @@ type UserObject = {
     user_metadata?: UserMetadata;
   };
 };
+// Custom Switch Component for better performance and custom design
+const CustomSwitch = ({
+  value,
+  onValueChange,
+  activeColor,
+  inActiveColor,
+  thumbColor = '#FFFFFF',
+}: {
+  value: boolean;
+  onValueChange: (val: boolean) => void;
+  activeColor: string;
+  inActiveColor: string;
+  thumbColor?: string;
+}) => {
+  const [localValue, setLocalValue] = useState(value);
+  const translateX = useRef(new Animated.Value(value ? 20 : 0)).current;
+
+  useEffect(() => {
+    setLocalValue(value);
+  }, [value]);
+
+  useEffect(() => {
+    Animated.timing(translateX, {
+      toValue: localValue ? 20 : 0,
+      duration: 0,
+      useNativeDriver: true,
+    }).start();
+  }, [localValue]);
+
+  const handlePress = () => {
+    const newValue = !localValue;
+    setLocalValue(newValue);
+    onValueChange(newValue);
+  };
+
+  return (
+    <Pressable onPress={handlePress}>
+      <View
+        style={{
+          width: 45,
+          height: 25,
+          borderRadius: 15,
+          backgroundColor: localValue ? activeColor : inActiveColor,
+          padding: 2,
+          justifyContent: 'center',
+        }}>
+        <Animated.View
+          style={{
+            width: 21,
+            height: 21,
+            borderRadius: 11,
+            backgroundColor: thumbColor,
+            transform: [{ translateX }],
+            shadowColor: '#000',
+            shadowOffset: { width: 0, height: 1 },
+            shadowOpacity: 0.2,
+            shadowRadius: 1.41,
+            elevation: 2,
+          }}
+        />
+      </View>
+    </Pressable>
+  );
+};
+
 export default function SettingScreen() {
   const router = useRouter();
   const scrollX = useRef(new Animated.Value(0)).current;
@@ -187,7 +252,11 @@ export default function SettingScreen() {
 
   useEffect(() => {
     const backAction = () => {
-      router.replace('/home');
+      if (router.canGoBack()) {
+        router.back();
+      } else {
+        router.replace('/home');
+      }
       return true;
     };
 
@@ -654,26 +723,12 @@ export default function SettingScreen() {
                 className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Phone dialer icon
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowPhoneDialer(!showPhoneDialer)}
-                className="justify-center rounded-full px-[2px]"
-                style={{
-                  width: 45,
-                  height: 25,
-                  backgroundColor: showPhoneDialer
-                    ? selectedColor || '#4CAF50'
-                    : isDarkMode
-                      ? '#4B5563'
-                      : '#A3B9D9',
-                }}>
-                <View
-                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{
-                    alignSelf: showPhoneDialer ? 'flex-end' : 'flex-start',
-                  }}
-                />
-              </TouchableOpacity>
+              <CustomSwitch
+                value={showPhoneDialer}
+                onValueChange={setShowPhoneDialer}
+                activeColor={selectedColor || '#4CAF50'}
+                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
             </View>
 
             {/* Camera Icon */}
@@ -683,26 +738,12 @@ export default function SettingScreen() {
                 className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Camera icon
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowCameraIcon(!showCameraIcon)}
-                className="justify-center rounded-full px-[2px]"
-                style={{
-                  width: 45,
-                  height: 25,
-                  backgroundColor: showCameraIcon
-                    ? selectedColor || '#4CAF50'
-                    : isDarkMode
-                      ? '#4B5563'
-                      : '#A3B9D9',
-                }}>
-                <View
-                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{
-                    alignSelf: showCameraIcon ? 'flex-end' : 'flex-start',
-                  }}
-                />
-              </TouchableOpacity>
+              <CustomSwitch
+                value={showCameraIcon}
+                onValueChange={setShowCameraIcon}
+                activeColor={selectedColor || '#4CAF50'}
+                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
             </View>
 
             {/* Alarm Clock */}
@@ -712,26 +753,12 @@ export default function SettingScreen() {
                 className={`font-regular text-[16px] ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Alarm Clock icon
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setAlarmClock(!alarmClock)}
-                className="justify-center rounded-full px-[2px]"
-                style={{
-                  width: 45,
-                  height: 25,
-                  backgroundColor: alarmClock
-                    ? selectedColor || '#4CAF50'
-                    : isDarkMode
-                      ? '#4B5563'
-                      : '#A3B9D9',
-                }}>
-                <View
-                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{
-                    alignSelf: alarmClock ? 'flex-end' : 'flex-start',
-                  }}
-                />
-              </TouchableOpacity>
+              <CustomSwitch
+                value={alarmClock}
+                onValueChange={setAlarmClock}
+                activeColor={selectedColor || '#4CAF50'}
+                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
             </View>
 
             {/* Time Format */}
@@ -804,26 +831,12 @@ export default function SettingScreen() {
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Show Status Bar
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowStatusBar(!showStatusBar)}
-                className="justify-center rounded-full px-[2px]"
-                style={{
-                  width: 45,
-                  height: 25,
-                  backgroundColor: showStatusBar
-                    ? selectedColor || '#4CAF50'
-                    : isDarkMode
-                      ? '#4B5563'
-                      : '#A3B9D9',
-                }}>
-                <View
-                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{
-                    alignSelf: showStatusBar ? 'flex-end' : 'flex-start',
-                  }}
-                />
-              </TouchableOpacity>
+              <CustomSwitch
+                value={showStatusBar}
+                onValueChange={setShowStatusBar}
+                activeColor={selectedColor || '#4CAF50'}
+                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
             </View>
 
             {/* Show Usage Info */}
@@ -833,26 +846,12 @@ export default function SettingScreen() {
                 className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Show Usage Info
               </Text>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                onPress={() => setShowUsageInfo(!showUsageInfo)}
-                className="justify-center rounded-full px-[2px]"
-                style={{
-                  width: 45,
-                  height: 25,
-                  backgroundColor: showUsageInfo // Replace with actual state
-                    ? selectedColor || '#4CAF50'
-                    : isDarkMode
-                      ? '#4B5563'
-                      : '#A3B9D9',
-                }}>
-                <View
-                  className="h-[21px] w-[21px] rounded-full bg-white shadow-sm"
-                  style={{
-                    alignSelf: showUsageInfo ? 'flex-end' : 'flex-start', // Replace with actual state
-                  }}
-                />
-              </TouchableOpacity>
+              <CustomSwitch
+                value={showUsageInfo}
+                onValueChange={setShowUsageInfo}
+                activeColor={selectedColor || '#4CAF50'}
+                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
             </View>
           </View>
         </View>
@@ -1124,7 +1123,7 @@ export default function SettingScreen() {
 
           <Text
             allowFontScaling={false}
-            className={`font-regular mb-[10%] mt-[5%] text-center text-[12px] ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8D99AE]'}`}>
+            className={`font-regular mb-[10%] mt-[5%] text-center justify-center text-[12px] ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8D99AE]'}`}>
             Please let us know any issue or suggestion.
             {'\n'}Our dedicated developers are ready to fix your issue ASAP.
           </Text>

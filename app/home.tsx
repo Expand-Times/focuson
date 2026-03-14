@@ -319,6 +319,20 @@ export default function Home() {
     return () => clearInterval(timer);
   }, [timeOffset]);
 
+  // Reset to Home screen whenever focused
+  // Reset to Home screen whenever focused to ensure "first homescreen" experience
+  useFocusEffect(
+    useCallback(() => {
+      translateX.value = -SCREEN_WIDTH;
+    }, [])
+  );
+
+  useFocusEffect(
+    useCallback(() => {
+      translateX.value = -SCREEN_WIDTH;
+    }, [])
+  );
+
   useFocusEffect(
     useCallback(() => {
       const fetchStats = () => {
@@ -1000,7 +1014,7 @@ export default function Home() {
                 Swipe Left
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-black/40"
+                className="mt-2 text-base text-center justify-center font-regular text-black/40"
                 allowFontScaling={false}>
                 To see All Apps list
               </Text>
@@ -1021,16 +1035,16 @@ export default function Home() {
                 Swipe Right
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-black/40" 
+                className="mt-2 text-base text-center justify-center font-regular text-black/40" 
                 allowFontScaling={false}>
-                To see Apps list by Category
+                To see Apps list by {'\n'} Category
               </Text>
             </View>
           )}
 
           {/* Step 4: Tap & Scroll (Show on Home) */}
           {tutorialStep === 4 && (
-            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
+            <View className="items-center p-2 bg-white rounded-3xl backdrop-blur-md">
               <Image 
                 source={require('../assets/Animation/icons8-scroll.gif')} 
                 className="h-24 w-24"
@@ -1042,9 +1056,9 @@ export default function Home() {
                 Tap and Scroll
               </Text>
               <Text 
-                className="mt-2 text-base font-regular text-black/40"  
+                className="mt-2 text-base text-center justify-center font-regular text-black/40"  
                 allowFontScaling={false}>
-                Scroll Alphabet bubble to change apps list
+                Scroll Alphabet bubble {'\n'}to change apps list
               </Text>
             </View>
           )}
