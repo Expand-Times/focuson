@@ -8,6 +8,8 @@ import {
   Image,
   StatusBar,
   Alert,
+  Modal,
+  ScrollView,
 } from 'react-native';
 import { Stack, Link,  useFocusEffect } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -77,6 +79,7 @@ export default function Home() {
   // 5: Done
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     checkTutorialStatus();
@@ -84,9 +87,33 @@ export default function Home() {
 
   const checkTutorialStatus = async () => {
     try {
+      const hasShownWelcome = await AsyncStorage.getItem('hasShownWelcome');
+      if (!hasShownWelcome) {
+        setShowWelcome(true);
+        return;
+      }
+
       const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
       if (!hasShown) {
         // Load saved step if exists
+        const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
+        if (savedStep) {
+          setTutorialStep(parseInt(savedStep));
+        }
+        setShowTutorial(true);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleWelcomeComplete = async () => {
+    try {
+      await AsyncStorage.setItem('hasShownWelcome', 'true');
+      setShowWelcome(false);
+      
+      const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
+      if (!hasShown) {
         const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
         if (savedStep) {
           setTutorialStep(parseInt(savedStep));
@@ -994,6 +1021,75 @@ export default function Home() {
           </Animated.View>
         </GestureDetector>
       </Animated.View>
+      {/* Welcome Popup */}
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={showWelcome}
+        onRequestClose={handleWelcomeComplete}
+      >
+        <View className="flex-1 items-center justify-center bg-black/80">
+          <View
+            className={`relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl ${
+              isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+            }`}
+          >
+            <Text
+              allowFontScaling={false}
+              className={`mb-8 text-center text-xl font-bold ${
+                isDarkMode ? 'text-white' : 'text-slate-800'
+              }`}
+            >
+              Welcome to Focus On: Minimalist Launcher
+            </Text>
+
+            <ScrollView 
+              className="mb-6" 
+              showsVerticalScrollIndicator={false}
+              contentContainerStyle={{ alignItems: 'center' }}
+            >
+               <Image 
+                source={require('../assets/Animation/nodatashared.png')} 
+                className="h-16 w-16 mb-4"
+                resizeMode="contain"
+              />
+              <Text
+                allowFontScaling={false}
+                className={`text-base leading-6 text-center mb-6 ${
+                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                }`}
+              >
+                We do not collect, share or sell your data. All data is stored only on your device.
+              </Text>
+              
+              <Image 
+                source={require('../assets/Animation/noads.png')} 
+                className="h-16 w-16 mb-4"
+                resizeMode="contain"
+              />
+              <Text
+                allowFontScaling={false}
+                className={`text-base leading-6 text-center ${
+                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                }`}
+              >
+                We do not show any third-party ads. And it’s free to use.
+                {'\n\n'}
+                Stay with us.  💖  Thank you
+              </Text>
+            </ScrollView>
+
+            <TouchableOpacity
+              className="w-full items-center rounded-xl bg-[#7EA6E0] py-3"
+              onPress={handleWelcomeComplete}
+            >
+              <Text allowFontScaling={false} className="font-semibold text-white">
+                Go
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
 
       {/* Tutorial Overlay */}
       {showTutorial && (
