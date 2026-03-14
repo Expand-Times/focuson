@@ -38,7 +38,7 @@ import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { SidebarItem } from './context/Sidebar';
 
 const { height } = Dimensions.get('window');
-const ITEM_HEIGHT = (height * 0.50) / 28;
+const ITEM_HEIGHT = (height * 0.65) / 28;
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -66,6 +66,7 @@ export default function AllApps({
     searchbg,
     searchi,
     alphaside,
+    alpha,
     header,
     numberbg,
     number,
@@ -745,33 +746,32 @@ export default function AllApps({
                 viewabilityConfig={viewabilityConfig}
               />
             </View>
-
-            {/* Alphabet Sidebar */}
-            {showSidebar && (
-              <View className="z-50 items-center justify-center py-4">
-                <GestureDetector gesture={sidebarGesture}>
-                  <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 0 }}>
-                    {sidebarChars.map((letter, index) => (
-                      <SidebarItem
-                        key={letter}
-                        letter={letter}
-                        index={index}
-                        touchY={touchY}
-                        isTouching={isTouching}
-                        onSelect={() => { }}
-                        isDarkMode={isDarkMode}
-                        isImageWallpaper={!!isImageWallpaper}
-                        currentLetter={currentLetter}
-                        style={alphaside}
-                        itemHeight={ITEM_HEIGHT}
-                        enableLiquidEffect={true}
-                      />
-                    ))}
-                  </View>
-                </GestureDetector>
-              </View>
-            )}
           </View>
+
+          {/* Alphabet Sidebar */}
+          {showSidebar && (
+            <View className="absolute right-0 top-0 bottom-0 z-50 items-center justify-center py-4">
+              <GestureDetector gesture={sidebarGesture}>
+                <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 0 }}>
+                  {sidebarChars.map((letter, index) => (
+                    <SidebarItem
+                      key={letter}
+                      letter={letter}
+                      index={index}
+                      touchY={touchY}
+                      isTouching={isTouching}
+                      onSelect={() => { }}
+                      isDarkMode={isDarkMode}
+                      currentLetter={currentLetter}
+                      style={alpha}
+                      itemHeight={ITEM_HEIGHT}
+                      enableLiquidEffect={true}
+                    />
+                  ))}
+                </View>
+              </GestureDetector>
+            </View>
+          )}
 
           <AppModal
             visible={modalVisible}
