@@ -12,8 +12,9 @@ import {
   KeyboardAvoidingView,
   StatusBar,
   Dimensions,
+  FlatList,
+  ViewToken
 } from 'react-native';
-import { FlashList, FlashListRef, ViewToken } from '@shopify/flash-list';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
   Gesture,
@@ -25,9 +26,9 @@ import {  runOnJS,useSharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 
-type FlashListHeader = { type: 'header'; title: string };
-type FlashListItem = { type: 'item'; data: AppItem; sectionTitle: string };
-type FlashListDataItem = FlashListHeader | FlashListItem;
+type FlatListHeader = { type: 'header'; title: string };
+type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
+type FlatListDataItem = FlatListHeader | FlatListItem;
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -48,13 +49,13 @@ export type AllAppsProps = {
   activeLetter?: string;
 };
 
-export default function AllApps({
+const AllApps = memo(({
   enableGestures = true,
   initialLetter,
   showSidebar = true,
   autoFocus = false,
   activeLetter: propActiveLetter,
-}: AllAppsProps = {}) {
+}: AllAppsProps = {}) => {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
@@ -119,7 +120,7 @@ export default function AllApps({
   const params = useLocalSearchParams();
   const isSelectMode = params.mode === 'select';
 
-  const flashListRef = useRef<FlashListRef<FlashListDataItem>>(null);
+  const listRef = useRef<FlatList<FlatListDataItem>>(null);
 
   useEffect(() => {
     if (isSelectMode) {
@@ -150,7 +151,10 @@ export default function AllApps({
   };
 
   const [internalActiveLetter, setInternalActiveLetter] = useState<string | null>(null);
-  const activeLetter = propActiveLetter || internalActiveLetter;
+  const activeLetter = propActiveLetter; // Ignore internal state filtering completely to keep the list full
+
+  // Track the previous active letter to determine if data actually needs to change
+  const prevActiveLetterRef = useRef<string | null>(null);
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
@@ -223,17 +227,17 @@ export default function AllApps({
         .filter((section) => section?.data?.length > 0);
     }
 
-    // Filter by activeLetter if present (Sidebar Scroll Optimization)
-    if (activeLetter) {
-      result = result.filter((section) => section.title === activeLetter);
-    }
-
     return result;
-  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames, activeLetter]);
+  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
 
-  const flashListData = useMemo(() => {
-    const data: FlashListDataItem[] = [];
-    sections.forEach((section) => {
+  const FlatListData = useMemo(() => {
+    const data: FlatListDataItem[] = [];
+    
+    // Do NOT filter the list data here anymore. Let the full list remain rendered
+    // so FlatList can scroll to the correct index without recreating the entire list.
+    const filteredSections = sections;
+
+    filteredSections.forEach((section) => {
       data.push({ type: 'header', title: section.title });
       section.data.forEach((item) => {
         data.push({ type: 'item', data: item, sectionTitle: section.title });
@@ -407,7 +411,7 @@ export default function AllApps({
   };
 
   const renderItem = useCallback(
-    ({ item }: { item: FlashListDataItem }) => {
+    ({ item }: { item: FlatListDataItem }) => {
       if (item.type === 'header') {
         return (
           <Text
@@ -480,7 +484,7 @@ export default function AllApps({
 
   const [currentLetter, setCurrentLetter] = useState('');
 
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FlashListDataItem>[] }) => {
+  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FlatListDataItem>[] }) => {
     if (viewableItems.length > 0) {
       const firstItem = viewableItems[0].item;
       if (firstItem.type === 'header') {
@@ -498,18 +502,18 @@ export default function AllApps({
   const scrollToLetter = useCallback((letter: string) => {
     setCurrentLetter(letter);
 
-    const index = flashListData.findIndex(
+    const index = FlatListData.findIndex(
       (item) => item.type === 'header' && item.title === letter
     );
 
-    if (index !== -1 && flashListRef.current) {
+    if (index !== -1 && listRef.current) {
       try {
-        flashListRef.current.scrollToIndex({ index, animated: false });
+        listRef.current.scrollToIndex({ index, animated: false });
       } catch (e) {
         console.warn('Scroll to letter failed', e);
       }
     }
-  }, [flashListData]);
+  }, [FlatListData]);
 
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
@@ -518,26 +522,27 @@ export default function AllApps({
   const handleGestureScroll = useCallback((letter: string) => {
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
-      setInternalActiveLetter(letter);
+      // Just update the visual letter indicator, DO NOT filter the data
       setCurrentLetter(letter);
+      // We also scroll to the letter index
+      scrollToLetter(letter);
     }
-  }, []);
+  }, [scrollToLetter]);
 
   const handleGestureEnd = useCallback(() => {
-    setInternalActiveLetter(null);
+    // Optional: reset logic if needed
   }, []);
 
   // Restore scroll position when sidebar interaction ends
   useEffect(() => {
-    if (!activeLetter && (lastScrolledLetter.current || initialLetter)) {
-      const target = lastScrolledLetter.current || initialLetter;
-      // Small timeout to ensure SectionList has re-rendered with full data
+    // If we have an initial letter and no active letter prop, scroll to it on mount
+    if (initialLetter) {
       const timer = setTimeout(() => {
-        if(target) scrollToLetter(target);
+        scrollToLetter(initialLetter);
       }, 50);
       return () => clearTimeout(timer);
     }
-  }, [activeLetter, initialLetter, scrollToLetter]);
+  }, [initialLetter, scrollToLetter]);
 
   const activeIndex = useSharedValue(-1);
 
@@ -577,6 +582,8 @@ export default function AllApps({
     });
 
   const RootContainer = enableGestures ? GestureHandlerRootView : View;
+
+  console.log(`[${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}] Rendering all-apps FlatList, FlatListData length:`, FlatListData?.length);
 
   return (
     <RootContainer style={{ flex: 1 }}>
@@ -732,12 +739,11 @@ export default function AllApps({
           <View className="flex-1 flex-row">
             {/* Apps List */}
             <View className="w-full px-3 ">
-              <FlashList
-                ref={flashListRef}
-                data={flashListData}
+              <FlatList
+                ref={listRef}
+                data={FlatListData}
                 renderItem={renderItem}
-                getItemType={(item) => item.type}
-                keyExtractor={(item) =>
+                keyExtractor={(item: FlatListDataItem) =>
                   item.type === 'header' ? `header-${item.title}` : item.data.packageName
                 }
                 contentContainerStyle={{ paddingBottom: 20 }}
@@ -943,7 +949,9 @@ export default function AllApps({
       </GestureDetector>
     </RootContainer>
   );
-}
+});
+
+export default AllApps;
 
 const formatUsageTime = (millis?: number) => {
   if (!millis) return '0 min';
