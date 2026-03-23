@@ -46,11 +46,9 @@ export type AllAppsProps = {
 
 const AllApps = memo(({
   enableGestures = true,
-  initialLetter,
-  showSidebar = true,
   autoFocus = false,
 }: AllAppsProps = {}) => {
-  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = useMemo(
@@ -419,7 +417,6 @@ const AllApps = memo(({
           isImageWallpaper={isImageWallpaper}
           isDarkMode={isDarkMode}
           theme={fontConfig}
-          showUsageInfo={showUsageInfo}
           wallpaperIndex={wallpaperIndex}
         />
       );
@@ -432,7 +429,6 @@ const AllApps = memo(({
       isImageWallpaper,
       isDarkMode,
       fontConfig,
-      showUsageInfo,
       wallpaperIndex,
       header
     ]
@@ -571,28 +567,16 @@ const AllApps = memo(({
                 <TouchableOpacity
                   className="p-2"
                   hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                  <View
-                    style={[
-                      allappi,
-                      {
-                        borderColor:
+                  <View style={allappi}>
+                    <Image
+                      source={require('../assets/images/SettingIcon.png')}
+                      style={{
+                        width: 30,
+                        height: 30,
+                        tintColor:
                           allappi?.color ||
                           (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                      },
-                    ]}
-                    className={`rounded-lg border border-2 ${isImageWallpaper
-                        ? 'border-white/50'
-                        : isDarkMode
-                          ? 'border-[#858E9D]'
-                          : 'border-[#858E9D]'
-                      }`}>
-                    <MaterialCommunityIcons
-                      name="tune-variant"
-                      size={25}
-                      color={
-                        allappi?.color ||
-                        (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
-                      }
+                      }}
                     />
                   </View>
                 </TouchableOpacity>
@@ -811,12 +795,9 @@ const AppListItem = memo(
     isImageWallpaper,
     isDarkMode,
     theme,
-    showUsageInfo,
     wallpaperIndex,
   }: any) => {
     const { applist, applistbg, appdu } = theme || {};
-
-    const usageText = formatUsageTime(item.usageTime);
 
     return (
       <TouchableOpacity
@@ -859,21 +840,7 @@ const AppListItem = memo(
           </Text>
         </View>
 
-        {showUsageInfo && (
-          <View className="flex-row items-center">
-            <Text
-              allowFontScaling={false}
-              style={appdu}
-              className={`text-[10px] font-light ${isImageWallpaper
-                  ? 'text-slate-300'
-                  : isDarkMode
-                    ? 'text-[#728099]'
-                    : 'text-[#4D6D99]'
-                } opacity-90`}>
-              TO: {item.launchCount || 0} times || TU: {usageText}
-            </Text>
-          </View>
-        )}
+     
       </TouchableOpacity>
     );
   }

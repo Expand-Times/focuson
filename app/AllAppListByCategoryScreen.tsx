@@ -47,7 +47,7 @@ export default function AllAppListByCategoryScreen({
   autoFocus?: boolean;
 }) {
   const router = useRouter();
-  const { isDarkMode, wallpaper, wallpaperIndex, showUsageInfo, showStatusBar } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar } = useColorContext();
   const {
     apps,
     loading: appsLoading,
@@ -487,7 +487,7 @@ export default function AllAppListByCategoryScreen({
                         }`}>
                       <MaterialCommunityIcons
                         name="plus"
-                        size={22}
+                        size={25}
                         color={
                           appi?.color ||
                           (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
@@ -497,28 +497,16 @@ export default function AllAppListByCategoryScreen({
                   </TouchableOpacity>
                   <Link href="/settingScreen" asChild>
                     <TouchableOpacity>
-                      <View
-                        style={[
-                          appi,
-                          {
-                            borderColor:
+                      <View style={appi}>
+                        <Image
+                          source={require('../assets/images/SettingIcon.png')}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            tintColor:
                               appi?.color ||
                               (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                          },
-                        ]}
-                        className={`rounded-lg border border-2 ${isImageWallpaper
-                            ? 'border-white/50'
-                            : isDarkMode
-                              ? 'border-[#858E9D]'
-                              : 'border-[#858E9D]'
-                          }`}>
-                        <MaterialCommunityIcons
-                          name="tune-variant"
-                          size={22}
-                          color={
-                            appi?.color ||
-                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
-                          }
+                          }}
                         />
                       </View>
                     </TouchableOpacity>
@@ -621,22 +609,6 @@ export default function AllAppListByCategoryScreen({
                                   : appRenames[app.packageName] || app.label}
                               </Text>
                             </View>
-                            {showUsageInfo && (
-                              <View className="flex-row items-center">
-                                <Text
-                                  allowFontScaling={false}
-                                  style={applistCdu}
-                                  className={`font-regular text-[10px] opacity-90 ${isImageWallpaper
-                                      ? 'text-slate-300'
-                                      : isDarkMode
-                                        ? 'text-[#728099]'
-                                        : 'text-[#4D6D99]'
-                                    }`}>
-                                  TO: {app.launchCount || 0} Times || TU:{' '}
-                                  {formatUsageTime(app.usageTime)}
-                                </Text>
-                              </View>
-                            )}
                           </TouchableOpacity>
                         ))}
                       </View>

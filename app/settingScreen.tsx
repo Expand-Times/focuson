@@ -202,8 +202,6 @@ export default function SettingScreen() {
     timeOffset,
     showStatusBar,
     setShowStatusBar,
-    showUsageInfo,
-    setShowUsageInfo,
   } = useColorContext();
 
   const handleApplyTheme = () => {
@@ -825,21 +823,6 @@ export default function SettingScreen() {
               <CustomSwitch
                 value={showStatusBar}
                 onValueChange={setShowStatusBar}
-                activeColor={selectedColor || '#4CAF50'}
-                inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
-              />
-            </View>
-
-            {/* Show Usage Info */}
-            <View className="mb-[6%] flex-row items-center justify-between px-4">
-              <Text
-                allowFontScaling={false}
-                className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-                Show Usage Info
-              </Text>
-              <CustomSwitch
-                value={showUsageInfo}
-                onValueChange={setShowUsageInfo}
                 activeColor={selectedColor || '#4CAF50'}
                 inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
               />
