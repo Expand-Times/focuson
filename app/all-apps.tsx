@@ -36,17 +36,12 @@ import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
-import { SidebarItem } from './context/Sidebar';
-
-const { height } = Dimensions.get('window');
-const ITEM_HEIGHT = (height * 0.65) / 28;
 
 export type AllAppsProps = {
   enableGestures?: boolean;
   initialLetter?: string;
   showSidebar?: boolean;
   autoFocus?: boolean;
-  activeLetter?: SharedValue<string>;
 };
 
 const AllApps = memo(({
@@ -54,7 +49,6 @@ const AllApps = memo(({
   initialLetter,
   showSidebar = true,
   autoFocus = false,
-  activeLetter: propActiveLetter,
 }: AllAppsProps = {}) => {
   const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, showUsageInfo } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
@@ -128,16 +122,6 @@ const AllApps = memo(({
       setSelectedPackageNames(homeApps.map((a) => a.packageName));
     }
   }, [isSelectMode, homeApps]);
-
-  useEffect(() => {
-    if (initialLetter) {
-      // Small timeout to ensure list is rendered and ref is available
-      const timer = setTimeout(() => {
-        scrollToLetter(initialLetter);
-      }, 0.1);
-      return () => clearTimeout(timer);
-    }
-  }, [initialLetter]);
 
   const handleSaveSelection = async () => {
     try {
@@ -454,135 +438,6 @@ const AllApps = memo(({
     ]
   );
 
-  const sidebarChars = useMemo(() => {
-    const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
-    const presentLetters = new Set<string>();
-    let hasNonAlpha = false;
-
-    visibleApps.forEach((app) => {
-      const name = appRenames[app.packageName] || app.label;
-      const firstChar = name.charAt(0).toUpperCase();
-      if (/^[A-Z]/.test(firstChar)) {
-        presentLetters.add(firstChar);
-      } else {
-        hasNonAlpha = true;
-      }
-    });
-
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter((char) => presentLetters.has(char));
-
-    let result = [...chars];
-    if (hasNonAlpha) {
-      result.unshift('#');
-    }
-    if (pinnedPackageNames.length > 0) {
-      result.unshift('*');
-    }
-    return result;
-  }, [apps, pinnedPackageNames, blockedPackageNames, appRenames]);
-
-  const currentLetter = useSharedValue('');
-
-  const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FlatListDataItem>[] }) => {
-    if (viewableItems.length > 0) {
-      const firstItem = viewableItems[0].item;
-      if (firstItem.type === 'header') {
-        currentLetter.value = firstItem.title;
-      } else {
-        currentLetter.value = firstItem.sectionTitle;
-      }
-    }
-  }).current;
-
-  const viewabilityConfig = useRef({
-    itemVisiblePercentThreshold: 10,
-  }).current;
-
-  const scrollToLetter = useCallback((letter: string) => {
-    currentLetter.value = letter;
-
-    const index = FlatListData.findIndex(
-      (item) => item.type === 'header' && item.title === letter
-    );
-
-    if (index !== -1 && listRef.current) {
-      try {
-        listRef.current.scrollToIndex({ index, animated: false });
-      } catch (e) {
-        console.warn('Scroll to letter failed', e);
-      }
-    }
-  }, [FlatListData, currentLetter]);
-
-  const touchY = useSharedValue(0);
-  const isTouching = useSharedValue(false);
-  const lastScrolledLetter = useRef('');
-  
-  const handleGestureScroll = useCallback((letter: string) => {
-    if (lastScrolledLetter.current !== letter) {
-      lastScrolledLetter.current = letter;
-      // Just update the visual letter indicator, DO NOT filter the data
-      currentLetter.value = letter;
-      // We also scroll to the letter index
-      scrollToLetter(letter);
-    }
-  }, [scrollToLetter, currentLetter]);
-
-  useAnimatedReaction(
-    () => (propActiveLetter ? propActiveLetter.value : null),
-    (letter, prevLetter) => {
-      if (letter && letter !== prevLetter) {
-        runOnJS(handleGestureScroll)(letter);
-      }
-    },
-    [propActiveLetter, handleGestureScroll]
-  );
-
-  const handleGestureEnd = useCallback(() => {
-    // Optional: reset logic if needed
-  }, []);
-
-  // Restore scroll position when sidebar interaction ends
-  useEffect(() => {
-    // If we have an initial letter and no active letter prop, scroll to it on mount
-    if (initialLetter) {
-      const timer = setTimeout(() => {
-        scrollToLetter(initialLetter);
-      }, 50);
-      return () => clearTimeout(timer);
-    }
-  }, [initialLetter, scrollToLetter]);
-
-  const activeIndex = useSharedValue(-1);
-
-  const sidebarGesture = useMemo(() => Gesture.Pan()
-    .onBegin((e) => {
-      'worklet';
-      isTouching.value = true;
-      touchY.value = e.y;
-      const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length && index !== activeIndex.value) {
-        activeIndex.value = index;
-        runOnJS(handleGestureScroll)(sidebarChars[index]);
-      }
-    })
-    .onUpdate((e) => {
-      'worklet';
-      touchY.value = e.y;
-      const index = Math.floor(e.y / ITEM_HEIGHT);
-      if (index >= 0 && index < sidebarChars.length && index !== activeIndex.value) {
-        activeIndex.value = index;
-        runOnJS(handleGestureScroll)(sidebarChars[index]);
-      }
-    })
-    .onFinalize(() => {
-      'worklet';
-      isTouching.value = false;
-      touchY.value = -100;
-      activeIndex.value = -1;
-      runOnJS(handleGestureEnd)();
-    }), [sidebarChars, activeIndex, handleGestureScroll, handleGestureEnd]);
-
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
     .enabled(enableGestures)
@@ -757,36 +612,9 @@ const AllApps = memo(({
                 }
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
-                onViewableItemsChanged={onViewableItemsChanged}
-                viewabilityConfig={viewabilityConfig}
               />
             </View>
           </View>
-
-          {/* Alphabet Sidebar */}
-          {showSidebar && (
-            <View className="absolute right-0 top-0 bottom-0 z-50 items-center justify-center py-4">
-              <GestureDetector gesture={sidebarGesture}>
-                <View className="w-8 items-center bg-transparent" style={{ paddingVertical: 0 }}>
-                  {sidebarChars.map((letter, index) => (
-                    <SidebarItem
-                      key={letter}
-                      letter={letter}
-                      index={index}
-                      touchY={touchY}
-                      isTouching={isTouching}
-                      onSelect={() => { }}
-                      isDarkMode={isDarkMode}
-                      currentLetter={currentLetter}
-                      style={alpha}
-                      itemHeight={ITEM_HEIGHT}
-                      enableLiquidEffect={true}
-                    />
-                  ))}
-                </View>
-              </GestureDetector>
-            </View>
-          )}
 
           <AppModal
             visible={modalVisible}

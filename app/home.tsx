@@ -35,7 +35,6 @@ import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import AllAppListByCategoryScreen from './AllAppListByCategoryScreen';
 import AllApps from './all-apps';
-import { SidebarItem } from './context/Sidebar';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
 import { useColorContext } from './context/ColorContext';
@@ -43,7 +42,6 @@ import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
-const ITEM_HEIGHT = (height * 0.65) / 28;
 export default function Home() {
   
   const insets = useSafeAreaInsets();
@@ -145,39 +143,6 @@ export default function Home() {
     }
   };
 
-  // Sidebar Logic
-  const sidebarChars = useMemo(() => {
-    const visibleApps = allApps.filter((app) => !blockedPackageNames.includes(app.packageName));
-    const presentLetters = new Set<string>();
-    let hasNonAlpha = false;
-
-    visibleApps.forEach((app) => {
-      const name = appRenames[app.packageName] || app.label;
-      const firstChar = name.charAt(0).toUpperCase();
-      if (/^[A-Z]/.test(firstChar)) {
-        presentLetters.add(firstChar);
-      } else {
-        hasNonAlpha = true;
-      }
-    });
-
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').filter(char => presentLetters.has(char));
-
-    let result = [...chars];
-    if (hasNonAlpha) {
-      result.unshift('#');
-    }
-    if (pinnedPackageNames.length > 0) {
-      result.unshift('*');
-    }
-    return result;
-  }, [allApps, pinnedPackageNames, blockedPackageNames, appRenames]);
-  const touchY = useSharedValue(0);
-  const isTouching = useSharedValue(false);
-  const isSidebarActive = useSharedValue(false);
-  const dragLetter = useSharedValue('');
-  const [allAppsLetter, setAllAppsLetter] = useState('');
-  const lastLetterRef = useRef('');
   const translateX = useSharedValue(-SCREEN_WIDTH);
   const context = useSharedValue({ startX: 0 });
   const showTutorialSV = useSharedValue(false);
@@ -216,124 +181,10 @@ export default function Home() {
       // Step 3: Wait for return to Home (Category -> Home)
       // Target: translateX approaches -SCREEN_WIDTH
       if (tutorialStep === 3 && currentX < -SCREEN_WIDTH * 0.9) {
-        runOnJS(updateTutorialStep)(4);
-      }
-    },
-    [showTutorial, tutorialStep]
-  );
-
-  // Track Sidebar Usage for Step 4
-  useAnimatedReaction(
-    () => isSidebarActive.value,
-    (isActive) => {
-      if (showTutorial && tutorialStep === 4 && isActive) {
         runOnJS(updateTutorialStep)(5);
       }
     },
     [showTutorial, tutorialStep]
-  );
-
- const navigateToAllAppsWithLetter = (letter: string) => {
-    dragLetter.value = letter;
-    setAllAppsLetter(letter);
-    translateX.value = withSpring(-SCREEN_WIDTH * 2, {
-      damping: 40,
-      stiffness: 1500,
-      overshootClamping: true,
-      mass: 0.3,
-    });
-  };
-
-  const clearDragLetterState = useCallback(() => {
-    dragLetter.value = '';
-    lastLetterRef.current = '';
-  }, [dragLetter]);
-
-  const handleSidebarInteraction = useCallback(
-    (index: number) => {
-      if (index >= 0 && index < sidebarChars.length) {
-        const letter = sidebarChars[index];
-
-        // Only update if the letter has changed to prevent excessive re-renders
-        if (letter !== lastLetterRef.current) {
-          lastLetterRef.current = letter;
-          dragLetter.value = letter;
-          // We don't call setAllAppsLetter here to avoid massive re-renders of Home.
-          // AllApps uses dragLetter (passed as activeLetter) to scroll natively.
-
-          // Ensure we are on AllApps screen
-          if (translateX.value > -SCREEN_WIDTH * 1.5) {
-            translateX.value = withSpring(-SCREEN_WIDTH * 2, {
-              damping: 40,
-              stiffness: 1500,
-              overshootClamping: true,
-              mass: 0.3,
-            });
-          }
-        }
-      }
-    },
-    [sidebarChars, translateX, dragLetter]
-  );
-
-  const sidebarGesture = useMemo(
-    () =>
-      Gesture.Pan()
-        .onBegin((e) => {
-          // Disable sidebar if tutorial is active AND on Step 2 (Swipe Right)
-          // Sidebar should work on Step 0 (Swipe Left) and Step 4 (Sidebar)
-          if (showTutorial && tutorialStep === 2) return;
-
-          isSidebarActive.value = true;
-          isTouching.value = true;
-          touchY.value = e.y;
-
-          // Start navigation animation immediately on UI thread
-          if (translateX.value > -SCREEN_WIDTH * 1.5) {
-            translateX.value = withSpring(-SCREEN_WIDTH * 2, {
-              damping: 40,
-              stiffness: 1500,
-              overshootClamping: true,
-              mass: 0.3,
-            });
-          }
-
-          const index = Math.floor(e.y / ITEM_HEIGHT);
-          runOnJS(handleSidebarInteraction)(index);
-        })
-        .onUpdate((e) => {
-          if (showTutorial && tutorialStep === 2) return;
-          
-          touchY.value = e.y;
-          const index = Math.floor(e.y / ITEM_HEIGHT);
-          runOnJS(handleSidebarInteraction)(index);
-        })
-        .onEnd(() => {
-          // Logic handled in update
-        })
-        .onFinalize(() => {
-          if (showTutorial && tutorialStep === 2) return;
-
-          isSidebarActive.value = false;
-          isTouching.value = false;
-          runOnJS(clearDragLetterState)();
-          translateX.value = withSpring(-SCREEN_WIDTH * 2, {
-            damping: 40,
-            stiffness: 1500,
-            overshootClamping: true,
-            mass: 0.3,
-          });
-        }),
-    [
-      handleSidebarInteraction,
-      clearDragLetterState,
-      isSidebarActive,
-      isTouching,
-      touchY,
-      translateX,
-      showTutorial,
-      tutorialStep
-    ]
   );
 
   // Home Apps State
@@ -458,11 +309,9 @@ export default function Home() {
     .activeOffsetX([-20, 20])
     .failOffsetY([-20, 20])
     .onStart(() => {
-      if (isSidebarActive.value) return;
       context.value = { startX: translateX.value };
     })
     .onUpdate((e) => {
-      if (isSidebarActive.value) return;
       let nextPos = context.value.startX + e.translationX;
       
       // Tutorial Constraints
@@ -485,7 +334,6 @@ export default function Home() {
       translateX.value = Math.max(-SCREEN_WIDTH * 2, Math.min(0, nextPos));
     })
     .onEnd((e) => {
-      if (isSidebarActive.value) return;
       const currentPos = translateX.value;
 
       // Determine target position based on velocity and position
@@ -665,20 +513,6 @@ export default function Home() {
     camera,
     bubblebg,
   } = fontConfig || ({} as any);
-
-  const sidebarContainerStyle = useAnimatedStyle(() => {
-    const opacity = interpolate(
-      translateX.value,
-      [-SCREEN_WIDTH, -SCREEN_WIDTH * 0.8],
-      [1, 0],
-      Extrapolation.CLAMP
-    );
-
-    return {
-      opacity,
-      zIndex: translateX.value > -SCREEN_WIDTH * 0.9 ? -1 : 100,
-    };
-  });
 
   return (
     <GestureHandlerRootView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
@@ -981,47 +815,12 @@ export default function Home() {
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
             <AllApps
               enableGestures={false}
-              initialLetter={allAppsLetter}
               showSidebar={false}
-              activeLetter={dragLetter}
             />
           </View>
         </Animated.View>
       </GestureDetector>
 
-      {/* Sidebar Overlay - Moved to Root */}
-      <Animated.View
-        style={[
-          {
-            position: 'absolute',
-            right: 0,
-            top: 0,
-            bottom: 0,
-            justifyContent: 'center',
-            zIndex: 100,
-          },
-          sidebarContainerStyle,
-        ]}>
-        <GestureDetector gesture={sidebarGesture}>
-          <Animated.View style={{ paddingHorizontal: 4 }}>
-            {sidebarChars.map((letter, index) => (
-              <SidebarItem
-                key={index}
-                letter={letter}
-                index={index}
-                touchY={touchY}
-                isTouching={isTouching}
-                onSelect={(l) => navigateToAllAppsWithLetter(l)}
-                isDarkMode={isDarkMode}
-                currentLetter={dragLetter}
-                style={alpha}
-                itemHeight={ITEM_HEIGHT}
-                enableLiquidEffect={true}
-              />
-            ))}
-          </Animated.View>
-        </GestureDetector>
-      </Animated.View>
       {/* Welcome Popup */}
       <Modal
         animationType="fade"
@@ -1135,27 +934,6 @@ export default function Home() {
                 className="mt-2 text-base text-center justify-center font-regular text-black/40" 
                 allowFontScaling={false}>
                 To see Apps list by {'\n'} Category
-              </Text>
-            </View>
-          )}
-
-          {/* Step 4: Tap & Scroll (Show on Home) */}
-          {tutorialStep === 4 && (
-            <View className="items-center p-2 bg-white rounded-3xl backdrop-blur-md">
-              <Image 
-                source={require('../assets/Animation/icons8-scroll.gif')} 
-                className="h-24 w-24"
-                resizeMode="contain"
-              />
-              <Text 
-                className="mt-4 text-2xl font-bold italic text-black/40"
-                allowFontScaling={false}>
-                Tap and Scroll
-              </Text>
-              <Text 
-                className="mt-2 text-base text-center justify-center font-regular text-black/40"  
-                allowFontScaling={false}>
-                Scroll Alphabet bubble {'\n'}to change apps list
               </Text>
             </View>
           )}
