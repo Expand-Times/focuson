@@ -39,7 +39,7 @@ type UserObject = {
   };
 };
 // Custom Switch Component for better performance and custom design
-const CustomSwitch = ({
+const CustomSwitch = React.memo(({
   value,
   onValueChange,
   activeColor,
@@ -62,7 +62,7 @@ const CustomSwitch = ({
   useEffect(() => {
     Animated.timing(translateX, {
       toValue: localValue ? 20 : 0,
-      duration: 0,
+      duration: 150,
       useNativeDriver: true,
     }).start();
   }, [localValue]);
@@ -101,7 +101,30 @@ const CustomSwitch = ({
       </View>
     </Pressable>
   );
-};
+});
+
+const THEME_DATA = [
+  { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
+  { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
+  { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
+  { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Desert Dusk' },
+  { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Neon City' },
+  { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Midnight Purple' },
+  { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Forest Green' },
+  { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Ocean Blue' },
+  { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Sunset Vibes' },
+  { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Minimal Grey' },
+  { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Deep Space' },
+  { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'Mountain Peak' },
+  { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Abstract Waves' },
+  { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Urban Jungle' },
+  { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'Calm Water' },
+  { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Retro Vibe' },
+  { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Dark Matter' },
+  { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'Golden Hour' },
+  { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Golden Hour' },
+  { id: 19, img: require('../assets/Themes/20.jpg'), wallpaperIndex: 19, name: 'Golden Hour' },
+];
 
 export default function SettingScreen() {
   const router = useRouter();
@@ -183,29 +206,6 @@ export default function SettingScreen() {
     setShowUsageInfo,
   } = useColorContext();
 
-  const THEME_DATA = [
-    { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
-    { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
-    { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
-    { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Desert Dusk' },
-    { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Neon City' },
-    { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Midnight Purple' },
-    { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Forest Green' },
-    { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Ocean Blue' },
-    { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Sunset Vibes' },
-    { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Minimal Grey' },
-    { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Deep Space' },
-    { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'Mountain Peak' },
-    { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Abstract Waves' },
-    { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Urban Jungle' },
-    { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'Calm Water' },
-    { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Retro Vibe' },
-    { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Dark Matter' },
-    { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'Golden Hour' },
-    { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Golden Hour' },
-    { id: 19, img: require('../assets/Themes/20.jpg'), wallpaperIndex: 19, name: 'Golden Hour' },
-  ];
-
   const handleApplyTheme = () => {
     setIsProcessing(true);
 
@@ -236,6 +236,9 @@ export default function SettingScreen() {
       const data = await AsyncStorage.getItem('userAuthInfo');
       const userDetails = data && data.trim().length ? JSON.parse(data) : {};
       setUserAuthInfo(userDetails);
+      if (userDetails?.user?.user_metadata?.email) {
+        setShowSignOut(true);
+      }
     } catch {
       setUserAuthInfo({});
     }
@@ -243,10 +246,6 @@ export default function SettingScreen() {
 
   useEffect(() => {
     userData();
-
-    if (userAuthInfo?.user?.user_metadata?.email) {
-      setShowSignOut(true);
-    }
   }, []);
 
   useEffect(() => {
@@ -1175,6 +1174,10 @@ export default function SettingScreen() {
               snapToInterval={width * 0.8} // ITEM_WIDTH + 2 * SPACING
               decelerationRate="fast"
               snapToAlignment="start"
+              initialNumToRender={3}
+              maxToRenderPerBatch={3}
+              windowSize={5}
+              removeClippedSubviews={Platform.OS === 'android'}
               contentContainerStyle={{
                 paddingHorizontal: (width - width * 0.8) / 2,
               }}
