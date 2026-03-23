@@ -22,7 +22,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import {  runOnJS,useSharedValue } from 'react-native-reanimated';
+import {  runOnJS,useSharedValue,useAnimatedReaction,SharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 
@@ -46,7 +46,7 @@ export type AllAppsProps = {
   initialLetter?: string;
   showSidebar?: boolean;
   autoFocus?: boolean;
-  activeLetter?: string;
+  activeLetter?: SharedValue<string>;
 };
 
 const AllApps = memo(({
@@ -151,7 +151,6 @@ const AllApps = memo(({
   };
 
   const [internalActiveLetter, setInternalActiveLetter] = useState<string | null>(null);
-  const activeLetter = propActiveLetter; // Ignore internal state filtering completely to keep the list full
 
   // Track the previous active letter to determine if data actually needs to change
   const prevActiveLetterRef = useRef<string | null>(null);
@@ -482,15 +481,15 @@ const AllApps = memo(({
     return result;
   }, [apps, pinnedPackageNames, blockedPackageNames, appRenames]);
 
-  const [currentLetter, setCurrentLetter] = useState('');
+  const currentLetter = useSharedValue('');
 
   const onViewableItemsChanged = useRef(({ viewableItems }: { viewableItems: ViewToken<FlatListDataItem>[] }) => {
     if (viewableItems.length > 0) {
       const firstItem = viewableItems[0].item;
       if (firstItem.type === 'header') {
-        setCurrentLetter(firstItem.title);
+        currentLetter.value = firstItem.title;
       } else {
-        setCurrentLetter(firstItem.sectionTitle);
+        currentLetter.value = firstItem.sectionTitle;
       }
     }
   }).current;
@@ -500,7 +499,7 @@ const AllApps = memo(({
   }).current;
 
   const scrollToLetter = useCallback((letter: string) => {
-    setCurrentLetter(letter);
+    currentLetter.value = letter;
 
     const index = FlatListData.findIndex(
       (item) => item.type === 'header' && item.title === letter
@@ -513,7 +512,7 @@ const AllApps = memo(({
         console.warn('Scroll to letter failed', e);
       }
     }
-  }, [FlatListData]);
+  }, [FlatListData, currentLetter]);
 
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
@@ -523,11 +522,21 @@ const AllApps = memo(({
     if (lastScrolledLetter.current !== letter) {
       lastScrolledLetter.current = letter;
       // Just update the visual letter indicator, DO NOT filter the data
-      setCurrentLetter(letter);
+      currentLetter.value = letter;
       // We also scroll to the letter index
       scrollToLetter(letter);
     }
-  }, [scrollToLetter]);
+  }, [scrollToLetter, currentLetter]);
+
+  useAnimatedReaction(
+    () => (propActiveLetter ? propActiveLetter.value : null),
+    (letter, prevLetter) => {
+      if (letter && letter !== prevLetter) {
+        runOnJS(handleGestureScroll)(letter);
+      }
+    },
+    [propActiveLetter, handleGestureScroll]
+  );
 
   const handleGestureEnd = useCallback(() => {
     // Optional: reset logic if needed

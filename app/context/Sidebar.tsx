@@ -17,7 +17,7 @@ interface SidebarItemProps {
   isTouching: SharedValue<boolean>;
   onSelect: (letter: string) => void;
   isDarkMode: boolean;
-  currentLetter: string;
+  currentLetter: SharedValue<string>;
   isImageWallpaper?: boolean;
   style?: any;
   itemHeight: number;
@@ -102,7 +102,7 @@ export const SidebarItem = ({
 
     // Determine active state: either currently touched OR selected via prop (fallback)
     // We prioritize touch interaction for instant feedback
-    const isActive = isTouching.value ? isSelectedByTouch : currentLetter === letter;
+    const isActive = isTouching.value ? isSelectedByTouch : currentLetter.value === letter;
 
     // Define colors
     let activeColor = '#5C8BCC'; // Default light mode active

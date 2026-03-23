@@ -175,7 +175,7 @@ export default function Home() {
   const touchY = useSharedValue(0);
   const isTouching = useSharedValue(false);
   const isSidebarActive = useSharedValue(false);
-  const [dragLetter, setDragLetter] = useState('');
+  const dragLetter = useSharedValue('');
   const [allAppsLetter, setAllAppsLetter] = useState('');
   const lastLetterRef = useRef('');
   const translateX = useSharedValue(-SCREEN_WIDTH);
@@ -234,7 +234,7 @@ export default function Home() {
   );
 
  const navigateToAllAppsWithLetter = (letter: string) => {
-    setDragLetter(letter);
+    dragLetter.value = letter;
     setAllAppsLetter(letter);
     translateX.value = withSpring(-SCREEN_WIDTH * 2, {
       damping: 40,
@@ -245,9 +245,9 @@ export default function Home() {
   };
 
   const clearDragLetterState = useCallback(() => {
-    setDragLetter('');
+    dragLetter.value = '';
     lastLetterRef.current = '';
-  }, []);
+  }, [dragLetter]);
 
   const handleSidebarInteraction = useCallback(
     (index: number) => {
@@ -257,8 +257,9 @@ export default function Home() {
         // Only update if the letter has changed to prevent excessive re-renders
         if (letter !== lastLetterRef.current) {
           lastLetterRef.current = letter;
-          setDragLetter(letter);
-          setAllAppsLetter(letter);
+          dragLetter.value = letter;
+          // We don't call setAllAppsLetter here to avoid massive re-renders of Home.
+          // AllApps uses dragLetter (passed as activeLetter) to scroll natively.
 
           // Ensure we are on AllApps screen
           if (translateX.value > -SCREEN_WIDTH * 1.5) {
@@ -272,7 +273,7 @@ export default function Home() {
         }
       }
     },
-    [sidebarChars, translateX]
+    [sidebarChars, translateX, dragLetter]
   );
 
   const sidebarGesture = useMemo(
@@ -861,7 +862,7 @@ export default function Home() {
                       allowFontScaling={false}
                       style={don}
                       className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                      Don't add unnecessary{' '}
+                      Don&apos;t add unnecessary{' '}
                       {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
                     </Text>
                   </TouchableOpacity>
@@ -1073,7 +1074,7 @@ export default function Home() {
                   isDarkMode ? 'text-slate-300' : 'text-slate-600'
                 }`}
               >
-                We do not show any third-party ads. And it’s free to use.
+                We do not show any third-party ads. And it&apos;s free to use.
                 {'\n\n'}
                 Stay with us.  💖  Thank you
               </Text>
