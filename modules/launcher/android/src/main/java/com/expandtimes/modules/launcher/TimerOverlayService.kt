@@ -91,7 +91,7 @@ class TimerOverlayService : Service() {
         }
         
         if (targetPackageName != null) {
-            startUsageToday = getUsageToday(targetPackageName!!)
+            startUsageToday = getUsageStatsToday(targetPackageName!!).first
             handler.post(checkUsageRunnable)
         } else {
             stopSelf()
@@ -103,7 +103,9 @@ class TimerOverlayService : Service() {
     private fun checkUsage() {
         if (targetPackageName == null) return
         
-        val currentUsage = getUsageToday(targetPackageName!!)
+        val stats = getUsageStatsToday(targetPackageName!!)
+        val currentUsage = stats.first
+        val openCount = stats.second
         val usageDelta = currentUsage - startUsageToday
         
         // If usage since start exceeds limit
@@ -116,13 +118,13 @@ class TimerOverlayService : Service() {
                     startActivity(homeIntent)
                     stopSelf()
                 } else {
-                    showTimesUpOverlay(currentUsage)
+                    showTimesUpOverlay(currentUsage, openCount)
                 }
             }
         }
     }
 
-    private fun getUsageToday(packageName: String): Long {
+    private fun getUsageStatsToday(packageName: String): Pair<Long, Int> {
         try {
             val calendar = Calendar.getInstance()
             calendar.set(Calendar.HOUR_OF_DAY, 0)
@@ -132,17 +134,19 @@ class TimerOverlayService : Service() {
             val startTime = calendar.timeInMillis
             val endTime = System.currentTimeMillis()
 
-            val events = usageStatsManager?.queryEvents(startTime, endTime) ?: return 0L
+            val events = usageStatsManager?.queryEvents(startTime, endTime) ?: return Pair(0L, 0)
             val event = UsageEvents.Event()
             
             var totalTime = 0L
             var lastStartTime = 0L
+            var openCount = 0
             
             while (events.hasNextEvent()) {
                 events.getNextEvent(event)
                 if (event.packageName == packageName) {
                     if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
                         lastStartTime = event.timeStamp
+                        openCount++
                     } else if (event.eventType == UsageEvents.Event.MOVE_TO_BACKGROUND) {
                         if (lastStartTime != 0L) {
                             totalTime += (event.timeStamp - lastStartTime)
@@ -156,10 +160,10 @@ class TimerOverlayService : Service() {
                 totalTime += (System.currentTimeMillis() - lastStartTime)
             }
             
-            return totalTime
+            return Pair(totalTime, openCount)
         } catch (e: Exception) {
             e.printStackTrace()
-            return 0L
+            return Pair(0L, 0)
         }
     }
 
@@ -176,9 +180,17 @@ class TimerOverlayService : Service() {
         }
     }
 
-    private fun showTimesUpOverlay(totalUsageToday: Long) {
-        // Use a ContextThemeWrapper to ensure widgets (like Button) have a theme
-        val context = android.view.ContextThemeWrapper(this, android.R.style.Theme_DeviceDefault_Light)
+    private fun showTimesUpOverlay(totalUsageToday: Long, openCount: Int) {
+        val currentNightMode = resources.configuration.uiMode and android.content.res.Configuration.UI_MODE_NIGHT_MASK
+        val isDarkMode = currentNightMode == android.content.res.Configuration.UI_MODE_NIGHT_YES
+        val defaultBg = if (isDarkMode) "#000000" else "#FFFFFF"
+        val defaultText = if (isDarkMode) "#FFFFFF" else "#111827"
+        val defaultSubtitle = if (isDarkMode) "#9CA3AF" else "#6B7280"
+        val defaultDivider = if (isDarkMode) "#374151" else "#E5E7EB"
+
+        // Use a ContextThemeWrapper to ensure widgets (like Button) have a theme that respects dark mode
+        val themeResId = if (isDarkMode) android.R.style.Theme_DeviceDefault else android.R.style.Theme_DeviceDefault_Light
+        val context = android.view.ContextThemeWrapper(this, themeResId)
         
         // Root container (Dimmed Background)
         val rootLayout = android.widget.FrameLayout(context).apply {
@@ -192,7 +204,7 @@ class TimerOverlayService : Service() {
             orientation = LinearLayout.VERTICAL
             
             val shape = android.graphics.drawable.GradientDrawable()
-            shape.setColor(getThemeColor("modalBg", "#FFFFFF"))
+            shape.setColor(getThemeColor("modalBg", defaultBg))
             shape.cornerRadius = 48f // Rounded corners
             background = shape
             
@@ -204,7 +216,7 @@ class TimerOverlayService : Service() {
         val title = TextView(context).apply {
             text = "Time Up!"
             textSize = 24f
-            setTextColor(getThemeColor("textColor", "#111827")) // Gray-900
+            setTextColor(getThemeColor("textColor", defaultText)) // Gray-900 or White
             typeface = android.graphics.Typeface.DEFAULT_BOLD
             gravity = Gravity.CENTER
         }
@@ -214,13 +226,61 @@ class TimerOverlayService : Service() {
         val h = TimeUnit.MILLISECONDS.toHours(totalUsageToday)
         val m = TimeUnit.MILLISECONDS.toMinutes(totalUsageToday) % 60
         val timeStr = if (h > 0) String.format("%dh %02dm", h, m) else String.format("%d minutes", m)
-        val fullText = "Total usage today $timeStr"
+        val openStr = "$openCount times"
         
+        val fullText = "TO: $openStr  ||  TU: $timeStr"
         val spannable = android.text.SpannableString(fullText)
-        val timeStart = fullText.indexOf(timeStr)
+        
+        val grayColor = getThemeColor("subtitleColor", defaultSubtitle)
+        val orangeColor = getThemeColor("highlightColor", "#F59E0B")
+        
+        // Base color gray for the whole text
+        spannable.setSpan(
+            android.text.style.ForegroundColorSpan(grayColor),
+            0, fullText.length,
+            android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+
+        // Make "TO:" bold
+        val toStart = fullText.indexOf("TO:")
+        if (toStart >= 0) {
+            spannable.setSpan(
+                android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                toStart, toStart + 3,
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        // Color "$openCount times" orange and bold
+        val openStart = fullText.indexOf(openStr)
+        if (openStart >= 0) {
+            spannable.setSpan(
+                android.text.style.ForegroundColorSpan(orangeColor),
+                openStart, openStart + openStr.length,
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            spannable.setSpan(
+                android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                openStart, openStart + openStr.length,
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        // Make "TU:" bold
+        val tuStart = fullText.indexOf("TU:")
+        if (tuStart >= 0) {
+            spannable.setSpan(
+                android.text.style.StyleSpan(android.graphics.Typeface.BOLD),
+                tuStart, tuStart + 3,
+                android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+        }
+
+        // Color "$timeStr" orange and bold
+        val timeStart = fullText.indexOf(timeStr, tuStart) // Start searching after "TU:"
         if (timeStart >= 0) {
             spannable.setSpan(
-                android.text.style.ForegroundColorSpan(getThemeColor("subtitleColor", "#F59E0B")), // Amber-500 or subtitle color
+                android.text.style.ForegroundColorSpan(orangeColor),
                 timeStart, timeStart + timeStr.length,
                 android.text.Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
             )
@@ -234,7 +294,7 @@ class TimerOverlayService : Service() {
         val subtitle = TextView(context).apply {
             text = spannable
             textSize = 15f
-            setTextColor(getThemeColor("subtitleColor", "#6B7280")) // Gray-500
+            setTextColor(getThemeColor("subtitleColor", defaultSubtitle))
             gravity = Gravity.CENTER
             setPadding(0, 16, 0, 64)
         }
@@ -257,7 +317,7 @@ class TimerOverlayService : Service() {
         val label = TextView(context).apply {
             text = "Let me use another"
             textSize = 16f
-            setTextColor(getThemeColor("subtitleColor", "#374151")) // Gray-700
+            setTextColor(getThemeColor("subtitleColor", defaultText)) // Changed to defaultText for better visibility
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 24)
         }
@@ -279,7 +339,7 @@ class TimerOverlayService : Service() {
                 setOnClickListener {
                     try {
                         val extraTime = minutes * 60 * 1000L
-                        val currentUsage = getUsageToday(targetPackageName!!)
+                        val currentUsage = getUsageStatsToday(targetPackageName!!).first
                         val currentDelta = currentUsage - startUsageToday
                         limitMs = currentDelta + extraTime
                         
@@ -328,12 +388,20 @@ class TimerOverlayService : Service() {
         
         cardLayout.addView(row2)
          // Toggle
-        val toggleBtn = TextView(context).apply {
-            text = "▼" // Unicode Down Arrow
-            textSize = 24f
-            setTextColor(getThemeColor("toggleColor", "#64748B"))
-            gravity = Gravity.CENTER
-            setPadding(16, 16, 16, 16)
+        val toggleBtn = android.widget.ImageView(context).apply {
+            val downResId = resources.getIdentifier("ic_chevron_down", "drawable", packageName)
+            if (downResId != 0) {
+                setImageResource(downResId)
+            }
+            setColorFilter(getThemeColor("toggleColor", defaultSubtitle))
+            
+            val padding = (8 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+            
+            val size = (40 * resources.displayMetrics.density).toInt()
+            layoutParams = LinearLayout.LayoutParams(size, size).apply {
+                gravity = Gravity.CENTER
+            }
         }
         
         val settingsContainer = LinearLayout(context).apply {
@@ -350,10 +418,12 @@ class TimerOverlayService : Service() {
         toggleBtn.setOnClickListener {
             if (settingsContainer.visibility == View.VISIBLE) {
                 settingsContainer.visibility = View.GONE
-                toggleBtn.text = "▼"
+                val downResId = resources.getIdentifier("ic_chevron_down", "drawable", packageName)
+                if (downResId != 0) toggleBtn.setImageResource(downResId)
             } else {
                 settingsContainer.visibility = View.VISIBLE
-                toggleBtn.text = "▲"
+                val upResId = resources.getIdentifier("ic_chevron_up", "drawable", packageName)
+                if (upResId != 0) toggleBtn.setImageResource(upResId)
             }
         }
         cardLayout.addView(toggleBtn)
@@ -362,7 +432,7 @@ class TimerOverlayService : Service() {
         val whenText = TextView(context).apply {
             text = "When time is over"
             textSize = 16f
-            setTextColor(getThemeColor("whenTextColor", "#1F2937"))
+            setTextColor(getThemeColor("whenTextColor", defaultText))
             gravity = Gravity.CENTER
             setPadding(0, 0, 0, 32)
             typeface = android.graphics.Typeface.DEFAULT_BOLD
@@ -412,7 +482,7 @@ class TimerOverlayService : Service() {
             val text = TextView(context).apply {
                 text = label
                 textSize = 16f
-                setTextColor(getThemeColor("remindTextColor", "#374151"))
+                setTextColor(getThemeColor("remindTextColor", defaultText))
             }
             container.addView(text)
             
@@ -467,7 +537,7 @@ class TimerOverlayService : Service() {
         val remindText = TextView(context).apply {
             text = "Remind Me"
             textSize = 16f
-            setTextColor(getThemeColor("remindTextColor", "#374151"))
+            setTextColor(getThemeColor("remindTextColor", defaultText))
         }
         remindContainer.addView(remindText)
         
@@ -503,8 +573,8 @@ class TimerOverlayService : Service() {
         
         val warningText = TextView(context).apply {
             text = "2nd Warning"
-            textSize = 14f
-            setTextColor(getThemeColor("remindTextColor", "#6B7280")) // Using remind color or fallback gray
+            textSize = 16f
+            setTextColor(getThemeColor("remindTextColor", defaultSubtitle)) // Using remind color or fallback gray
         }
         warningContainer.addView(warningText)
         
@@ -520,7 +590,7 @@ class TimerOverlayService : Service() {
         
         // Divider
         val divider = View(context).apply {
-            setBackgroundColor(getThemeColor("dividerColor", "#E5E7EB")) // Gray-200
+            setBackgroundColor(getThemeColor("dividerColor", defaultDivider)) // Default gray or dark gray
         }
         val dividerParams = LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 2)
         dividerParams.setMargins(0, 0, 0, 32)

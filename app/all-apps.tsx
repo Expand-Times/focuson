@@ -11,9 +11,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   StatusBar,
-  Dimensions,
   FlatList,
-  ViewToken
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
@@ -22,7 +20,6 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import {  runOnJS,useSharedValue,useAnimatedReaction,SharedValue } from 'react-native-reanimated';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 
@@ -31,7 +28,7 @@ type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
 type FlatListDataItem = FlatListHeader | FlatListItem;
 import { useRouter, useLocalSearchParams, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
-import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
@@ -58,8 +55,6 @@ const AllApps = memo(({
   const {
     searchbg,
     searchi,
-    alphaside,
-    alpha,
     header,
     numberbg,
     number,
@@ -132,7 +127,6 @@ const AllApps = memo(({
     }
   };
 
-  const [internalActiveLetter, setInternalActiveLetter] = useState<string | null>(null);
 
   // Track the previous active letter to determine if data actually needs to change
   const prevActiveLetterRef = useRef<string | null>(null);
