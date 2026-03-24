@@ -38,6 +38,12 @@ type AppContextType = {
 
   // Excluded Apps from Timer
   isExcludedFromTimer: (packageName: string) => boolean;
+
+  // Timed Blocking
+  timedBlocks: Record<string, number>;
+  setTimedBlock: (packageName: string, unblockAt: number) => Promise<void>;
+  clearTimedBlock: (packageName: string) => Promise<void>;
+  isTemporarilyBlocked: (packageName: string) => boolean;
 };
 
 const ALLOWED_CATEGORIES = [
@@ -80,6 +86,10 @@ const AppContext = createContext<AppContextType>({
   setReminderOptionState: async () => {},
 
   isExcludedFromTimer: () => true,
+  timedBlocks: {},
+  setTimedBlock: async () => {},
+  clearTimedBlock: async () => {},
+  isTemporarilyBlocked: () => false,
 });
 
 export const AppProvider = ({ children }: { children: React.ReactNode }) => {
@@ -94,6 +104,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [categoryOverrides, setCategoryOverrides] = useState<Record<string, string>>({});
   const [renamedCategories, setRenamedCategories] = useState<Record<string, string>>({});
   const [reminderOption, setReminderOption] = useState<'mindful' | 'remind' | 'quit'>('remind');
+  const [timedBlocks, setTimedBlocks] = useState<Record<string, number>>({});
 
   const fetchApps = async () => {
     try {
@@ -117,7 +128,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         storedCustomCats,
         storedCatOverrides,
         storedCatRenames,
-        storedReminder
+        storedReminder,
+        storedTimedBlocks
       ] = await Promise.all([
         AsyncStorage.getItem('homeApps'),
         AsyncStorage.getItem('pinnedApps'),
@@ -126,7 +138,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         AsyncStorage.getItem('customCategories'),
         AsyncStorage.getItem('categoryOverrides'),
         AsyncStorage.getItem('renamedCategories'),
-        AsyncStorage.getItem('reminderOption')
+        AsyncStorage.getItem('reminderOption'),
+        AsyncStorage.getItem('timedBlocks')
       ]);
 
       if (storedHomeApps) setHomeApps(JSON.parse(storedHomeApps));
@@ -137,6 +150,23 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       if (storedCatOverrides) setCategoryOverrides(JSON.parse(storedCatOverrides));
       if (storedCatRenames) setRenamedCategories(JSON.parse(storedCatRenames));
       if (storedReminder) setReminderOption(storedReminder as any);
+      if (storedTimedBlocks) {
+        try {
+          const parsed = JSON.parse(storedTimedBlocks);
+          // Purge expired blocks
+          const now = Date.now();
+          const filtered: Record<string, number> = {};
+          Object.keys(parsed || {}).forEach((k) => {
+            if (typeof parsed[k] === 'number' && parsed[k] > now) {
+              filtered[k] = parsed[k];
+            }
+          });
+          setTimedBlocks(filtered);
+          await AsyncStorage.setItem('timedBlocks', JSON.stringify(filtered));
+        } catch {
+          setTimedBlocks({});
+        }
+      }
 
     } catch (error) {
       console.error('Failed to load data:', error);
@@ -205,6 +235,27 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     await AsyncStorage.setItem('reminderOption', option);
   };
 
+  const setTimedBlock = async (packageName: string, unblockAt: number) => {
+    const updated = { ...timedBlocks, [packageName]: unblockAt };
+    setTimedBlocks(updated);
+    await AsyncStorage.setItem('timedBlocks', JSON.stringify(updated));
+  };
+
+  const clearTimedBlock = async (packageName: string) => {
+    const updated = { ...timedBlocks };
+    delete updated[packageName];
+    setTimedBlocks(updated);
+    await AsyncStorage.setItem('timedBlocks', JSON.stringify(updated));
+  };
+
+  const isTemporarilyBlocked = useCallback(
+    (packageName: string) => {
+      const until = timedBlocks[packageName];
+      return typeof until === 'number' && until > Date.now();
+    },
+    [timedBlocks]
+  );
+
   const isExcludedFromTimer = useCallback((packageName: string) => {
     // 1. Find the app
     const app = apps.find(a => a.packageName === packageName);
@@ -250,7 +301,11 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     renameCategory,
     reminderOption,
     setReminderOptionState,
-    isExcludedFromTimer
+    isExcludedFromTimer,
+    timedBlocks,
+    setTimedBlock,
+    clearTimedBlock,
+    isTemporarilyBlocked
   }), [
     apps,
     loading,
@@ -261,7 +316,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     customCategories,
     categoryOverrides,
     renamedCategories,
-    reminderOption
+    reminderOption,
+    timedBlocks
   ]);
 
   return (

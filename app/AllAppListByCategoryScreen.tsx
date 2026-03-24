@@ -33,6 +33,8 @@ import { useAppContext } from './context/AppContext';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 
 import AppModal from './context/Modal';
+import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
+import Screenmodal from './components/Screenmodal';
 
 type Category = {
   title: string;
@@ -60,6 +62,9 @@ export default function AllAppListByCategoryScreen({
     customCategories,
     addCustomCategory,
     isExcludedFromTimer,
+    setTimedBlock,
+    isTemporarilyBlocked,
+    timedBlocks,
   } = useAppContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   const [searchQuery, setSearchQuery] = useState('');
@@ -82,6 +87,10 @@ export default function AllAppListByCategoryScreen({
   const [showAppRenamer, setShowAppRenamer] = useState(false);
   const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
+  const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
+  const [screenTimeVisible, setScreenTimeVisible] = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   // wallpaperFontConfig
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
@@ -271,7 +280,11 @@ export default function AllAppListByCategoryScreen({
   };
 
   const onAppPress = (app: AppItem) => {
-    if (isExcludedFromTimer(app.packageName)) {
+    if (isTemporarilyBlocked(app.packageName)) {
+      setSelectedApp(app);
+      setBlockedUntil(timedBlocks[app.packageName] || null);
+      setBlockedInfoVisible(true);
+    } else if (isExcludedFromTimer(app.packageName)) {
       openApplication(app.packageName);
     } else {
       setSelectedApp(app);
@@ -320,6 +333,18 @@ export default function AllAppListByCategoryScreen({
       console.error('Failed to save app rename', e);
     }
     closeModal();
+  };
+
+  const handleConfirmBlock = async (durationMs: number) => {
+    if (!selectedApp) return;
+    try {
+      const until = Date.now() + durationMs;
+      await setTimedBlock(selectedApp.packageName, until);
+      setBlockModalVisible(false);
+      closeModal();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const filteredCategories = useMemo(() => {
@@ -714,16 +739,16 @@ export default function AllAppListByCategoryScreen({
                                     </Text>
                                   </TouchableOpacity>
 
-                                  {/* Copy to */}
+                                  {/* Screen time */}
                                   <TouchableOpacity
                                     style={numberbg}
                                     className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                    onPress={() => console.log('Copy to')}>
+                                    onPress={() => setScreenTimeVisible(true)}>
                                     <Text
                                       style={number}
                                       allowFontScaling={false}
                                       className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                      Copy to
+                                      Screen time
                                     </Text>
                                   </TouchableOpacity>
 
@@ -731,7 +756,9 @@ export default function AllAppListByCategoryScreen({
                                   <TouchableOpacity
                                     style={numberbg}
                                     className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                    onPress={() => console.log('Block')}>
+                                    onPress={() => {
+                                      setBlockModalVisible(true);
+                                    }}>
                                     <Text
                                       style={number}
                                       allowFontScaling={false}
@@ -897,6 +924,34 @@ export default function AllAppListByCategoryScreen({
               </KeyboardAvoidingView>
             </Modal>
 
+            <Screenmodal
+              visible={screenTimeVisible}
+              onClose={() => setScreenTimeVisible(false)}
+              isDarkMode={isDarkMode}
+              theme={fontConfig}
+              appLabel={selectedApp?.label}
+              packageName={selectedApp?.packageName}
+            />
+
+            <BlockDurationModal
+              visible={blockModalVisible}
+              onClose={() => setBlockModalVisible(false)}
+              onConfirm={handleConfirmBlock}
+              isDarkMode={isDarkMode}
+              theme={fontConfig}
+              appLabel={selectedApp?.label}
+              appIconBase64={selectedApp?.icon}
+              packageName={selectedApp?.packageName}
+            />
+
+            <BlockedInfoModal
+              visible={blockedInfoVisible}
+              onClose={() => setBlockedInfoVisible(false)}
+              isDarkMode={isDarkMode}
+              theme={fontConfig}
+              appLabel={selectedApp?.label}
+              unblockAt={blockedUntil}
+            />
             {/* Rename Category Modal */}
             <Modal
               animationType="fade"

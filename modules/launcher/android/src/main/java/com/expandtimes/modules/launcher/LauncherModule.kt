@@ -587,6 +587,56 @@ class LauncherModule : Module() {
         )
     }
 
+    Function("getPackageWeeklyUsage") { targetPackage: String ->
+        try {
+            val endTime = System.currentTimeMillis()
+            val startTime = endTime - (7 * 24 * 60 * 60 * 1000)
+            val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
+            val stats = usageStatsMap[targetPackage]
+            val total = stats?.totalTimeInForeground ?: 0L
+            return@Function total
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return@Function 0L
+        }
+    }
+
+    Function("getPackageDailyUsage7d") { targetPackage: String ->
+        try {
+            val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val results = mutableListOf<Long>()
+            val cal = Calendar.getInstance()
+            // Iterate from 6 days ago to today
+            for (i in 6 downTo 0) {
+                val startCal = Calendar.getInstance()
+                startCal.add(Calendar.DAY_OF_YEAR, -i)
+                startCal.set(Calendar.HOUR_OF_DAY, 0)
+                startCal.set(Calendar.MINUTE, 0)
+                startCal.set(Calendar.SECOND, 0)
+                startCal.set(Calendar.MILLISECOND, 0)
+                val start = startCal.timeInMillis
+
+                val endCal = Calendar.getInstance()
+                endCal.add(Calendar.DAY_OF_YEAR, -i)
+                endCal.set(Calendar.HOUR_OF_DAY, 23)
+                endCal.set(Calendar.MINUTE, 59)
+                endCal.set(Calendar.SECOND, 59)
+                endCal.set(Calendar.MILLISECOND, 999)
+                val end = endCal.timeInMillis
+
+                val dayMap = usageStatsManager.queryAndAggregateUsageStats(start, end)
+                val stats = dayMap[targetPackage]
+                val total = stats?.totalTimeInForeground ?: 0L
+                results.add(total)
+            }
+            return@Function results
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return@Function emptyList<Long>()
+        }
+    }
+
     View(LauncherView::class) {
       Prop("url") { view: LauncherView, url: URL ->
         view.webView.loadUrl(url.toString())

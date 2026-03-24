@@ -33,6 +33,7 @@ import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
+import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -83,6 +84,9 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
     appRenames,
     renameApp,
     isExcludedFromTimer,
+    setTimedBlock,
+    isTemporarilyBlocked,
+    timedBlocks,
   } = useAppContext();
 
   const apps = useMemo(() => {
@@ -102,6 +106,9 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
   const [renameModalVisible, setRenameModalVisible] = useState(false);
   const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [newName, setNewName] = useState('');
+  const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -264,7 +271,11 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
           setSelectedPackageNames((prev) => [...prev, app.packageName]);
         }
       } else {
-        if (isExcludedFromTimer(app.packageName)) {
+        if (isTemporarilyBlocked(app.packageName)) {
+          setSelectedApp(app);
+          setBlockedUntil(timedBlocks[app.packageName] || null);
+          setBlockedInfoVisible(true);
+        } else if (isExcludedFromTimer(app.packageName)) {
           openApplication(app.packageName);
         } else {
           setSelectedApp(app);
@@ -272,7 +283,7 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
         }
       }
     },
-    [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames, isPremium]
+    [isSelectMode, selectedPackageNames, isExcludedFromTimer, isTemporarilyBlocked, timedBlocks, appRenames, isPremium]
   );
 
   const handleAppLongPress = useCallback(
@@ -343,23 +354,21 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
     }
   };
 
-  const handleBlock = async () => {
+  const handleBlock = () => {
     if (!selectedApp) return;
-    Alert.alert('Block App', `Are you sure you want to block ${selectedApp.label}?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Block',
-        style: 'destructive',
-        onPress: async () => {
-          try {
-            await toggleBlockApp(selectedApp.packageName);
-            setOptionsModalVisible(false);
-          } catch (e) {
-            console.error(e);
-          }
-        },
-      },
-    ]);
+    setBlockModalVisible(true);
+    setOptionsModalVisible(false);
+  };
+
+  const handleConfirmBlock = async (durationMs: number) => {
+    if (!selectedApp) return;
+    try {
+      const until = Date.now() + durationMs;
+      await setTimedBlock(selectedApp.packageName, until);
+      setBlockModalVisible(false);
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleRename = () => {
@@ -802,6 +811,25 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
           </Modal>
         </View>
       </GestureDetector>
+      <BlockDurationModal
+        visible={blockModalVisible}
+        onClose={() => setBlockModalVisible(false)}
+        onConfirm={handleConfirmBlock}
+        isDarkMode={isDarkMode}
+        theme={fontConfig}
+        appLabel={selectedApp?.label}
+        appIconBase64={selectedApp?.icon}
+        packageName={selectedApp?.packageName}
+      />
+
+      <BlockedInfoModal
+        visible={blockedInfoVisible}
+        onClose={() => setBlockedInfoVisible(false)}
+        isDarkMode={isDarkMode}
+        theme={fontConfig}
+        appLabel={selectedApp?.label}
+        unblockAt={blockedUntil}
+      />
     </RootContainer>
   );
 });
