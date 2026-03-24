@@ -189,6 +189,7 @@ export default function SettingScreen() {
   }
   const {
     isDarkMode,
+    isPremium,
     setWallpaper,
     selectedColor,
     showPhoneDialer,
@@ -205,6 +206,11 @@ export default function SettingScreen() {
   } = useColorContext();
 
   const handleApplyTheme = () => {
+    const isLocked = !isPremium && currentThemeIndex >= 4;
+    if (isLocked) {
+      setModalVisible(true);
+      return;
+    }
     setIsProcessing(true);
 
     // Apply logic here
@@ -801,6 +807,11 @@ export default function SettingScreen() {
                 className={`mb-[5%] mt-[6%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Select Theme
               </Text>
+              <Text
+                allowFontScaling={false}
+                className={`-mt-3 mb-4 px-4 text-[12px] ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#8D99AE]'}`}>
+                Customize 20 themes (Free 4)
+              </Text>
               <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
                 <Image
                   source={require('../assets/Themes/group.png')}
@@ -1202,6 +1213,23 @@ export default function SettingScreen() {
                         isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
                       }`}>
                       <Image source={item.img} className="h-full w-full" resizeMode="cover" />
+                      {!isPremium && index >= 4 && (
+                        <View
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: 'rgba(0,0,0,0.4)',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}>
+                          <Text allowFontScaling={false} className="text-white text-base font-semibold">
+                            Premium
+                          </Text>
+                        </View>
+                      )}
                     </View>
                   </Animated.View>
                 );

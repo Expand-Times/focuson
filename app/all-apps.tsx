@@ -45,7 +45,7 @@ const AllApps = memo(({
   enableGestures = true,
   autoFocus = false,
 }: AllAppsProps = {}) => {
-  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar } = useColorContext();
+const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = useMemo(
@@ -118,6 +118,22 @@ const AllApps = memo(({
 
   const handleSaveSelection = async () => {
     try {
+      const max = isPremium ? 6 : 3;
+      if (selectedPackageNames.length > max) {
+        if (!isPremium) {
+          Alert.alert(
+            'Limit Reached',
+            'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+            ]
+          );
+        } else {
+          Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
+        }
+        return;
+      }
       // Filter the full apps list to get the full AppItem objects for selected packages
       const selectedAppItems = apps.filter((app) => selectedPackageNames.includes(app.packageName));
       await updateHomeApps(selectedAppItems);
@@ -229,8 +245,20 @@ const AllApps = memo(({
           setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
         } else {
           // Select
-          if (selectedPackageNames.length >= 6) {
-            Alert.alert('Limit Reached', 'You cannot add more than 6 apps.');
+          const max = isPremium ? 6 : 3;
+          if (selectedPackageNames.length >= max) {
+            if (!isPremium) {
+              Alert.alert(
+                'Limit Reached',
+                'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
+                [
+                  { text: 'Cancel', style: 'cancel' },
+                  { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+                ]
+              );
+            } else {
+              Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
+            }
             return;
           }
           setSelectedPackageNames((prev) => [...prev, app.packageName]);
@@ -244,7 +272,7 @@ const AllApps = memo(({
         }
       }
     },
-    [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames]
+    [isSelectMode, selectedPackageNames, isExcludedFromTimer, appRenames, isPremium]
   );
 
   const handleAppLongPress = useCallback(
@@ -274,8 +302,20 @@ const AllApps = memo(({
     try {
       const currentHomeApps = [...homeApps];
 
-      if (currentHomeApps.length >= 6) {
-        Alert.alert('Limit Reached', 'Home screen is full (max 6 apps).');
+      const max = isPremium ? 6 : 3;
+      if (currentHomeApps.length >= max) {
+        if (!isPremium) {
+          Alert.alert(
+            'Limit Reached',
+            'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
+            [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+            ]
+          );
+        } else {
+          Alert.alert('Limit Reached', 'Home screen is full (max 6 apps).');
+        }
         return;
       }
 

@@ -11,16 +11,12 @@ import {
   Modal,
   ScrollView,
 } from 'react-native';
-import { Stack, Link,  useFocusEffect } from 'expo-router';
+import { Stack, Link, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
-import {  useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import {
-  Gesture,
-  GestureDetector,
-  GestureHandlerRootView,
-} from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   useSharedValue,
@@ -43,8 +39,8 @@ import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
-  
   const insets = useSafeAreaInsets();
+  const router = useRouter();
   const {
     apps: allApps,
     homeApps,
@@ -62,6 +58,7 @@ export default function Home() {
     dateFormat,
     timeOffset,
     isDarkMode,
+    isPremium,
     showStatusBar,
   } = useColorContext();
 
@@ -109,7 +106,7 @@ export default function Home() {
     try {
       await AsyncStorage.setItem('hasShownWelcome', 'true');
       setShowWelcome(false);
-      
+
       const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
       if (!hasShown) {
         const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
@@ -239,8 +236,6 @@ export default function Home() {
     return `${mins}m`;
   };
 
-
-
   const { launchAppWithTimer } = useAppLauncher();
 
   const handleLaunchApp = (durationMinutes: number) => {
@@ -252,8 +247,6 @@ export default function Home() {
       }
     }
   };
-
-
 
   const openDialer = () => {
     if (Platform.OS === 'android') {
@@ -298,7 +291,7 @@ export default function Home() {
     .maxDistance(10)
     .runOnJS(true)
     .onEnd(() => {
-      const isHome = Math.abs(translateX.value - (-SCREEN_WIDTH)) < 10;
+      const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
       if (isHome) {
         handleLockScreen();
       }
@@ -313,7 +306,7 @@ export default function Home() {
     })
     .onUpdate((e) => {
       let nextPos = context.value.startX + e.translationX;
-      
+
       // Tutorial Constraints
       if (showTutorialSV.value) {
         if (tutorialStepSV.value <= 1) {
@@ -576,7 +569,6 @@ export default function Home() {
                   className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
                   {getFormattedDate(currentTime)}
                 </Text>
-
               </View>
 
               {/* Main Actions */}
@@ -675,32 +667,52 @@ export default function Home() {
                 )}
 
                 {/* Add Icon */}
-                <Link href="/all-apps?mode=select" asChild>
-                  <TouchableOpacity
-                    className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
-                    <MaterialCommunityIcons
-                      name="plus-circle-outline"
-                      style={icon}
-                      size={30}
-                      color={
-                        wallpaper && typeof wallpaper !== 'string'
-                          ? '#A3B9D9'
-                          : isDarkMode
-                            ? '#738099'
-                            : '#B8CBE5'
+                <TouchableOpacity
+                  className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}
+                  onPress={() => {
+                    const max = isPremium ? 6 : 3;
+                    if (homeApps.length >= max) {
+                      if (!isPremium) {
+                        Alert.alert(
+                          'Limit Reached',
+                          'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Upgrade',
+                              onPress: () => router.push('/PremiumPackageScreen'),
+                            },
+                          ]
+                        );
+                      } else {
+                        Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
                       }
-                    />
+                      return;
+                    }
+                    router.push('/all-apps?mode=select');
+                  }}>
+                  <MaterialCommunityIcons
+                    name="plus-circle-outline"
+                    style={icon}
+                    size={30}
+                    color={
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? '#A3B9D9'
+                        : isDarkMode
+                          ? '#738099'
+                          : '#B8CBE5'
+                    }
+                  />
 
-                    {/* do */}
-                    <Text
-                      allowFontScaling={false}
-                      style={don}
-                      className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                      Don&apos;t add unnecessary{' '}
-                      {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
-                    </Text>
-                  </TouchableOpacity>
-                </Link>
+                  {/* do */}
+                  <Text
+                    allowFontScaling={false}
+                    style={don}
+                    className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
+                    Don&apos;t add unnecessary{' '}
+                    {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
+                  </Text>
+                </TouchableOpacity>
               </View>
 
               {/* Footer Info */}
@@ -813,10 +825,7 @@ export default function Home() {
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
-            <AllApps
-              enableGestures={false}
-              showSidebar={false}
-            />
+            <AllApps enableGestures={false} showSidebar={false} />
           </View>
         </Animated.View>
       </GestureDetector>
@@ -826,63 +835,56 @@ export default function Home() {
         animationType="fade"
         transparent={true}
         visible={showWelcome}
-        onRequestClose={handleWelcomeComplete}
-      >
+        onRequestClose={handleWelcomeComplete}>
         <View className="flex-1 items-center justify-center bg-black/80">
           <View
             className={`relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl ${
               isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
-            }`}
-          >
+            }`}>
             <Text
               allowFontScaling={false}
               className={`mb-8 text-center text-xl font-bold ${
                 isDarkMode ? 'text-white' : 'text-slate-800'
-              }`}
-            >
+              }`}>
               Welcome to Focus On: Minimalist Launcher
             </Text>
 
-            <ScrollView 
-              className="mb-6" 
+            <ScrollView
+              className="mb-6"
               showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ alignItems: 'center' }}
-            >
-               <Image 
-                source={require('../assets/Animation/nodatashared.png')} 
-                className="h-16 w-16 mb-4"
+              contentContainerStyle={{ alignItems: 'center' }}>
+              <Image
+                source={require('../assets/Animation/nodatashared.png')}
+                className="mb-4 h-16 w-16"
                 resizeMode="contain"
               />
               <Text
                 allowFontScaling={false}
-                className={`text-base leading-6 text-center mb-6 ${
+                className={`mb-6 text-center text-base leading-6 ${
                   isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}
-              >
+                }`}>
                 We do not collect, share or sell your data. All data is stored only on your device.
               </Text>
-              
-              <Image 
-                source={require('../assets/Animation/noads.png')} 
-                className="h-16 w-16 mb-4"
+
+              <Image
+                source={require('../assets/Animation/noads.png')}
+                className="mb-4 h-16 w-16"
                 resizeMode="contain"
               />
               <Text
                 allowFontScaling={false}
-                className={`text-base leading-6 text-center ${
+                className={`text-center text-base leading-6 ${
                   isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}
-              >
+                }`}>
                 We do not show any third-party ads. And it&apos;s free to use.
                 {'\n\n'}
-                Stay with us.  💖  Thank you
+                Stay with us. 💖 Thank you
               </Text>
             </ScrollView>
 
             <TouchableOpacity
               className="w-full items-center rounded-xl bg-[#7EA6E0] py-3"
-              onPress={handleWelcomeComplete}
-            >
+              onPress={handleWelcomeComplete}>
               <Text allowFontScaling={false} className="font-semibold text-white">
                 Go
               </Text>
@@ -898,19 +900,19 @@ export default function Home() {
           className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
           {/* Step 0: Swipe Left (Show on Home) */}
           {tutorialStep === 0 && (
-            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
-              <Image 
-                source={require('../assets/Animation/icons8-drag-left.gif')} 
+            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
+              <Image
+                source={require('../assets/Animation/icons8-drag-left.gif')}
                 className="h-24 w-24"
                 resizeMode="contain"
               />
-              <Text 
+              <Text
                 className="mt-4 text-2xl font-bold italic text-black/40"
                 allowFontScaling={false}>
                 Swipe Left
               </Text>
-              <Text 
-                className="mt-2 text-base text-center justify-center font-regular text-black/40"
+              <Text
+                className="font-regular mt-2 justify-center text-center text-base text-black/40"
                 allowFontScaling={false}>
                 To see All Apps list
               </Text>
@@ -919,19 +921,19 @@ export default function Home() {
 
           {/* Step 2: Swipe Right (Show on Home) */}
           {tutorialStep === 2 && (
-            <View className="items-center bg-white p-6 rounded-3xl backdrop-blur-md">
-              <Image 
-                source={require('../assets/Animation/icons8-drag-right.gif')} 
+            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
+              <Image
+                source={require('../assets/Animation/icons8-drag-right.gif')}
                 className="h-24 w-24"
                 resizeMode="contain"
               />
-              <Text 
+              <Text
                 className="mt-4 text-2xl font-bold italic text-black/40"
                 allowFontScaling={false}>
                 Swipe Right
               </Text>
-              <Text 
-                className="mt-2 text-base text-center justify-center font-regular text-black/40" 
+              <Text
+                className="font-regular mt-2 justify-center text-center text-base text-black/40"
                 allowFontScaling={false}>
                 To see Apps list by {'\n'} Category
               </Text>

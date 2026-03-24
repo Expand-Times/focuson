@@ -47,7 +47,7 @@ export default function AllAppListByCategoryScreen({
   autoFocus?: boolean;
 }) {
   const router = useRouter();
-  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar } = useColorContext();
+  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useColorContext();
   const {
     apps,
     loading: appsLoading,
@@ -116,7 +116,23 @@ export default function AllAppListByCategoryScreen({
     }
   }, [apps, appsLoading, categoryOverrides, appRenames, customCategories]);
 
+  const ensurePremium = () => {
+    if (!isPremium) {
+      Alert.alert(
+        'Premium Feature',
+        'This feature is available for premium users only.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+        ]
+      );
+      return false;
+    }
+    return true;
+  };
+
   const handleStartEditing = (originalTitle: string, currentDisplayTitle: string) => {
+    if (!ensurePremium()) return;
     setEditingCategory(originalTitle);
     setTempCategoryName(currentDisplayTitle);
     setRenameCategoryModalVisible(true);
@@ -280,6 +296,7 @@ export default function AllAppListByCategoryScreen({
   };
 
   const startAppRenaming = () => {
+    if (!ensurePremium()) return;
     if (!selectedApp) return;
     setTempAppName(selectedApp.label);
     setShowAppRenamer(true);
@@ -565,6 +582,7 @@ export default function AllAppListByCategoryScreen({
                               }
                             />
                           </TouchableOpacity>
+                        
                         </View>
 
                       {/* App List */}
@@ -674,12 +692,25 @@ export default function AllAppListByCategoryScreen({
                                   <TouchableOpacity
                                     style={numberbg}
                                     className={`w-[48%] items-center rounded-lg ${isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA6E0]'} py-3`}
-                                    onPress={() => setShowCategorySelector(true)}>
+                                    onPress={() => {
+                                      if (!isPremium) {
+                                        Alert.alert(
+                                          'Premium Feature',
+                                          'Moving apps between categories is a premium feature.',
+                                          [
+                                            { text: 'Cancel', style: 'cancel' },
+                                            { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+                                          ]
+                                        );
+                                        return;
+                                      }
+                                      setShowCategorySelector(true);
+                                    }}>
                                     <Text
                                       style={number}
                                       allowFontScaling={false}
                                       className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                      Move to
+                                      {isPremium ? 'Move to' : 'Move to'}
                                     </Text>
                                   </TouchableOpacity>
 
@@ -718,7 +749,7 @@ export default function AllAppListByCategoryScreen({
                                       style={number}
                                       allowFontScaling={false}
                                       className={`text-base font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-white'}`}>
-                                      Rename
+                                      {isPremium ? 'Rename' : 'Rename'}
                                     </Text>
                                   </TouchableOpacity>
 
