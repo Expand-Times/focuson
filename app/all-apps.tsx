@@ -829,6 +829,7 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
         theme={fontConfig}
         appLabel={selectedApp?.label}
         unblockAt={blockedUntil}
+        appIconBase64={selectedApp?.icon}
       />
     </RootContainer>
   );

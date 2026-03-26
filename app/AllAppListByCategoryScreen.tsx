@@ -951,6 +951,7 @@ export default function AllAppListByCategoryScreen({
               theme={fontConfig}
               appLabel={selectedApp?.label}
               unblockAt={blockedUntil}
+              appIconBase64={selectedApp?.icon}
             />
             {/* Rename Category Modal */}
             <Modal

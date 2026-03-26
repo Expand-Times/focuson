@@ -109,7 +109,13 @@ export const BlockDurationModal = ({
   }, [visible, packageName]);
 
   const btnLabel =
-    step === 0 ? 'Block' : step === 1 ? 'I am Sure!' : step === 2 ? 'I’ve iron will' : 'Confirm Block!';
+    step === 0
+      ? 'Block'
+      : step === 1
+        ? 'I am Sure!'
+        : step === 2
+          ? 'I’ve iron will'
+          : 'Confirm Block!';
 
   const handlePrimary = () => {
     if (step < 3) {
@@ -124,11 +130,15 @@ export const BlockDurationModal = ({
 
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={onClose}>
           <View className="flex-1 items-center justify-center bg-black/60">
             <TouchableWithoutFeedback>
-              <View style={modalbg} className={`w-[85%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <View
+                style={modalbg}
+                className={`w-[85%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <Text
                   style={open}
                   allowFontScaling={false}
@@ -173,7 +183,7 @@ export const BlockDurationModal = ({
                       style={{
                         width:
                           sliderW && CHOICES.length > 1
-                            ? (sliderW * (selectedIdx / (CHOICES.length - 1))) || 0
+                            ? sliderW * (selectedIdx / (CHOICES.length - 1)) || 0
                             : 0,
                       }}
                     />
@@ -207,10 +217,14 @@ export const BlockDurationModal = ({
                     ))}
                   </View>
                   <View className="mt-2 flex-row justify-between">
-                    <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                       {CHOICES[0].label}
                     </Text>
-                    <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
                       {CHOICES[CHOICES.length - 1].label}
                     </Text>
                   </View>
@@ -226,7 +240,9 @@ export const BlockDurationModal = ({
                 <TouchableOpacity
                   className={`mt-3 items-center rounded-xl py-2 ${isDarkMode ? 'bg-[#212D41]' : 'bg-slate-200'}`}
                   onPress={onClose}>
-                  <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
+                  <Text
+                    allowFontScaling={false}
+                    className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -246,6 +262,7 @@ type BlockedInfoModalProps = {
   theme?: ThemeLike | null;
   appLabel?: string | null;
   unblockAt?: number | null;
+  appIconBase64?: string | null;
 };
 
 export const BlockedInfoModal = ({
@@ -255,39 +272,62 @@ export const BlockedInfoModal = ({
   theme,
   appLabel,
   unblockAt,
+  appIconBase64,
 }: BlockedInfoModalProps) => {
   const { modalbg } = theme || ({} as any);
+  const remainingMs = unblockAt ? Math.max(unblockAt - Date.now(), 0) : 0;
+  const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
+  const remainingLabel =
+    remainingHours >= 24
+      ? `${Math.ceil(remainingHours / 24)} day${Math.ceil(remainingHours / 24) > 1 ? 's' : ''}`
+      : `${remainingHours} hour${remainingHours !== 1 ? 's' : ''}`;
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
-      <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={onClose}>
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
-              <View style={modalbg} className={`w-[320px] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <Text
-                  allowFontScaling={false}
-                  className={`mb-1 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                  {appLabel} Blocked
-                </Text>
-                <Text
-                  allowFontScaling={false}
-                  className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  You’ll be able to use {appLabel} after {unblockAt ? new Date(unblockAt).toLocaleString() : ''}
-                </Text>
-                <TouchableOpacity
-                  className={`mb-3 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
-                  onPress={onClose}>
-                  <Text allowFontScaling={false} className="font-medium text-white">
-                    Ok
+              <View
+                style={modalbg}
+                className={`h-full w-full p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <View className="items-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-center text-2xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    {appLabel} Blocked
                   </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className={`items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#212D41]' : 'bg-slate-200'}`}
-                  onPress={onClose}>
-                  <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    Help me!
+                </View>
+                <View className="flex-1 items-center justify-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`text-center text-2xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                    Can you remember? You blocked {appLabel} for {remainingLabel}
                   </Text>
-                </TouchableOpacity>
+                  {appIconBase64 ? (
+                    <Image
+                      source={{ uri: `data:image/png;base64,${appIconBase64}` }}
+                      className="mt-4 h-16 w-16"
+                      resizeMode="contain"
+                    />
+                  ) : null}
+                </View>
+                <View className="items-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    You’ll be able to use {appLabel} after{' '}
+                    {unblockAt ? new Date(unblockAt).toLocaleString() : ''}
+                  </Text>
+                  <TouchableOpacity
+                    className={`mb-3 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
+                    onPress={onClose}>
+                    <Text allowFontScaling={false} className="font-medium text-white">
+                      Ok
+                    </Text>
+                  </TouchableOpacity>
+                </View>
               </View>
             </TouchableWithoutFeedback>
           </View>
