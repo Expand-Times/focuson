@@ -59,6 +59,34 @@ export const BlockDurationModal = ({
   );
   const [selectedIdx, setSelectedIdx] = useState(3);
   const [step, setStep] = useState(0);
+  const [sliderW, setSliderW] = useState(0);
+  const [lastIdxChangeAt, setLastIdxChangeAt] = useState(0);
+
+  const selectedLabelText = useMemo(() => {
+    const lbl = CHOICES[selectedIdx]?.label || '6h';
+    if (lbl.endsWith('h')) {
+      const n = parseInt(lbl.replace('h', ''), 10);
+      return `${n} ${n === 1 ? 'hour' : 'hours'}`;
+    }
+    if (lbl.endsWith('d')) {
+      const n = parseInt(lbl.replace('d', ''), 10);
+      return `${n} ${n === 1 ? 'day' : 'days'}`;
+    }
+    return lbl;
+  }, [selectedIdx]);
+
+  const handleBarTouch = (x: number) => {
+    if (!sliderW) return;
+    const count = CHOICES.length;
+    const seg = sliderW / (count - 1);
+    const target = Math.min(count - 1, Math.max(0, Math.round(x / seg)));
+    const now = Date.now();
+    if (target === selectedIdx) return;
+    if (now - lastIdxChangeAt < 90) return;
+    const step = Math.sign(target - selectedIdx);
+    setSelectedIdx(selectedIdx + step);
+    setLastIdxChangeAt(now);
+  };
 
   useEffect(() => {
     let mounted = true;
@@ -100,7 +128,7 @@ export const BlockDurationModal = ({
         <TouchableWithoutFeedback onPress={onClose}>
           <View className="flex-1 items-center justify-center bg-black/60">
             <TouchableWithoutFeedback>
-              <View style={modalbg} className={`w-[320px] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+              <View style={modalbg} className={`w-[85%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                 <Text
                   style={open}
                   allowFontScaling={false}
@@ -131,25 +159,61 @@ export const BlockDurationModal = ({
                 <Text
                   allowFontScaling={false}
                   className={`mb-2 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                  Select duration
+                  {selectedLabelText}
                 </Text>
-                <View className="mb-4 flex-row flex-wrap justify-between">
-                  {CHOICES.map((d, idx) => (
-                    <TouchableOpacity
-                      key={d.label}
-                      className={`mb-2 w-[30%] items-center rounded-lg px-3 py-2 ${
-                        selectedIdx === idx ? 'bg-[#7EA6E0]' : isDarkMode ? 'bg-[#213048]' : 'bg-[#E6EEF9]'
-                      }`}
-                      onPress={() => setSelectedIdx(idx)}>
-                      <Text
-                        allowFontScaling={false}
-                        className={`${
-                          selectedIdx === idx ? 'text-white' : isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'
-                        }`}>
-                        {d.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
+                <View className="mb-4">
+                  <View
+                    className={`h-12 w-full rounded-full ${isDarkMode ? 'bg-[#213048]' : 'bg-[#E6EEF9]'} relative overflow-hidden`}
+                    onLayout={(e) => setSliderW(e.nativeEvent.layout.width)}
+                    onStartShouldSetResponder={() => true}
+                    onResponderGrant={(e) => handleBarTouch(e.nativeEvent.locationX)}
+                    onResponderMove={(e) => handleBarTouch(e.nativeEvent.locationX)}>
+                    <View
+                      className={`${isDarkMode ? 'bg-[#7EA6E0]/40' : 'bg-[#7EA6E0]/30'} absolute left-0 top-0 h-full rounded`}
+                      style={{
+                        width:
+                          sliderW && CHOICES.length > 1
+                            ? (sliderW * (selectedIdx / (CHOICES.length - 1))) || 0
+                            : 0,
+                      }}
+                    />
+                    <View
+                      className="absolute  h-12 w-12 rounded-full bg-[#5279B8]"
+                      style={{
+                        left:
+                          sliderW && CHOICES.length > 1
+                            ? Math.max(
+                                0,
+                                Math.min(
+                                  sliderW - 20,
+                                  sliderW * (selectedIdx / (CHOICES.length - 1)) - 20
+                                )
+                              )
+                            : 0,
+                        shadowColor: '#000',
+                        shadowOpacity: 0.15,
+                        shadowRadius: 4,
+                        shadowOffset: { width: 0, height: 2 },
+                        elevation: 3,
+                      }}
+                    />
+                  </View>
+                  <View className="mt-2 flex-row items-center justify-between px-1">
+                    {CHOICES.map((_, i) => (
+                      <View
+                        key={i}
+                        className={`${isDarkMode ? 'bg-[#64748B]' : 'bg-[#c9d7ee]'} h-1.5 w-1.5 rounded-full`}
+                      />
+                    ))}
+                  </View>
+                  <View className="mt-2 flex-row justify-between">
+                    <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {CHOICES[0].label}
+                    </Text>
+                    <Text allowFontScaling={false} className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                      {CHOICES[CHOICES.length - 1].label}
+                    </Text>
+                  </View>
                 </View>
                 <TouchableOpacity
                   style={numberbg}
