@@ -373,6 +373,17 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
 
   const handleRename = () => {
     if (!selectedApp) return;
+    if (!isPremium) {
+      Alert.alert(
+        'Premium Feature',
+        'Renaming apps is available for premium users only.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+        ]
+      );
+      return;
+    }
     setNewName(selectedApp.label);
     setRenameModalVisible(true);
     setOptionsModalVisible(false);
@@ -709,7 +720,7 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
                     className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                     onPress={handleRename}>
                     <Text style={number} className="font-medium text-white">
-                      Rename
+                      {isPremium ? 'Rename' : 'Rename'}
                     </Text>
                   </TouchableOpacity>
                   <TouchableOpacity

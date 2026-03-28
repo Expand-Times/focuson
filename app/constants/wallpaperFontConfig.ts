@@ -61,6 +61,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {color: '#1A2B33'}, 
     applistCdu: {color: '#1A2B33'}, 
     applistCbg: {backgroundColor: '#0A26331A'}, 
+    // block1
+    block: {backgroundColor: '#FFFFFF'},
+    blockText1: {color: '#2E3B4D'},
+    blockText2: {color: '#858E9D'},
+    blockText3: {color: '#8698B2'},
+    blockText4: {color: '#2E3B4D'},
+    blockText5: {color: '#2E3B4D'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#51CDE4'],
+    blockcircle: {backgroundColor: '#43ABBE'},
+    blockbutton1: {backgroundColor: '#51CDE5'},
+    blockbutton2: {backgroundColor: '#42ABBE'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#2E3B4D'},
+    blockText7: {color: '#2E3B4D'},
+    blockText8: {color: '#858E9D'},
+  //  weekly
+    weeklytext1: {color: '#2F3A4D'},
+    weeklytext2: {color: '#89A2CA'},
+    weekly2: {backgroundColor: '#51CDE5'},
    },
   3: { // Wallpaper/4.jpg
     // home
@@ -113,6 +134,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Codystar-Regular', fontSize: 20,color: '#fff'}, 
     applistCdu: {fontFamily: 'Codystar-Regular', fontSize: 12,color: '#fff'}, 
     applistCbg: {backgroundColor: ''},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
    },
    4: { // Wallpaper/5.jpg
       // home
@@ -165,6 +207,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Imprima-Regular', fontSize: 18,color: '#fff'}, 
     applistCdu: {fontFamily: 'Imprima-Regular', fontSize: 12,color: '#fff'}, 
     applistCbg: {backgroundColor: '#0A223333'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
    },
    5: { // Wallpaper/6.jpg
        // home
@@ -217,6 +280,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Imprima-Regular', fontSize: 18,color: '#fff'}, 
     applistCdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#738099'}, 
     applistCbg: {backgroundColor: '#0A223333'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
    } ,
    6: { // Wallpaper/7.jpg
         // home
@@ -270,6 +354,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Poppins-Regular', fontSize: 18,color: '#132C4D'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#132C4D'}, 
     applistCbg: {backgroundColor: '#0A26331A'},
+    // block1
+    block: {backgroundColor: '#FFFFFF'},
+    blockText1: {color: '#2E3B4D'},
+    blockText2: {color: '#858E9D'},
+    blockText3: {color: '#8698B2'},
+    blockText4: {color: '#2E3B4D'},
+    blockText5: {color: '#2E3B4D'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#CC70CC'],
+    blockcircle: {backgroundColor: '#995C99'},
+    blockbutton1: {backgroundColor: '#CC70CC'},
+    blockbutton2: {backgroundColor: '#995C99'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#2E3B4D'},
+    blockText7: {color: '#2E3B4D'},
+    blockText8: {color: '#858E9D'},
+  //  weekly
+    weeklytext1: {color: '#2F3A4D'},
+    weeklytext2: {color: '#89A2CA'},
+    weekly2: {backgroundColor: '#CC70CC'},
    },
  7:{ //Wallpaper/8.jpg
      // home
@@ -322,6 +427,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Imprima-Regular', fontSize: 18,color: '#fff'}, 
     applistCdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#6ba397'}, 
     applistCbg: {backgroundColor: '#0A223333'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  8:{ //Wallpaper/9.jpg
     // home
@@ -374,6 +500,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'GreatVibes-Regular', fontSize: 22,color: '#FF4D79'}, 
     applistCdu: {fontFamily: 'GreatVibes-Regular', fontSize: 12,color: '#FFFFFF'}, 
     applistCbg: {backgroundColor: '',borderColor: '#FFFFFF10', borderWidth: 1}, 
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  9:{ //Wallpaper/10.jpg
    // home
@@ -425,7 +572,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#A2B9D9'}, 
     applistC: {fontFamily: 'Imprima-Regular', fontSize: 18,color: '#FFFFFF'}, 
     applistCdu: {fontFamily: 'Imprima-Regular', fontSize: 10,color: '#FFFFFF85'}, 
-    applistCbg: {backgroundColor: '#0C121B00'}, 
+    applistCbg: {backgroundColor: '#0C121B00'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'}, 
  },
  10:{ //Wallpaper/11.jpg
       // home
@@ -478,7 +646,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#A2B9D9'}, 
     applistC: {fontFamily: 'UnicaOne-Regular', fontSize: 18,color: '#FFFFFF'}, 
     applistCdu: {fontFamily: 'UnicaOne-Regular', fontSize: 12,color: '#FFFFFF85'}, 
-    applistCbg: {backgroundColor: '#132C4D00'},  
+    applistCbg: {backgroundColor: '#132C4D00'}, 
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'}, 
  },
  11:{ //Wallpaper/12.jpg
        // home
@@ -532,6 +721,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Gugi-Regular', fontSize: 18,color: '#26E500'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#26E50085'}, 
     applistCbg: {backgroundColor: ''}, 
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  12:{//Wallpaper/13.jpg
    // home
@@ -585,6 +795,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'LobsterTwo-Regular', fontSize: 18,color: '#FF59A5'}, 
     applistCdu: {fontFamily: 'LobsterTwo-Regular', fontSize: 10,color: '#FF59A5'}, 
     applistCbg: {backgroundColor: '#FF59A50D'}, 
+    // block1
+    block: {backgroundColor: '#FFFFFF'},
+    blockText1: {color: '#2E3B4D'},
+    blockText2: {color: '#858E9D'},
+    blockText3: {color: '#8698B2'},
+    blockText4: {color: '#2E3B4D'},
+    blockText5: {color: '#2E3B4D'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#FF59A5'],
+    blockcircle: {backgroundColor: '#CC4784'},
+    blockbutton1: {backgroundColor: '#FF59A5'},
+    blockbutton2: {backgroundColor: '#CC4784'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#2E3B4D'},
+    blockText7: {color: '#2E3B4D'},
+    blockText8: {color: '#858E9D'},
+  //  weekly
+    weeklytext1: {color: '#2F3A4D'},
+    weeklytext2: {color: '#89A2CA'},
+    weekly2: {backgroundColor: '#FF59A5'},
  },
  13:{//Wallpaper/14.jpg
      // home
@@ -638,6 +869,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'DynaPuff-Regular', fontSize: 18,color: '#A37ACC'}, 
     applistCdu: {fontFamily: 'Imprima-Regular', fontSize: 12,color: '#B781CF'}, 
     applistCbg: {backgroundColor: '#D4CEFC33'}, 
+    // block1
+    block: {backgroundColor: '#FFFFFF'},
+    blockText1: {color: '#2E3B4D'},
+    blockText2: {color: '#858E9D'},
+    blockText3: {color: '#8698B2'},
+    blockText4: {color: '#2E3B4D'},
+    blockText5: {color: '#2E3B4D'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#A37ACC'],
+    blockcircle: {backgroundColor: '#896CA6'},
+    blockbutton1: {backgroundColor: '#A37ACC'},
+    blockbutton2: {backgroundColor: '#896CA6'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#2E3B4D'},
+    blockText7: {color: '#2E3B4D'},
+    blockText8: {color: '#858E9D'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#A37ACC'},
  },
  14:{ //Wallpaper/15.jpg
   
@@ -691,7 +943,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#FF0000'}, 
     applistC: {fontFamily: 'Imprima-Regular', fontSize: 18,color: '#FFFFFF'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#FF8080'}, 
-    applistCbg: {backgroundColor: '#FF000180'}
+    applistCbg: {backgroundColor: '#FF000180'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  15:{ //Wallpaper/16.jpg
     // home
@@ -745,7 +1018,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#132C4D'}, 
     applistC: {fontFamily: 'Comfortaa-Regular', fontSize: 16,color: '#FFFFFF'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#FFFFFF70'}, 
-    applistCbg: {backgroundColor: '#FFFFFF00'}
+    applistCbg: {backgroundColor: '#FFFFFF00'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#FF9500'],
+    blockcircle: {backgroundColor: '#E58E39'},
+    blockbutton1: {backgroundColor: '#FF9500'},
+    blockbutton2: {backgroundColor: '#FF9500'},
+    blockbuttontext: {color: '#000000'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#FF9500'},
  },
  16:{ //Wallpaper/17.jpg
     // home
@@ -798,7 +1092,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#808080'}, 
     applistC: {fontFamily: 'CourierPrime-Bold', fontSize: 18,color: '#FFFFFF'}, 
     applistCdu: {fontFamily: 'RobotoSlab-Regular', fontSize: 10,color: '#FFFFFF'}, 
-    applistCbg: {backgroundColor: '',borderWidth: 1,borderColor: '#FFFFFF50'}
+    applistCbg: {backgroundColor: '',borderWidth: 1,borderColor: '#FFFFFF50'},
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  
  17:{ //Wallpaper/18.jpg
@@ -852,7 +1167,28 @@ const wallpaperFontConfig: Record<number, {
     appCi: {color: '#808080'}, 
     applistC: {fontFamily: 'CourierPrime-Bold', fontSize: 18,color: '#000000'}, 
     applistCdu: {fontFamily: 'RobotoSlab-Regular', fontSize: 10,color: '#000000'}, 
-    applistCbg: {backgroundColor: '',borderWidth: 1,borderColor: '#00000050'}
+    applistCbg: {backgroundColor: '',borderWidth: 1,borderColor: '#00000050'},
+   // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  18:{ //Wallpaper/19.jpg
       // home
@@ -906,6 +1242,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Poppins-Regular', fontSize: 18,color: '#DBDFE5'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#FFFFFF50'}, 
     applistCbg: {backgroundColor: ''}, 
+     // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  },
  19:{ //Wallpaper/20.jpg
          // home
@@ -959,6 +1316,27 @@ const wallpaperFontConfig: Record<number, {
     applistC: {fontFamily: 'Poppins-Regular', fontSize: 18,color: '#DBDFE5'}, 
     applistCdu: {fontFamily: 'Poppins-Regular', fontSize: 10,color: '#FFFFFF50'}, 
     applistCbg: {backgroundColor: ''}, 
+    // block1
+    block: {backgroundColor: '#131B27'},
+    blockText1: {color: '#DBDFE5'},
+    blockText2: {color: '#728099'},
+    blockText3: {color: '#7FA8E5'},
+    blockText4: {color: '#DBDFE5'},
+    blockText5: {color: '#DBDFE5'},
+    blockbg: {backgroundColor: '#ECF0FF'},
+    blockgradient: ['#ECF0FF', '#7EA9E5'],
+    blockcircle: {backgroundColor: '#5D8BCC'},
+    blockbutton1: {backgroundColor: '#212C40'},
+    blockbutton2: {backgroundColor: '#212C40'},
+    blockbuttontext: {color: '#FFFFFF'},
+    // block2
+    blockText6: {color: '#DBDFE5'},
+    blockText7: {color: '#DBDFE5'},
+    blockText8: {color: '#728099'},
+  //  weekly
+    weeklytext1: {color: '#DBDFE5'},
+    weeklytext2: {color: '#728099'},
+    weekly2: {backgroundColor: '#212C40'},
  }
   
  }; 

@@ -41,7 +41,7 @@ export default function Screenmodal({
   appLabel,
   packageName,
 }: Props) {
-  const { modalbg, open } = theme || ({} as any);
+  const { block, weeklytext1, weeklytext2, blockbuttontext, blockbutton1 } = theme || ({} as any);
   const [dailyMs, setDailyMs] = useState<number[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -124,18 +124,19 @@ export default function Screenmodal({
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
       <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={{ flex: 1 }}>
         <TouchableWithoutFeedback onPress={onClose}>
-          <View className="flex-1 items-center justify-center bg-black/60">
+          <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
               <View
-                style={modalbg}
-                className={`w-[90%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                
+                className={`w-[90%]  rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#1E293B]'}`}>
                 <Text
-                  style={open}
+                  
                   allowFontScaling={false}
-                  className={`mb-2 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                  className={`mb-2 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-300'}`}>
                   {appLabel ? `Last 7 Days: ${appLabel}` : 'Last 7 Days'}
                 </Text>
                 <Text
+                 
                   allowFontScaling={false}
                   className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
                   {loading ? 'Loading...' : `Total: ${formatHM(totalMs)} (hours shown)`}
@@ -153,9 +154,10 @@ export default function Screenmodal({
                   />
                 </View>
                 <TouchableOpacity
+                  style={blockbutton1}
                   className={`mt-4 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
                   onPress={onClose}>
-                  <Text allowFontScaling={false} className="font-medium text-white">
+                  <Text style={blockbuttontext} allowFontScaling={false} className="font-medium text-white">
                     Close
                   </Text>
                 </TouchableOpacity>

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   Modal,
   View,
@@ -8,8 +8,10 @@ import {
   TouchableWithoutFeedback,
   Platform,
   Image,
+
 } from 'react-native';
 import Launcher from '../../modules/launcher';
+import { LinearGradient } from 'expo-linear-gradient';
 
 type ThemeLike = Record<string, any>;
 
@@ -34,13 +36,13 @@ export const BlockDurationModal = ({
   appIconBase64,
   packageName,
 }: BlockDurationModalProps) => {
-  const { modalbg, numberbg, number, open } = theme || ({} as any);
+  const { block,blockcircle,blockgradient,blockText1,blockText2,blockText3,blockText4,blockText5,blockText6,blockText7,blockText8,blockbutton1,blockbutton2,blockbuttontext,weeklytext1,weeklytext2 ,blockbg} = theme || ({} as any);
   const [weeklyMs, setWeeklyMs] = useState<number | null>(null);
   const formatHM = (millis: number) => {
     const hours = Math.floor(millis / (1000 * 60 * 60));
     const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
     if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
+    return `${minutes} min`;
   };
   const CHOICES = useMemo(
     () => [
@@ -59,34 +61,33 @@ export const BlockDurationModal = ({
   );
   const [selectedIdx, setSelectedIdx] = useState(3);
   const [step, setStep] = useState(0);
-  const [sliderW, setSliderW] = useState(0);
-  const [lastIdxChangeAt, setLastIdxChangeAt] = useState(0);
+  const [sliderW, setSliderW] = useState(6);
+  const SliderCmp = useMemo(() => {
+    try {
+      const mod = require('@react-native-community/slider');
+      return mod?.default || mod?.Slider || null;
+    } catch {
+      return null;
+    }
+  }, []);
+  const libDraggingRef = useRef(false);
+  const THUMB_SIZE = 42;
 
-  const selectedLabelText = useMemo(() => {
+
+  const selectedNumUnit = useMemo(() => {
     const lbl = CHOICES[selectedIdx]?.label || '6h';
     if (lbl.endsWith('h')) {
       const n = parseInt(lbl.replace('h', ''), 10);
-      return `${n} ${n === 1 ? 'hour' : 'hours'}`;
+      return { num: `${n}`, unit: n === 1 ? 'hour' : 'hours' };
     }
     if (lbl.endsWith('d')) {
       const n = parseInt(lbl.replace('d', ''), 10);
-      return `${n} ${n === 1 ? 'day' : 'days'}`;
+      return { num: `${n}`, unit: n === 1 ? 'day' : 'days' };
     }
-    return lbl;
+    return { num: lbl, unit: '' };
   }, [selectedIdx]);
 
-  const handleBarTouch = (x: number) => {
-    if (!sliderW) return;
-    const count = CHOICES.length;
-    const seg = sliderW / (count - 1);
-    const target = Math.min(count - 1, Math.max(0, Math.round(x / seg)));
-    const now = Date.now();
-    if (target === selectedIdx) return;
-    if (now - lastIdxChangeAt < 90) return;
-    const step = Math.sign(target - selectedIdx);
-    setSelectedIdx(selectedIdx + step);
-    setLastIdxChangeAt(now);
-  };
+
 
   useEffect(() => {
     let mounted = true;
@@ -137,16 +138,16 @@ export const BlockDurationModal = ({
           <View className="flex-1 items-center justify-center bg-black/60">
             <TouchableWithoutFeedback>
               <View
-                style={modalbg}
-                className={`w-[85%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                style={block}
+                className={`w-[85%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
                 <Text
-                  style={open}
+                  style={blockText1}
                   allowFontScaling={false}
-                  className={`mb-1 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                  Block {appLabel}
+                  className={`mb-1 text-center text-base font-regular ${isDarkMode ? 'text-[#DBDFE5]' : 'text-gray-900'}`}>
+                  Block <Text  allowFontScaling={false} className="font-bold">{appLabel}</Text>
                 </Text>
                 {appIconBase64 ? (
-                  <View className="my-3 items-center">
+                  <View className="my-6 items-center">
                     <Image
                       source={{ uri: `data:image/png;base64,${appIconBase64}` }}
                       className="h-16 w-16"
@@ -156,58 +157,118 @@ export const BlockDurationModal = ({
                 ) : null}
                 {weeklyMs !== null && (
                   <Text
+                    style={blockText2}
                     allowFontScaling={false}
-                    className={`mb-2 text-center text-sm font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                    {formatHM(weeklyMs)} spent on {appLabel} last 7 days
+                    className={`mb-2 text-center text-base font-regular ${isDarkMode ? 'text-[#728099]' : 'text-slate-700'}`}>
+                    <Text allowFontScaling={false} className="font-bold">{formatHM(weeklyMs)}</Text> spent on <Text  allowFontScaling={false} className="font-bold">{appLabel}</Text> last 7 days
                   </Text>
                 )}
                 <Text
+                  style={blockText3}
                   allowFontScaling={false}
-                  className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
-                  You can’t open this app within selected time period after blocking.
+                  className={`mb-4 text-center text-sm font-medium ${isDarkMode ? 'text-[#7FA8E5]' : 'text-slate-600'}`}>
+                  You <Text  allowFontScaling={false} className="font-bold">can’t open</Text> this <Text  className="font-bold">app</Text> within selected time <Text  className="font-bold">period after blocking.</Text> Think twice before blocking!
                 </Text>
                 <Text
+                  style={blockText4}
                   allowFontScaling={false}
-                  className={`mb-2 text-center text-base font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
-                  {selectedLabelText}
+                  className={`my-4 text-center text-base font-regular ${isDarkMode ? 'text-[#DBDFE5]' : 'text-gray-900'}`}>
+                  Block <Text  allowFontScaling={false} className="font-bold">{appLabel}</Text> Completely for
+                </Text>
+                <Text
+                  style={blockText5}
+                  allowFontScaling={false}
+                  className={`mb-4 text-center  ${isDarkMode ? 'text-[#DBDFE5]' : 'text-slate-700'}`}>
+                  <Text allowFontScaling={false} className="font-extrabold text-2xl">
+                    {selectedNumUnit.num}
+                  </Text>
+                  {selectedNumUnit.unit ? (
+                    <Text allowFontScaling={false} className="font-regular text-base">
+                      {' '}{selectedNumUnit.unit}
+                    </Text>
+                  ) : null}
                 </Text>
                 <View className="mb-4">
-                  <View
-                    className={`h-12 w-full rounded-full ${isDarkMode ? 'bg-[#213048]' : 'bg-[#E6EEF9]'} relative overflow-hidden`}
-                    onLayout={(e) => setSliderW(e.nativeEvent.layout.width)}
-                    onStartShouldSetResponder={() => true}
-                    onResponderGrant={(e) => handleBarTouch(e.nativeEvent.locationX)}
-                    onResponderMove={(e) => handleBarTouch(e.nativeEvent.locationX)}>
-                    <View
-                      className={`${isDarkMode ? 'bg-[#7EA6E0]/40' : 'bg-[#7EA6E0]/30'} absolute left-0 top-0 h-full rounded`}
-                      style={{
-                        width:
-                          sliderW && CHOICES.length > 1
-                            ? sliderW * (selectedIdx / (CHOICES.length - 1)) || 0
-                            : 0,
-                      }}
-                    />
-                    <View
-                      className="absolute  h-12 w-12 rounded-full bg-[#5279B8]"
-                      style={{
-                        left:
-                          sliderW && CHOICES.length > 1
-                            ? Math.max(
-                                0,
-                                Math.min(
-                                  sliderW - 20,
-                                  sliderW * (selectedIdx / (CHOICES.length - 1)) - 20
-                                )
-                              )
-                            : 0,
-                        shadowColor: '#000',
-                        shadowOpacity: 0.15,
-                        shadowRadius: 4,
-                        shadowOffset: { width: 0, height: 2 },
-                        elevation: 3,
-                      }}
-                    />
-                  </View>
+                  {SliderCmp ? (
+                    <View className="w-full">
+                      <View
+                        style={blockbg}
+                        className={`h-12 w-full rounded-full ${isDarkMode ? 'bg-[#213048]' : 'bg-[#ECF0FF]'} relative overflow-hidden`}
+                        onLayout={(e) => setSliderW(e.nativeEvent.layout.width)}>
+                        <LinearGradient
+                          colors={
+                            Array.isArray(blockgradient)
+                              ? blockgradient
+                              : (isDarkMode
+                                  ? (blockgradient?.dark ?? ['#213048', '#7EA6E0'])
+                                  : (blockgradient?.light ?? ['#ECF0FF', '#7EA6E0']))
+                          }
+                          start={{ x: 0, y: 0 }}
+                          end={{ x: 1, y: 0 }}
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            top: 0,
+                            bottom: 0,
+                            width: `${(CHOICES.length > 1 ? (selectedIdx / (CHOICES.length - 1)) : 0) * 100}%`,
+                          }}
+                        />
+                        <SliderCmp
+                          value={selectedIdx}
+                          minimumValue={0}
+                          maximumValue={CHOICES.length - 1}
+                          step={1}
+                          onSlidingStart={() => { libDraggingRef.current = true; }}
+                          onValueChange={(v: number) => {
+                            if (libDraggingRef.current) setSelectedIdx(Math.round(v));
+                          }}
+                          onSlidingComplete={(v: number) => {
+                            setSelectedIdx(Math.round(v));
+                            libDraggingRef.current = false;
+                          }}
+                          minimumTrackTintColor="transparent"
+                          maximumTrackTintColor="transparent"
+                          thumbTintColor="transparent"
+                          style={{
+                            position: 'absolute',
+                            left: 0,
+                            right: 0,
+                            top: 0,
+                            bottom: 0,
+                            opacity: 0,
+                          }}
+                        />
+                        <View
+                          pointerEvents="none"
+                          style={{
+                            position: 'absolute',
+                            width: THUMB_SIZE,
+                            height: THUMB_SIZE,
+                            borderRadius: THUMB_SIZE / 2,
+                            backgroundColor: (blockcircle?.backgroundColor) || (isDarkMode ? '#64748B' : '#5D8BCC'),
+                            top: (42 - THUMB_SIZE) / 2,
+                            left:
+                              sliderW && CHOICES.length > 1
+                                ? Math.max(
+                                    0,
+                                    Math.min(
+                                      sliderW - THUMB_SIZE,
+                                      sliderW * (selectedIdx / (CHOICES.length - 1)) - THUMB_SIZE / 2
+                                    )
+                                  )
+                                : 0,
+                            shadowColor: '#000',
+                            shadowOpacity: 0.15,
+                            shadowRadius: 4,
+                            shadowOffset: { width: 0, height: 2 },
+                            elevation: 3,
+                          }}
+                        />
+                      </View>
+                    </View>
+                  ) : null}
+               
+                 
                   <View className="mt-2 flex-row items-center justify-between px-1">
                     {CHOICES.map((_, i) => (
                       <View
@@ -219,28 +280,30 @@ export const BlockDurationModal = ({
                   <View className="mt-2 flex-row justify-between">
                     <Text
                       allowFontScaling={false}
-                      className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                      className={`${isDarkMode ? 'text-[#728099]' : 'text-slate-600'} text-sm`}>
                       {CHOICES[0].label}
                     </Text>
                     <Text
                       allowFontScaling={false}
-                      className={`${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                      className={`${isDarkMode ? 'text-[#728099]' : 'text-slate-600'} text-sm`}>
                       {CHOICES[CHOICES.length - 1].label}
                     </Text>
                   </View>
                 </View>
                 <TouchableOpacity
-                  style={numberbg}
+                  style={blockbutton1}
                   className={`mt-2 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
                   onPress={handlePrimary}>
-                  <Text allowFontScaling={false} style={number} className="font-medium text-white">
+                  <Text allowFontScaling={false} style={blockbuttontext} className="font-medium text-white">
                     {btnLabel}
                   </Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                  className={`mt-3 items-center rounded-xl py-2 ${isDarkMode ? 'bg-[#212D41]' : 'bg-slate-200'}`}
+                  style={blockbutton2}
+                  className={`mt-3 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#212C40]' : 'bg-slate-200'}`}
                   onPress={onClose}>
                   <Text
+                    style={blockbuttontext}
                     allowFontScaling={false}
                     className={`${isDarkMode ? 'text-slate-300' : 'text-slate-700'}`}>
                     Cancel
@@ -274,7 +337,7 @@ export const BlockedInfoModal = ({
   unblockAt,
   appIconBase64,
 }: BlockedInfoModalProps) => {
-  const { modalbg } = theme || ({} as any);
+  const { block,blockText6,blockText7,blockText8,blockbuttontext,blockbutton1,blockbutton2 } = theme || ({} as any);
   const remainingMs = unblockAt ? Math.max(unblockAt - Date.now(), 0) : 0;
   const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
   const remainingLabel =
@@ -290,20 +353,22 @@ export const BlockedInfoModal = ({
           <View className="flex-1 items-center justify-center bg-black/50">
             <TouchableWithoutFeedback>
               <View
-                style={modalbg}
+                style={block}
                 className={`h-full w-full p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
-                <View className="items-center">
+                <View className="items-center mt-8">
                   <Text
+                    style={blockText6}
                     allowFontScaling={false}
-                    className={`text-center text-2xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                    {appLabel} Blocked
+                    className={`text-center text-xl font-bold  ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                    {appLabel} <Text className='font-medium'>Blocked</Text>
                   </Text>
                 </View>
                 <View className="flex-1 items-center justify-center">
                   <Text
+                    style={blockText7}
                     allowFontScaling={false}
-                    className={`text-center text-2xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
-                    Can you remember? You blocked {appLabel} for {remainingLabel}
+                    className={`text-center text-xl font-regular  ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                    Can you remember?{'\n'} You <Text className='font-semibold'>blocked {appLabel}</Text> for {remainingLabel}
                   </Text>
                   {appIconBase64 ? (
                     <Image
@@ -313,21 +378,26 @@ export const BlockedInfoModal = ({
                     />
                   ) : null}
                 </View>
-                <View className="items-center">
+                <View className="items-center mb-8">
                   <Text
+                    style={blockText8}
                     allowFontScaling={false}
-                    className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                    className={`mb-4 text-center text-sm  ${isDarkMode ? 'text-[#728099]' : 'text-[#858E9D]'}`}>
                     You’ll be able to use {appLabel} after{' '}
                     {unblockAt ? new Date(unblockAt).toLocaleString() : ''}
                   </Text>
-                  <TouchableOpacity
-                    className={`mb-3 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
+                 
+                </View>
+                 <TouchableOpacity
+                    style={blockbutton2}
+                    className={`mb-3 items-center rounded-xl  py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
                     onPress={onClose}>
-                    <Text allowFontScaling={false} className="font-medium text-white">
+                    <Text
+                      style={blockbuttontext}
+                      allowFontScaling={false} className="font-medium text-white">
                       Ok
                     </Text>
                   </TouchableOpacity>
-                </View>
               </View>
             </TouchableWithoutFeedback>
           </View>

@@ -807,11 +807,6 @@ export default function SettingScreen() {
                 className={`mb-[5%] mt-[6%] px-4 text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
                 Select Theme
               </Text>
-              <Text
-                allowFontScaling={false}
-                className={`-mt-3 mb-4 px-4 text-[12px] ${isDarkMode ? 'text-[#9CA3AF]' : 'text-[#8D99AE]'}`}>
-                Customize 20 themes (Free 4)
-              </Text>
               <TouchableOpacity onPress={() => setThemeModalVisible(true)} className="pl-4">
                 <Image
                   source={require('../assets/Themes/group.png')}
