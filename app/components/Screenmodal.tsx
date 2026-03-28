@@ -1,30 +1,36 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Modal, View, Text, TouchableOpacity, KeyboardAvoidingView, TouchableWithoutFeedback, Platform } from 'react-native';
+import {
+  Modal,
+  View,
+  Text,
+  TouchableOpacity,
+  KeyboardAvoidingView,
+  TouchableWithoutFeedback,
+  Platform,
+  Dimensions,
+} from 'react-native';
+import { LineChart } from 'react-native-chart-kit';
 import Launcher from '../../modules/launcher';
 
 type ThemeLike = Record<string, any>;
 
-type ScreenModalProps = {
+type Props = {
   visible: boolean;
   onClose: () => void;
   isDarkMode: boolean;
   theme?: ThemeLike | null;
   appLabel?: string | null;
   packageName?: string | null;
-  onMoreInfo?: () => void;
 };
 
+const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const { width } = Dimensions.get('window');
+
+const msToHours = (ms: number) => ms / 3600000;
 const formatHM = (millis: number) => {
-  const hours = Math.floor(millis / (1000 * 60 * 60));
-  const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  return `${minutes}m`;
-};
-
-const formatShortHM = (millis: number) => {
-  const minutes = Math.round(millis / 60000);
-  if (minutes >= 60) return `${Math.floor(minutes / 60)}h`;
-  return `${minutes}m`;
+  const h = Math.floor(millis / (1000 * 60 * 60));
+  const m = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
+  return h > 0 ? `${h}h ${m}m` : `${m}m`;
 };
 
 export default function Screenmodal({
@@ -34,28 +40,43 @@ export default function Screenmodal({
   theme,
   appLabel,
   packageName,
-  onMoreInfo,
-}: ScreenModalProps) {
-  const { modalbg, numberbg, number, open } = theme || ({} as any);
-  const [daily, setDaily] = useState<number[] | null>(null);
+}: Props) {
+  const { modalbg, open } = theme || ({} as any);
+  const [dailyMs, setDailyMs] = useState<number[] | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const labels = useMemo(() => {
+    const t = new Date();
+    t.setHours(0, 0, 0, 0);
+    const start = new Date(t.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const arr: string[] = [];
+    for (let i = 0; i < 7; i++) {
+      const d = new Date(start.getTime() + i * 24 * 60 * 60 * 1000);
+      arr.push(dayNames[d.getDay()]);
+    }
+    return arr;
+  }, []);
 
   useEffect(() => {
     let mounted = true;
     const load = async () => {
       try {
-        if (!visible) return;
-        if (packageName && (Launcher as any).getPackageDailyUsage7d) {
-          const arr = await (Launcher as any).getPackageDailyUsage7d(packageName);
-          if (mounted) setDaily(Array.isArray(arr) ? arr : null);
-        } else if (packageName && (Launcher as any).getPackageWeeklyUsage) {
-          const total = await (Launcher as any).getPackageWeeklyUsage(packageName);
-          const perDay = Math.floor((typeof total === 'number' ? total : 0) / 7);
-          if (mounted) setDaily(new Array(7).fill(perDay));
-        } else {
-          if (mounted) setDaily(null);
+        if (!visible || !packageName) return;
+        setLoading(true);
+        const weekly = Launcher.getPackageDailyUsage7d
+          ? await Launcher.getPackageDailyUsage7d(packageName)
+          : [];
+        if (mounted) {
+          if (Array.isArray(weekly) && weekly.length === 7) {
+            setDailyMs(weekly.map((v) => (typeof v === 'number' ? v : 0)));
+          } else {
+            setDailyMs(Array(7).fill(0));
+          }
         }
       } catch {
-        if (mounted) setDaily(null);
+        if (mounted) setDailyMs(Array(7).fill(0));
+      } finally {
+        if (mounted) setLoading(false);
       }
     };
     load();
@@ -64,17 +85,39 @@ export default function Screenmodal({
     };
   }, [visible, packageName]);
 
-  const maxVal = useMemo(() => (daily && daily.length ? Math.max(...daily) : 1), [daily]);
-  const total = useMemo(() => (daily ? daily.reduce((a, b) => a + b, 0) : 0), [daily]);
-  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
-  const axisMaxHours = useMemo(() => {
-    const mh = Math.ceil(maxVal / (60 * 60 * 1000));
-    const base = Math.max(1, mh);
-    return Math.ceil(base / 4) * 4;
-  }, [maxVal]);
-  const yTicks = useMemo(
-    () => Array.from({ length: 5 }, (_, i) => `${Math.round((axisMaxHours * (4 - i)) / 4)}h`),
-    [axisMaxHours]
+  const totalMs = useMemo(
+    () => (dailyMs ? dailyMs.reduce((a, b) => a + b, 0) : 0),
+    [dailyMs]
+  );
+
+  const chartData = useMemo(
+    () => ({
+      labels,
+      datasets: [
+        {
+          data: dailyMs ? dailyMs.map(msToHours) : Array(7).fill(0),
+          color: (opacity = 1) => (isDarkMode ? `rgba(126,166,224,${opacity})` : `rgba(82,121,184,${opacity})`),
+          strokeWidth: 3,
+        },
+      ],
+    }),
+    [labels, dailyMs, isDarkMode]
+  );
+
+  const chartConfig = useMemo(
+    () => ({
+      backgroundGradientFrom: isDarkMode ? '#1E293B' : '#FFFFFF',
+      backgroundGradientTo: isDarkMode ? '#1E293B' : '#FFFFFF',
+      decimalPlaces: 1,
+      color: (opacity = 1) => (isDarkMode ? `rgba(203,213,225,${opacity})` : `rgba(71,85,105,${opacity})`),
+      labelColor: (opacity = 1) => (isDarkMode ? `rgba(203,213,225,${opacity})` : `rgba(71,85,105,${opacity})`),
+      propsForDots: {
+        r: '4',
+        strokeWidth: '2',
+        stroke: isDarkMode ? '#7EA6E0' : '#5279B8',
+      },
+    }),
+    [isDarkMode]
   );
 
   return (
@@ -83,71 +126,39 @@ export default function Screenmodal({
         <TouchableWithoutFeedback onPress={onClose}>
           <View className="flex-1 items-center justify-center bg-black/60">
             <TouchableWithoutFeedback>
-              <View style={modalbg} className={`w-[340px] rounded-3xl ${isDarkMode ? 'bg-[#E8EEF7]' : 'bg-[#E8EEF7]'}`}>
-                <View className="rounded-t-3xl bg-[#E4ECF7] px-6 py-4">
-                  <Text allowFontScaling={false} className="text-center text-xl font-bold text-[#1b2b44]">
-                    <Text className="font-extrabold">{appLabel}</Text> Screen Time
+              <View
+                style={modalbg}
+                className={`w-[90%] rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                <Text
+                  style={open}
+                  allowFontScaling={false}
+                  className={`mb-2 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-gray-900'}`}>
+                  {appLabel ? `Last 7 Days: ${appLabel}` : 'Last 7 Days'}
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  {loading ? 'Loading...' : `Total: ${formatHM(totalMs)} (hours shown)`}
+                </Text>
+                <View className="items-center">
+                  <LineChart
+                    data={chartData}
+                    width={Math.min(width * 0.85, 360)}
+                    height={200}
+                    chartConfig={chartConfig}
+                    bezier
+                    yAxisSuffix="h"
+                    fromZero
+                    style={{ borderRadius: 16 }}
+                  />
+                </View>
+                <TouchableOpacity
+                  className={`mt-4 items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA6E0]' : 'bg-[#7EA6E0]'}`}
+                  onPress={onClose}>
+                  <Text allowFontScaling={false} className="font-medium text-white">
+                    Close
                   </Text>
-                </View>
-
-                <View className="px-6 py-6">
-                  <View className="h-48 w-full flex-row">
-                    <View className="mr-2 h-full w-8 items-end justify-between py-1">
-                      {yTicks.map((t) => (
-                        <Text key={t} allowFontScaling={false} className="text-[10px] text-[#6077a3]">
-                          {t}
-                        </Text>
-                      ))}
-                    </View>
-                    <View className="h-full flex-1 justify-end">
-                      <View className="absolute left-0 right-0 top-0 h-full justify-between">
-                        <View className="h-px w-full bg-[#c9d7ee]" />
-                        <View className="h-px w-full bg-[#c9d7ee]" />
-                        <View className="h-px w-full bg-[#c9d7ee]" />
-                        <View className="h-px w-full bg-[#c9d7ee]" />
-                        <View className="h-px w-full bg-[#c9d7ee]" />
-                      </View>
-                      <View className="flex-row items-end justify-between">
-                        {(daily ?? new Array(7).fill(0)).map((v, idx) => {
-                          const hPct =
-                            axisMaxHours > 0 ? Math.max(6, Math.round((v / (axisMaxHours * 60 * 60 * 1000)) * 100)) : 0;
-                          return (
-                            <View key={idx} className="items-center">
-                              <Text allowFontScaling={false} className="mb-1 text-[10px] text-[#6077a3]">
-                                {formatShortHM(v)}
-                              </Text>
-                              <View className="w-7 rounded bg-[#86A8DB]" style={{ height: `${hPct}%` }} />
-                              <Text allowFontScaling={false} className="mt-1 text-xs text-[#6077a3]">
-                                {labels[idx]}
-                              </Text>
-                            </View>
-                          );
-                        })}
-                      </View>
-                    </View>
-                  </View>
-
-                  <Text allowFontScaling={false} className="mt-4 text-center text-sm text-[#354764]">
-                    Last 7 days total: {formatHM(total)}
-                  </Text>
-                </View>
-
-                <View className="px-6 pb-6">
-                  <TouchableOpacity
-                    className="mb-3 items-center rounded-full bg-[#7EA6E0] py-3"
-                    onPress={onClose}>
-                    <Text allowFontScaling={false} className="text-base font-semibold text-white">
-                      Got It!
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    className="items-center rounded-full bg-[#5279B8] py-3"
-                    onPress={onMoreInfo ?? onClose}>
-                    <Text allowFontScaling={false} className="text-base font-semibold text-white">
-                      More Info
-                    </Text>
-                  </TouchableOpacity>
-                </View>
+                </TouchableOpacity>
               </View>
             </TouchableWithoutFeedback>
           </View>

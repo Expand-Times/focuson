@@ -36,6 +36,7 @@ import AppModal from './context/Modal';
 import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
 import Screenmodal from './components/Screenmodal';
 
+
 type Category = {
   title: string;
   data: AppItem[];
@@ -924,15 +925,6 @@ export default function AllAppListByCategoryScreen({
               </KeyboardAvoidingView>
             </Modal>
 
-            <Screenmodal
-              visible={screenTimeVisible}
-              onClose={() => setScreenTimeVisible(false)}
-              isDarkMode={isDarkMode}
-              theme={fontConfig}
-              appLabel={selectedApp?.label}
-              packageName={selectedApp?.packageName}
-            />
-
             <BlockDurationModal
               visible={blockModalVisible}
               onClose={() => setBlockModalVisible(false)}
@@ -952,6 +944,14 @@ export default function AllAppListByCategoryScreen({
               appLabel={selectedApp?.label}
               unblockAt={blockedUntil}
               appIconBase64={selectedApp?.icon}
+            />
+            <Screenmodal
+              visible={screenTimeVisible}
+              onClose={() => setScreenTimeVisible(false)}
+              isDarkMode={isDarkMode}
+              theme={fontConfig}
+              appLabel={selectedApp?.label}
+              packageName={selectedApp?.packageName}
             />
             {/* Rename Category Modal */}
             <Modal

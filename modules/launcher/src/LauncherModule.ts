@@ -26,6 +26,7 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
   getTodayUsageStats(): { totalUsageTime: number, unlockCount: number, packageUsage: Record<string, number> };
   getPackageWeeklyUsage(packageName: string): number;
   getPackageDailyUsage7d(packageName: string): number[];
+  getPackageDailyUsageLastCompletedWeek(packageName: string): number[];
 }
 
 // This call loads the native module object from the JSI.

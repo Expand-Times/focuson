@@ -605,30 +605,104 @@ class LauncherModule : Module() {
     Function("getPackageDailyUsage7d") { targetPackage: String ->
         try {
             val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-            val results = mutableListOf<Long>()
-            val cal = Calendar.getInstance()
-            // Iterate from 6 days ago to today
-            for (i in 6 downTo 0) {
-                val startCal = Calendar.getInstance()
-                startCal.add(Calendar.DAY_OF_YEAR, -i)
-                startCal.set(Calendar.HOUR_OF_DAY, 0)
-                startCal.set(Calendar.MINUTE, 0)
-                startCal.set(Calendar.SECOND, 0)
-                startCal.set(Calendar.MILLISECOND, 0)
-                val start = startCal.timeInMillis
+            val today = Calendar.getInstance()
+            today.set(Calendar.HOUR_OF_DAY, 0)
+            today.set(Calendar.MINUTE, 0)
+            today.set(Calendar.SECOND, 0)
+            today.set(Calendar.MILLISECOND, 0)
+            val windowEnd = today.timeInMillis
+            val dayMillis = 24L * 60 * 60 * 1000
+            val windowStart = windowEnd - 7L * dayMillis
 
-                val endCal = Calendar.getInstance()
-                endCal.add(Calendar.DAY_OF_YEAR, -i)
-                endCal.set(Calendar.HOUR_OF_DAY, 23)
-                endCal.set(Calendar.MINUTE, 59)
-                endCal.set(Calendar.SECOND, 59)
-                endCal.set(Calendar.MILLISECOND, 999)
-                val end = endCal.timeInMillis
+            val results = MutableList(7) { 0L }
 
-                val dayMap = usageStatsManager.queryAndAggregateUsageStats(start, end)
-                val stats = dayMap[targetPackage]
-                val total = stats?.totalTimeInForeground ?: 0L
-                results.add(total)
+            // Determine foreground state at windowStart by scanning a bit earlier
+            val preEvents = usageStatsManager.queryEvents(windowStart - dayMillis, windowStart)
+            val preEvent = android.app.usage.UsageEvents.Event()
+            var inForeground = false
+            while (preEvents.hasNextEvent()) {
+                preEvents.getNextEvent(preEvent)
+                if (preEvent.packageName == targetPackage) {
+                    if (preEvent.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                        inForeground = true
+                    } else if (preEvent.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                        inForeground = false
+                    }
+                }
+            }
+
+            var currentStart = if (inForeground) windowStart else 0L
+
+            fun addToBuckets(s: Long, e: Long) {
+                if (e <= s) return
+                for (i in 0..6) {
+                    val bucketStart = windowStart + i * dayMillis
+                    val bucketEnd = bucketStart + dayMillis
+                    val os = if (s > bucketStart) s else bucketStart
+                    val oe = if (e < bucketEnd) e else bucketEnd
+                    if (oe > os) {
+                        results[i] += (oe - os)
+                    }
+                }
+            }
+
+            val events = usageStatsManager.queryEvents(windowStart, windowEnd)
+            val ev = android.app.usage.UsageEvents.Event()
+            while (events.hasNextEvent()) {
+                events.getNextEvent(ev)
+                if (ev.packageName != targetPackage) continue
+                if (ev.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_FOREGROUND) {
+                    currentStart = if (ev.timeStamp > windowStart) ev.timeStamp else windowStart
+                    inForeground = true
+                } else if (ev.eventType == android.app.usage.UsageEvents.Event.MOVE_TO_BACKGROUND) {
+                    if (inForeground && currentStart > 0L) {
+                        val endTs = if (ev.timeStamp < windowEnd) ev.timeStamp else windowEnd
+                        addToBuckets(currentStart, endTs)
+                        inForeground = false
+                        currentStart = 0L
+                    }
+                }
+            }
+            if (inForeground && currentStart > 0L) {
+                addToBuckets(currentStart, windowEnd)
+            }
+
+            return@Function results
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return@Function emptyList<Long>()
+        }
+    }
+
+    Function("getPackageDailyUsageLastCompletedWeek") { targetPackage: String ->
+        try {
+            val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+            val today = Calendar.getInstance()
+            today.set(Calendar.HOUR_OF_DAY, 0)
+            today.set(Calendar.MINUTE, 0)
+            today.set(Calendar.SECOND, 0)
+            today.set(Calendar.MILLISECOND, 0)
+            val dow = today.get(Calendar.DAY_OF_WEEK)
+            val daysSinceMonday = (dow + 5) % 7
+            val startCal = today.clone() as Calendar
+            startCal.add(Calendar.DAY_OF_YEAR, -(daysSinceMonday + 7))
+            startCal.set(Calendar.HOUR_OF_DAY, 0)
+            startCal.set(Calendar.MINUTE, 0)
+            startCal.set(Calendar.SECOND, 0)
+            startCal.set(Calendar.MILLISECOND, 0)
+            val start = startCal.timeInMillis
+
+            val endCal = startCal.clone() as Calendar
+            endCal.add(Calendar.DAY_OF_YEAR, 7)
+            val end = endCal.timeInMillis
+
+            val buckets = usageStatsManager.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, start, end)
+            val dayMillis = 24L * 60 * 60 * 1000
+            val results = MutableList(7) { 0L }
+            for (us in buckets) {
+                if (us.packageName != targetPackage) continue
+                val idx = (((us.firstTimeStamp - start) / dayMillis).toInt()).coerceIn(0, 6)
+                results[idx] += us.totalTimeInForeground
             }
             return@Function results
         } catch (e: Exception) {
