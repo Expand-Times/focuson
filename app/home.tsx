@@ -861,7 +861,7 @@ export default function Home() {
               </Text>
 
               <Image
-                source={require('../assets/Animation/NoAds.png')}
+                source={require('../assets/Animation/noads.png')}
                 className="mb-4 h-24 w-24"
                 resizeMode="contain"
               />
