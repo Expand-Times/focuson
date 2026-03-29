@@ -320,8 +320,8 @@ export default function IntroUnified() {
                 </View>
               </View>
             </View>
-            <View className="mt-12 w-full">
-              <View className={`items-center rounded-3xl ${isDarkMode ? ' bg-[#0D121A]' : 'border-slate-50 bg-white'}`}>
+            <View className="mt-12  w-full">
+              <View className={`items-center p-6 rounded-3xl ${isDarkMode ? ' bg-[#0D121A]' : 'border-slate-50 bg-white'}`}>
                 <Text allowFontScaling={false} className={`mb-4 text-[16px] font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>You unlock your phone daily</Text>
                 <Text allowFontScaling={false} className="mb-4 text-[32px] font-bold text-[#F4BE37]">{actualUnlocks}x</Text>
                 <Text allowFontScaling={false} className={`text-[12px] ${isDarkMode ? 'text-[#738099]' : 'text-[#2E3B4D]'}`}>Assumption was {unlocks} times</Text>
