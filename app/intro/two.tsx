@@ -1,21 +1,22 @@
-import React, { useEffect } from 'react';
-import { View, Text, Image, StatusBar, useColorScheme } from 'react-native';
+import React from 'react';
+import {
+  View,
+  Text,
+  Image,
+  StatusBar,
+  useColorScheme,
+  TouchableOpacity,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import { Dimensions } from 'react-native';
+import { MaterialCommunityIcons } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 
 export default function IntroTwo() {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
-  useEffect(() => {
-      const timer = setTimeout(() => {
-        router.push('/intro/three');
-      }, 500);
-
-      return () => clearTimeout(timer);
-    }, []);
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
@@ -23,7 +24,7 @@ export default function IntroTwo() {
         backgroundColor={isDarkMode ? '#0D121A' : '#E1EAF5'}
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
       />
-      <View className="flex-1 items-center justify-between px-6 py-12">
+      <View className="relative flex-1 items-center justify-between px-6 pt-8 pb-20">
         {/* Header Section */}
         <View className="mt-8 items-center">
           <Text
@@ -39,9 +40,9 @@ export default function IntroTwo() {
               isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
             }`}>
             You are one of the{' '}
-            <Text allowFontScaling={false} className={`font-medium ${
-              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
-            }`}>
+            <Text
+              allowFontScaling={false}
+              className={`font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
               aware 0.08%
             </Text>{' '}
             of the
@@ -66,16 +67,16 @@ export default function IntroTwo() {
         </View>
 
         {/* Footer Text */}
-        <View className="items-center px-4">
+        <View className="items-center px-4 bottom-16">
           <Text
             allowFontScaling={false}
             className={`mb-12 text-center text-[13px] font-light leading-5 ${
               isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
             }`}>
             We are excited to help you to{' '}
-            <Text allowFontScaling={false} className={`font-bold ${
-              isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'
-            }`}>
+            <Text
+              allowFontScaling={false}
+              className={`font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
               be free
             </Text>{' '}
             from
@@ -92,6 +93,17 @@ export default function IntroTwo() {
               />
             </View>
           </View>
+         
+        </View>
+        <View className="absolute bottom-6 left-6 right-6">
+          <TouchableOpacity
+            activeOpacity={1}
+            className={`w-full flex-row items-center justify-center rounded-full ${isDarkMode ? 'border border-[#DADFE5]' : 'border border-[#2E3B4D] '} py-4`}
+            onPress={() => router.push('/intro/three')}
+          >
+            <Text allowFontScaling={false} className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>Next</Text>
+            <MaterialCommunityIcons name="arrow-right" size={20} color={isDarkMode ? 'white' : '#2E3B4D'} />
+          </TouchableOpacity>
         </View>
       </View>
     </SafeAreaView>

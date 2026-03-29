@@ -12,7 +12,6 @@ import {
   StatusBar
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter, useFocusEffect } from 'expo-router';
 import Launcher from '../../modules/launcher';
 import { startActivityAsync, ActivityAction } from 'expo-intent-launcher';

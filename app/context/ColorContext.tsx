@@ -66,7 +66,6 @@ interface ColorProviderProps {
 
 // Default color constants
 const DEFAULT_COLOR = '#7EA9E5';
-const DEFAULT_DARK_MODE = false;
 const DEFAULT_PREMIUM = false;
 
 const ColorProvider = ({children}: ColorProviderProps) => {

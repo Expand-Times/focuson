@@ -14,7 +14,7 @@ export default function IntroOne() {
   useEffect(() => {
     const timer = setTimeout(() => {
       router.push('/intro/two');
-    }, 500);
+    }, 2000);
 
     return () => clearTimeout(timer);
   }, []);

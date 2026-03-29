@@ -838,14 +838,10 @@ export default function Home() {
         onRequestClose={handleWelcomeComplete}>
         <View className="flex-1 items-center justify-center bg-black/80">
           <View
-            className={`relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl ${
-              isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
-            }`}>
+            className='relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl bg-[#1E293B] '>
             <Text
               allowFontScaling={false}
-              className={`mb-8 text-center text-xl font-bold ${
-                isDarkMode ? 'text-white' : 'text-slate-800'
-              }`}>
+              className='mb-8 text-center text-xl font-bold text-white'>
               Welcome to Focus On: Minimalist Launcher
             </Text>
 
@@ -854,28 +850,24 @@ export default function Home() {
               showsVerticalScrollIndicator={false}
               contentContainerStyle={{ alignItems: 'center' }}>
               <Image
-                source={require('../assets/Animation/nodatashared.png')}
-                className="mb-4 h-16 w-16"
+                source={require('../assets/Animation/NoDataTheft.png')}
+                className="mb-4 h-24 w-24"
                 resizeMode="contain"
               />
               <Text
                 allowFontScaling={false}
-                className={`mb-6 text-center text-base leading-6 ${
-                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}>
+                className='mb-6 text-center text-base leading-6 text-slate-300'>
                 We do not collect, share or sell your data. All data is stored only on your device.
               </Text>
 
               <Image
-                source={require('../assets/Animation/noads.png')}
-                className="mb-4 h-16 w-16"
+                source={require('../assets/Animation/NoAds.png')}
+                className="mb-4 h-24 w-24"
                 resizeMode="contain"
               />
               <Text
                 allowFontScaling={false}
-                className={`text-center text-base leading-6 ${
-                  isDarkMode ? 'text-slate-300' : 'text-slate-600'
-                }`}>
+                className='mb-6 text-center text-base leading-6 text-slate-300'>
                 We do not show any third-party ads. And it&apos;s free to use.
                 {'\n\n'}
                 Stay with us. 💖 Thank you
@@ -921,7 +913,7 @@ export default function Home() {
 
           {/* Step 2: Swipe Right (Show on Home) */}
           {tutorialStep === 2 && (
-            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
+            <View className="items-center rounded-3xl bg-black p-6 backdrop-blur-md">
               <Image
                 source={require('../assets/Animation/icons8-drag-right.gif')}
                 className="h-24 w-24"
@@ -939,7 +931,7 @@ export default function Home() {
               </Text>
             </View>
           )}
-        </View>
+           </View>
       )}
     </GestureHandlerRootView>
   );
