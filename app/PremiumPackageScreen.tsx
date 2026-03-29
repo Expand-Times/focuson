@@ -17,7 +17,7 @@ const PRODUCT_IDS = {
 
 export default function PremiumPackageScreen() {
   const router = useRouter();
-  const { isDarkMode } = useColorContext();
+  const { isDarkMode, unlockPremium } = useColorContext();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('lifetime');
   const [products, setProducts] = useState<IAP.Product[]>([]);
@@ -83,6 +83,7 @@ export default function PremiumPackageScreen() {
         // Here you would typically validate the receipt with your server
         // and then call finishTransaction
         await IAP.finishTransaction({ purchase: purchase as any });
+        await unlockPremium();
         Alert.alert('Success', 'Thank you for your purchase!');
         router.back();
       }
