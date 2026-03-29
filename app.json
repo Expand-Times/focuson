@@ -15,7 +15,8 @@
     "plugins": [
       "expo-router",
       "expo-font",
-      "./modules/launcher/plugin/withLauncher"
+      "./modules/launcher/plugin/withLauncher",
+      "expo-iap"
     ],
     "experiments": {
       "typedRoutes": true,

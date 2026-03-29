@@ -1,18 +1,99 @@
-import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ImageBackground } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Dimensions } from 'react-native';
+import * as IAP from 'expo-iap';
 
 const { width } = Dimensions.get('window');
+
+const PRODUCT_IDS = {
+  monthly: 'com.expandtimes.focuson.launcher.monthly',
+  yearly: 'com.expandtimes.focuson.launcher.yearly',
+  lifetime: 'com.expandtimes.focuson.launcher.lifetime',
+};
 
 export default function PremiumPackageScreen() {
   const router = useRouter();
   const { isDarkMode } = useColorContext();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly' | 'lifetime'>('lifetime');
+  const [products, setProducts] = useState<IAP.Product[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [isPurchasing, setIsPurchasing] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const initIAP = async () => {
+      try {
+        await IAP.initConnection();
+        
+        const fetchedProducts = await IAP.fetchProducts({
+          skus: [PRODUCT_IDS.lifetime, PRODUCT_IDS.monthly, PRODUCT_IDS.yearly],
+          type: 'all'
+        });
+
+        if (isMounted && fetchedProducts) {
+          setProducts(fetchedProducts as IAP.Product[]);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing IAP:', error);
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
+    };
+
+    initIAP();
+
+    return () => {
+      isMounted = false;
+      IAP.endConnection();
+    };
+  }, []);
+
+  const getProductData = (type: 'monthly' | 'yearly' | 'lifetime') => {
+    return products.find(p => p.id === PRODUCT_IDS[type]);
+  };
+
+  const handlePurchase = async () => {
+    const product = getProductData(selectedPlan);
+    if (!product) {
+      Alert.alert('Error', 'Product not found. Please try again later.');
+      return;
+    }
+
+    setIsPurchasing(true);
+    try {
+      const result = await IAP.requestPurchase({
+        request: {
+          apple: { sku: product.id },
+          google: { skus: [product.id] }
+        },
+        type: selectedPlan === 'lifetime' ? 'in-app' : 'subs'
+      } as any);
+
+      const purchase = Array.isArray(result) ? result[0] : result;
+
+      if (purchase) {
+        // Here you would typically validate the receipt with your server
+        // and then call finishTransaction
+        await IAP.finishTransaction({ purchase: purchase as any });
+        Alert.alert('Success', 'Thank you for your purchase!');
+        router.back();
+      }
+    } catch (error: any) {
+      if (error.code !== 'E_USER_CANCELLED' && error.code !== 'user-cancelled') {
+        Alert.alert('Purchase Error', error.message || 'Something went wrong');
+      }
+    } finally {
+      setIsPurchasing(false);
+    }
+  };
 
   const features = [
     'Up to 6 Favorite Apps',
@@ -23,9 +104,12 @@ export default function PremiumPackageScreen() {
     'Upcoming premium features',
   ];
 
-  const renderPlanCard = (type: 'monthly' | 'yearly' | 'lifetime', price: string, label: string) => {
+  const renderPlanCard = (type: 'monthly' | 'yearly' | 'lifetime', label: string) => {
     const isSelected = selectedPlan === type;
     const isLifetime = type === 'lifetime';
+    const product = getProductData(type);
+    const price = product ? product.displayPrice : '---';
+    const currency = product ? product.currency : '';
 
     // Styles based on the attached image and selection state
     // We keep the "Image" styling but dim the non-selected ones to show state
@@ -77,12 +161,14 @@ export default function PremiumPackageScreen() {
         </Text>
         
         <View className="mb-2 flex-row items-baseline">
-          <Text allowFontScaling={false} className={`text-[20px] font-extrabold ${textColor}`}>
+          <Text allowFontScaling={false} className={`text-[14px] font-extrabold ${textColor}`}>
             {price}
           </Text>
-          <Text allowFontScaling={false} className={`text-[10px] font-medium ${subTextColor} ml-1`}>
-            USD
-          </Text>
+          {!product?.displayPrice?.includes(currency) && (
+            <Text allowFontScaling={false} className={`text-[10px] font-medium ${subTextColor} ml-1`}>
+              {currency}
+            </Text>
+          )}
         </View>
         
         <Text allowFontScaling={false} className={`text-center font-light text-[9px] ${subTextColor}`}>
@@ -91,6 +177,15 @@ export default function PremiumPackageScreen() {
       </TouchableOpacity>
     );
   };
+
+  if (loading) {
+    return (
+      <View className={`flex-1 items-center justify-center ${isDarkMode ? 'bg-[#0F172A]' : 'bg-white'}`}>
+        <ActivityIndicator size="large" color="#5C8BCC" />
+        <Text className={`mt-4 ${isDarkMode ? 'text-white' : 'text-slate-600'}`}>Loading plans...</Text>
+      </View>
+    );
+  }
 
   return (
     <ImageBackground
@@ -149,17 +244,23 @@ export default function PremiumPackageScreen() {
 
           {/* Pricing Cards */}
           <View className="mb-8 flex-row justify-between px-4 items-center">
-            {renderPlanCard('monthly', '1', 'Monthly')}
-            {renderPlanCard('yearly', '10', 'Yearly')}
-            {renderPlanCard('lifetime', '20', 'Lifetime')}
+            {renderPlanCard('monthly', 'Monthly')}
+            {renderPlanCard('yearly', 'Yearly')}
+            {renderPlanCard('lifetime', 'Lifetime')}
           </View>
 
           {/* Continue Button */}
           <View className="mb-6 px-6">
             <TouchableOpacity
-              className="w-full items-center rounded-2xl bg-[#5C8BCC] py-4 shadow-md"
+              onPress={handlePurchase}
+              disabled={isPurchasing}
+              className={`w-full items-center rounded-2xl bg-[#5C8BCC] py-4 shadow-md ${isPurchasing ? 'opacity-70' : ''}`}
               activeOpacity={0.9}>
-              <Text allowFontScaling={false} className="text-[16px] font-medium text-white">Continue</Text>
+              {isPurchasing ? (
+                <ActivityIndicator color="white" />
+              ) : (
+                <Text allowFontScaling={false} className="text-[16px] font-medium text-white">Continue</Text>
+              )}
             </TouchableOpacity>
           </View>
 

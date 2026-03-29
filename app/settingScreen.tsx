@@ -986,6 +986,7 @@ export default function SettingScreen() {
                   Free Version
                 </Text>
                 <TouchableOpacity
+                  onPress={() => router.push('/PremiumPackageScreen')}
                   className={`rounded-xl ${isDarkMode ? 'bg-[#7FA8E5]' : 'bg-[#7EA9E5]'} px-4 py-2`}>
                   <Text
                     allowFontScaling={false}
