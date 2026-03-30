@@ -96,7 +96,7 @@ export default function Screenmodal({
       datasets: [
         {
           data: dailyMs ? dailyMs.map(msToHours) : Array(7).fill(0),
-          color: (opacity = 1) => (isDarkMode ? `rgba(126,166,224,${opacity})` : `rgba(82,121,184,${opacity})`),
+          color: (opacity = 1) => (`rgba(126,166,224,${opacity})`),
           strokeWidth: 3,
         },
       ],
@@ -106,15 +106,15 @@ export default function Screenmodal({
 
   const chartConfig = useMemo(
     () => ({
-      backgroundGradientFrom: isDarkMode ? '#1E293B' : '#FFFFFF',
-      backgroundGradientTo: isDarkMode ? '#1E293B' : '#FFFFFF',
+      backgroundGradientFrom: '#1E293B',
+      backgroundGradientTo: '#1E293B',
       decimalPlaces: 1,
-      color: (opacity = 1) => (isDarkMode ? `rgba(203,213,225,${opacity})` : `rgba(71,85,105,${opacity})`),
-      labelColor: (opacity = 1) => (isDarkMode ? `rgba(203,213,225,${opacity})` : `rgba(71,85,105,${opacity})`),
+      color: (opacity = 1) => (`rgba(203,213,225,${opacity})`),
+      labelColor: (opacity = 1) => (`rgba(203,213,225,${opacity})`),
       propsForDots: {
         r: '4',
         strokeWidth: '2',
-        stroke: isDarkMode ? '#7EA6E0' : '#5279B8',
+        stroke: '#7EA6E0',
       },
     }),
     [isDarkMode]
@@ -128,17 +128,17 @@ export default function Screenmodal({
             <TouchableWithoutFeedback>
               <View
                 
-                className={`w-[90%]  rounded-3xl p-6 ${isDarkMode ? 'bg-[#1E293B]' : 'bg-[#1E293B]'}`}>
+                className={`w-[90%]  rounded-3xl p-6 bg-[#1E293B]`}>
                 <Text
                   
                   allowFontScaling={false}
-                  className={`mb-2 text-center text-xl font-bold ${isDarkMode ? 'text-slate-300' : 'text-slate-300'}`}>
+                  className={`mb-2 text-center text-xl font-bold text-slate-300`}>
                   {appLabel ? `Last 7 Days: ${appLabel}` : 'Last 7 Days'}
                 </Text>
                 <Text
                  
                   allowFontScaling={false}
-                  className={`mb-4 text-center text-sm ${isDarkMode ? 'text-slate-400' : 'text-slate-600'}`}>
+                  className={`mb-4 text-center text-sm text-slate-400`}>
                   {loading ? 'Loading...' : `Total: ${formatHM(totalMs)} (hours shown)`}
                 </Text>
                 <View className="items-center">

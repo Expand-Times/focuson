@@ -458,11 +458,12 @@ export default function SettingScreen() {
   };
 
   return (
-    <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0C121B]' : 'bg-[#EBF1F7]'}`}>
+    <View className={`flex-1 ${isDarkMode ? 'bg-[#0C121B]' : 'bg-[#EBF1F7]'} pt-12`}>
       <StatusBar
         barStyle={isDarkMode ? 'light-content' : 'dark-content'}
         backgroundColor="transparent"
-        translucent
+        translucent={true}
+        animated={true}
         hidden={!showStatusBar}
       />
       {/* Header */}
@@ -1278,6 +1279,6 @@ export default function SettingScreen() {
           )}
         </SafeAreaView>
       </Modal>
-    </SafeAreaView>
+    </View>
   );
 }

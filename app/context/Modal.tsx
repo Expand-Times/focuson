@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TouchableOpacity, Modal, Image } from 'react-native';
+import { View, Text, TouchableOpacity, Image, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { AppItem } from '../../modules/launcher/src/Launcher.types';
 import { useAppContext } from './AppContext';
@@ -40,18 +40,17 @@ export default function AppModal({
     quit,
   } = theme || {};
 
+  if (!visible) return null;
+
   return (
-    <Modal
-      animationType="fade"
-      transparent={true}
-      visible={visible}
-      onRequestClose={onClose}>
-      <View className="flex-1 items-center justify-center bg-black/70">
-        <View
-          style={modalbg}
-          className={`w-[85%] rounded-3xl p-6 shadow-xl ${
-            isDarkMode ? 'bg-[#131B27]' : 'bg-white'
-          }`}>
+    <View className="absolute inset-0 z-50 items-center justify-center">
+      <Pressable className="absolute inset-0 bg-black/70" onPress={onClose} />
+      <View
+        style={modalbg}
+        className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${
+          isDarkMode ? 'bg-[#131B27]' : 'bg-white'
+        }`}>
+        <View className="w-full max-w-[520px]">
           <View className="mb-6 items-center">
             <Text
               allowFontScaling={false}
@@ -59,10 +58,7 @@ export default function AppModal({
               className={`mb-4 mt-[4%] text-center text-xl font-bold ${
                 isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'
               }`}>
-              Open{' '}
-              {selectedApp
-                ? appRenames[selectedApp.packageName] || selectedApp.label
-                : ''}
+              Open {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
             </Text>
 
             {selectedApp?.icon && (
@@ -76,36 +72,36 @@ export default function AppModal({
             <Text
               allowFontScaling={false}
               style={select}
-              className={`text-center mt-[4%] text-[14px] font-medium ${
+              className={`mt-[4%] text-center text-[14px] font-medium ${
                 isDarkMode ? 'text-[#728099]' : 'text-[#A3B8D9]'
               }`}>
               Select estimated use time
             </Text>
           </View>
 
-          {/* Time Selection */}
-          <View className="mb-4 flex-row flex-wrap justify-between">
-            {[2, 5, 10, 20].map((mins) => (
-              <TouchableOpacity
-                key={mins}
-                style={numberbg}
-                className={`mb-3 w-[48%] items-center rounded-xl ${
-                  isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA9E5]'
-                } py-3 active:opacity-80`}
-                onPress={() => onLaunch(mins)}>
-                <Text
-                  allowFontScaling={false}
-                  style={number}
-                  className={`text-base font-medium ${
-                    isDarkMode ? 'text-[#DADFE5]' : 'text-white'
-                  }`}>
-                  {mins} min
-                </Text>
-              </TouchableOpacity>
-            ))}
+          <View className="mb-4">
+            <View className="flex-row flex-wrap justify-between">
+              {[2, 5, 10, 20].map((mins) => (
+                <TouchableOpacity
+                  key={mins}
+                  style={numberbg}
+                  className={`mb-3 w-[48%] items-center rounded-xl ${
+                    isDarkMode ? 'bg-[#212C40]' : 'bg-[#7EA9E5]'
+                  } py-3 active:opacity-80`}
+                  onPress={() => onLaunch(mins)}>
+                  <Text
+                    allowFontScaling={false}
+                    style={number}
+                    className={`text-base font-medium ${
+                      isDarkMode ? 'text-[#DADFE5]' : 'text-white'
+                    }`}>
+                    {mins} min
+                  </Text>
+                </TouchableOpacity>
+              ))}
+            </View>
           </View>
 
-          {/* Toggle Icon */}
           <TouchableOpacity
             onPress={() => setShowTimeOverSettings(!showTimeOverSettings)}
             className="mb-2 self-center p-2">
@@ -118,7 +114,7 @@ export default function AppModal({
           </TouchableOpacity>
 
           {showTimeOverSettings && (
-            <View className="mb-4 w-full">
+            <View className="mb-4 w-full max-w-[520px] self-center">
               <Text
                 allowFontScaling={false}
                 style={when}
@@ -128,7 +124,6 @@ export default function AppModal({
                 When time is over
               </Text>
 
-              {/* Mindful Delay (Disabled) */}
               <TouchableOpacity
                 className="mb-3 flex-row items-center"
                 disabled={true}
@@ -138,8 +133,7 @@ export default function AppModal({
                   style={[
                     {
                       borderColor:
-                        togglei?.color ||
-                        (reminderOption === 'mindful' ? '#5B8BDF' : '#9CA3AF'),
+                        togglei?.color || (reminderOption === 'mindful' ? '#5B8BDF' : '#9CA3AF'),
                     },
                     togglei,
                   ]}
@@ -157,9 +151,7 @@ export default function AppModal({
                       style={{
                         backgroundColor: togglei?.color || '#5B8BDF',
                       }}
-                      className={`h-3 w-3 rounded-full ${
-                        togglei ? '' : 'bg-[#5B8BDF]'
-                      }`}
+                      className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`}
                     />
                   )}
                 </View>
@@ -170,7 +162,6 @@ export default function AppModal({
                 </Text>
               </TouchableOpacity>
 
-              {/* Remind Me */}
               <View className="mb-3 flex-row items-center justify-between">
                 <TouchableOpacity
                   className="flex-row items-center"
@@ -179,8 +170,7 @@ export default function AppModal({
                     style={[
                       {
                         borderColor:
-                          togglei?.color ||
-                          (reminderOption === 'remind' ? '#5B8BDF' : '#9CA3AF'),
+                          togglei?.color || (reminderOption === 'remind' ? '#5B8BDF' : '#9CA3AF'),
                       },
                       togglei,
                     ]}
@@ -198,23 +188,18 @@ export default function AppModal({
                         style={{
                           backgroundColor: togglei?.color || '#5B8BDF',
                         }}
-                        className={`h-3 w-3 rounded-full ${
-                          togglei ? '' : 'bg-[#5B8BDF]'
-                        }`}
+                        className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`}
                       />
                     )}
                   </View>
                   <Text
                     allowFontScaling={false}
                     style={remind}
-                    className={
-                      isDarkMode ? 'text-slate-300' : 'text-gray-700'
-                    }>
+                    className={isDarkMode ? 'text-slate-300' : 'text-gray-700'}>
                     Remind Me
                   </Text>
                 </TouchableOpacity>
 
-                {/* 2nd Warning Checkbox */}
                 <TouchableOpacity
                   className="flex-row items-center"
                   onPress={() => setSecondWarning(!secondWarning)}
@@ -223,9 +208,7 @@ export default function AppModal({
                   <View
                     style={[
                       {
-                        borderColor:
-                          togglei?.color ||
-                          (secondWarning ? '#5B8BDF' : '#9CA3AF'),
+                        borderColor: togglei?.color || (secondWarning ? '#5B8BDF' : '#9CA3AF'),
                         backgroundColor: secondWarning
                           ? togglei?.color || '#5B8BDF'
                           : 'transparent',
@@ -241,21 +224,16 @@ export default function AppModal({
                           ? ''
                           : 'border-gray-400'
                     }`}>
-                    {secondWarning && (
-                      <Ionicons name="checkmark" size={12} color="white" />
-                    )}
+                    {secondWarning && <Ionicons name="checkmark" size={12} color="white" />}
                   </View>
                   <Text
                     allowFontScaling={false}
-                    className={`text-sm ${
-                      isDarkMode ? 'text-slate-400' : 'text-gray-500'
-                    }`}>
+                    className={`text-sm ${isDarkMode ? 'text-slate-400' : 'text-gray-500'}`}>
                     2nd Warning
                   </Text>
                 </TouchableOpacity>
               </View>
 
-              {/* Quit */}
               <TouchableOpacity
                 className="mb-3 flex-row items-center"
                 onPress={() => setReminderOptionState('quit')}>
@@ -263,8 +241,7 @@ export default function AppModal({
                   style={[
                     {
                       borderColor:
-                        togglei?.color ||
-                        (reminderOption === 'quit' ? '#5B8BDF' : '#9CA3AF'),
+                        togglei?.color || (reminderOption === 'quit' ? '#5B8BDF' : '#9CA3AF'),
                     },
                     togglei,
                   ]}
@@ -282,9 +259,7 @@ export default function AppModal({
                       style={{
                         backgroundColor: togglei?.color || '#5B8BDF',
                       }}
-                      className={`h-3 w-3 rounded-full ${
-                        togglei ? '' : 'bg-[#5B8BDF]'
-                      }`}
+                      className={`h-3 w-3 rounded-full ${togglei ? '' : 'bg-[#5B8BDF]'}`}
                     />
                   )}
                 </View>
@@ -300,7 +275,7 @@ export default function AppModal({
 
           <View
             style={bordert}
-            className={`mt-2 mb-[6%] border-t pt-6 ${
+            className={`mb-[6%] mt-2 border-t pt-6 ${
               isDarkMode ? 'border-slate-700' : 'border-gray-200'
             }`}>
             <TouchableOpacity
@@ -319,6 +294,6 @@ export default function AppModal({
           </View>
         </View>
       </View>
-    </Modal>
+    </View>
   );
 }

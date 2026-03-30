@@ -12,6 +12,7 @@ import {
   KeyboardAvoidingView,
   StatusBar,
   FlatList,
+  Pressable,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
@@ -42,11 +43,8 @@ export type AllAppsProps = {
   autoFocus?: boolean;
 };
 
-const AllApps = memo(({
-  enableGestures = true,
-  autoFocus = false,
-}: AllAppsProps = {}) => {
-const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useColorContext();
+const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps = {}) => {
+  const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useColorContext();
   const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
   // wallpaper
   const fontConfig = useMemo(
@@ -150,7 +148,6 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
     }
   };
 
-
   // Track the previous active letter to determine if data actually needs to change
   const prevActiveLetterRef = useRef<string | null>(null);
 
@@ -230,7 +227,7 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
 
   const FlatListData = useMemo(() => {
     const data: FlatListDataItem[] = [];
-    
+
     // Do NOT filter the list data here anymore. Let the full list remain rendered
     // so FlatList can scroll to the correct index without recreating the entire list.
     const filteredSections = sections;
@@ -283,7 +280,15 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
         }
       }
     },
-    [isSelectMode, selectedPackageNames, isExcludedFromTimer, isTemporarilyBlocked, timedBlocks, appRenames, isPremium]
+    [
+      isSelectMode,
+      selectedPackageNames,
+      isExcludedFromTimer,
+      isTemporarilyBlocked,
+      timedBlocks,
+      appRenames,
+      isPremium,
+    ]
   );
 
   const handleAppLongPress = useCallback(
@@ -374,14 +379,10 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
   const handleRename = () => {
     if (!selectedApp) return;
     if (!isPremium) {
-      Alert.alert(
-        'Premium Feature',
-        'Renaming apps is available for premium users only.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-        ]
-      );
+      Alert.alert('Premium Feature', 'Renaming apps is available for premium users only.', [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+      ]);
       return;
     }
     setNewName(selectedApp.label);
@@ -392,13 +393,13 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
 
   const saveRename = async () => {
     if (!selectedApp) return;
-    
+
     const trimmedName = newName.trim();
     if (!trimmedName) return;
 
     // Check for duplicate app name
     const normalizedName = trimmedName.toLowerCase();
-    const isDuplicate = apps.some(app => {
+    const isDuplicate = apps.some((app) => {
       if (app.packageName === selectedApp.packageName) return false;
       const appName = appRenames[app.packageName] || app.label;
       return appName.toLowerCase() === normalizedName;
@@ -451,12 +452,9 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
         return (
           <Text
             style={header}
-            className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${isImageWallpaper
-                ? 'text-white'
-                : isDarkMode
-                  ? 'text-[#728099]'
-                  : 'text-[#142C4D]'
-              }`}>
+            className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
+              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+            }`}>
             {item.title}
           </Text>
         );
@@ -484,7 +482,7 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
       isDarkMode,
       fontConfig,
       wallpaperIndex,
-      header
+      header,
     ]
   );
 
@@ -497,7 +495,10 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
 
   const RootContainer = enableGestures ? GestureHandlerRootView : View;
 
-  console.log(`[${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}] Rendering all-apps FlatList, FlatListData length:`, FlatListData?.length);
+  console.log(
+    `[${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}] Rendering all-apps FlatList, FlatListData length:`,
+    FlatListData?.length
+  );
 
   return (
     <RootContainer style={{ flex: 1 }}>
@@ -529,12 +530,13 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
           <View className="mb-6 flex-row items-center ">
             <View
               style={searchbg}
-              className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${isImageWallpaper
+              className={`flex-1 flex-row items-center rounded-xl border px-4 py-1 ${
+                isImageWallpaper
                   ? 'border-white/20 '
                   : isDarkMode
                     ? 'border-[#212D41] bg-[]'
                     : 'border-slate-100 bg-white'
-                }`}>
+              }`}>
               <Ionicons
                 name="search"
                 size={20}
@@ -546,14 +548,15 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
               />
               <TextInput
                 style={searchCt}
-                className={`ml-2 flex-1 text-[16px] ${searchCt
+                className={`ml-2 flex-1 text-[16px] ${
+                  searchCt
                     ? ''
                     : isImageWallpaper
                       ? 'text-white'
                       : isDarkMode
                         ? 'text-[#fff]'
                         : 'text-[#A3B9D9]'
-                  }`}
+                }`}
                 placeholder="Search app here"
                 placeholderTextColor={
                   searchCt?.color ||
@@ -573,16 +576,17 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
           </View>
 
           {/* Header */}
-          <View className="w-full mb-4 flex-row items-center justify-between">
+          <View className="mb-4 w-full flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
               style={allappt}
-              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${isImageWallpaper
+              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
+                isImageWallpaper
                   ? 'text-white decoration-white'
                   : isDarkMode
                     ? 'text-[#DADFE5] decoration-[#DADFE5]'
                     : 'text-[#858E9D] decoration-[#858E9D]'
-                }`}>
+              }`}>
               {isSelectMode ? 'Select Apps' : 'All Apps'}
             </Text>
             {isSelectMode ? (
@@ -592,12 +596,13 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
                   onPress={() => router.back()}>
                   <Text
                     allowFontScaling={false}
-                    className={`text-[14px] font-medium ${isImageWallpaper
+                    className={`text-[14px] font-medium ${
+                      isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
                           ? 'text-[#DADFE5]'
                           : 'text-[#858E9D]'
-                      }`}>
+                    }`}>
                     Cancel
                   </Text>
                 </TouchableOpacity>
@@ -606,12 +611,13 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
                   onPress={handleSaveSelection}>
                   <Text
                     allowFontScaling={false}
-                    className={`text-[14px] font-bold ${isImageWallpaper
+                    className={`text-[14px] font-bold ${
+                      isImageWallpaper
                         ? 'text-white'
                         : isDarkMode
                           ? 'text-[#DADFE5]'
                           : 'text-[#FFFFFF]'
-                      }`}>
+                    }`}>
                     Add
                   </Text>
                 </TouchableOpacity>
@@ -663,15 +669,17 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
             theme={fontConfig}
           />
 
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={optionsModalVisible}
-            onRequestClose={() => setOptionsModalVisible(false)}>
-            <View className="flex-1 items-center justify-center bg-black/70">
+          {optionsModalVisible && (
+            <View className="absolute inset-0 z-50 items-center justify-center">
+              <Pressable
+                className="absolute inset-0 bg-black/70"
+                onPress={() => setOptionsModalVisible(false)}
+              />
               <View
                 style={modalbg}
-                className={`w-[320px] rounded-3xl p-6 shadow-xl ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${
+                  isDarkMode ? 'bg-[#131B27]' : 'bg-white'
+                }`}>
                 <View className="mb-6 items-center">
                   <Text
                     style={open}
@@ -680,85 +688,85 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
                     {selectedApp?.label} Options
                   </Text>
                   {selectedApp?.icon && (
-                    <Image
-                      source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                      className="mb-6 h-16 w-16 rounded-xl"
-                      resizeMode="contain"
-                    />
+                    <View className="mb-8 h-16 w-16 rounded-full">
+                      <Image
+                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                        className="h-full w-full rounded-full"
+                      />
+                    </View>
                   )}
                 </View>
-
-                <View className="flex-row flex-wrap justify-between gap-y-4">
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handleAddToHome}>
-                    <Text style={number} className="font-medium text-white">
-                      Add to Home
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handlePinToTop}>
-                    <Text style={number} className="font-medium text-white">
-                      {pinnedPackageNames.includes(selectedApp?.packageName || '')
-                        ? 'Unpin'
-                        : 'Pin to top'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handleBlock}>
-                    <Text style={number} className="font-medium text-white">
-                      Block
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handleRename}>
-                    <Text style={number} className="font-medium text-white">
-                      {isPremium ? 'Rename' : 'Rename'}
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handleAppInfo}>
-                    <Text style={number} className="font-medium text-white">
-                      App Info
-                    </Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    style={numberbg}
-                    className={`w-[130px] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                    onPress={handleUninstall}>
-                    <Text style={number} className="font-medium text-white">
-                      Uninstall
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-
-                <View
-                  style={bordert}
-                  className={`mt-6 border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
-                  <TouchableOpacity
-                    style={quitbg}
-                    className={`w-full items-center rounded-xl py-3 active:opacity-80 ${isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
-                      }`}
-                    onPress={() => setOptionsModalVisible(false)}>
-                    <Text
-                      style={quit}
-                      className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-white'}`}>
-                      Cancel
-                    </Text>
-                  </TouchableOpacity>
+                <View className="w-full max-w-[520px]">
+                  <View className="flex-row flex-wrap justify-between gap-y-4">
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handleAddToHome}>
+                      <Text style={number} className="font-medium text-white">
+                        Add to Home
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handlePinToTop}>
+                      <Text style={number} className="font-medium text-white">
+                        {pinnedPackageNames.includes(selectedApp?.packageName || '')
+                          ? 'Unpin'
+                          : 'Pin to top'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handleBlock}>
+                      <Text style={number} className="font-medium text-white">
+                        Block
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handleRename}>
+                      <Text style={number} className="font-medium text-white">
+                        {isPremium ? 'Rename' : 'Rename'}
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handleAppInfo}>
+                      <Text style={number} className="font-medium text-white">
+                        App Info
+                      </Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      style={numberbg}
+                      className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
+                      onPress={handleUninstall}>
+                      <Text style={number} className="font-medium text-white">
+                        Uninstall
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                  <View
+                    style={bordert}
+                    className={`mt-6 border-t pt-4 ${isDarkMode ? 'border-slate-700' : 'border-gray-200'}`}>
+                    <TouchableOpacity
+                      style={quitbg}
+                      className={`w-full items-center rounded-xl py-3 active:opacity-80 ${isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'}`}
+                      onPress={() => setOptionsModalVisible(false)}>
+                      <Text
+                        style={quit}
+                        className={`text-lg font-medium ${isDarkMode ? 'text-slate-400' : 'text-white'}`}>
+                        Cancel
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
               </View>
             </View>
-          </Modal>
+          )}
 
           <Modal
             animationType="fade"
@@ -785,12 +793,13 @@ const { isDarkMode, wallpaper, wallpaperIndex, showStatusBar, isPremium } = useC
                         value={newName}
                         onChangeText={setNewName}
                         style={[appC, applistCbg]}
-                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isImageWallpaper
+                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
+                          isImageWallpaper
                             ? 'border-white/20 text-white'
                             : isDarkMode
                               ? 'border-slate-600 bg-slate-800 text-slate-300'
                               : 'border-slate-300 bg-slate-50 text-slate-700'
-                          }`}
+                        }`}
                         autoFocus
                         showSoftInputOnFocus={softInputEnabled}
                         onTouchEnd={() => setSoftInputEnabled(true)}
@@ -874,13 +883,15 @@ const AppListItem = memo(
     const { applist, applistbg, appdu } = theme || {};
 
     return (
-      <TouchableOpacity
+      <Pressable
         style={applistbg}
-        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
-          } ${isSelectMode && isSelected ? '' : ''}`}
+        className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
+          isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
+        } ${isSelectMode && isSelected ? '' : ''}`}
         onPress={() => onPress(item)}
         onLongPress={() => onLongPress(item)}
-        delayLongPress={300}>
+        delayLongPress={100}
+        android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
         <View className="flex-1 flex-row items-center">
           {isSelectMode && (
             <Ionicons
@@ -907,15 +918,14 @@ const AppListItem = memo(
           <Text
             allowFontScaling={false}
             style={applist}
-            className={`font-regular text-[16px] ${isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
-              }`}
+            className={`font-regular text-[16px] ${
+              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
+            }`}
             numberOfLines={1}>
             {item.label.length > 15 ? `${item.label.slice(0, 15)}...` : item.label}
           </Text>
         </View>
-
-     
-      </TouchableOpacity>
+      </Pressable>
     );
   }
 );

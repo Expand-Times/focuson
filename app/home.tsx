@@ -913,7 +913,7 @@ export default function Home() {
 
           {/* Step 2: Swipe Right (Show on Home) */}
           {tutorialStep === 2 && (
-            <View className="items-center rounded-3xl bg-black p-6 backdrop-blur-md">
+            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
               <Image
                 source={require('../assets/Animation/icons8-drag-right.gif')}
                 className="h-24 w-24"
