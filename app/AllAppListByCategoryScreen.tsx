@@ -734,7 +734,7 @@ export default function AllAppListByCategoryScreen({
                         className={`text-base font-medium ${
                           isDarkMode ? 'text-[#DBDFE5]' : 'text-white'
                         }`}>
-                        Move to
+                        Move to category
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity
@@ -748,7 +748,7 @@ export default function AllAppListByCategoryScreen({
                         className={`text-base font-medium ${
                           isDarkMode ? 'text-[#DBDFE5]' : 'text-white'
                         }`}>
-                        Screen time
+                        Screen timess
                       </Text>
                     </TouchableOpacity>
                     <TouchableOpacity

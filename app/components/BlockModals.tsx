@@ -59,7 +59,7 @@ export const BlockDurationModal = ({
     ],
     []
   );
-  const [selectedIdx, setSelectedIdx] = useState(3);
+  const [selectedIdx, setSelectedIdx] = useState(0);
   const [step, setStep] = useState(0);
   const [sliderW, setSliderW] = useState(6);
   const SliderCmp = useMemo(() => {
@@ -193,14 +193,14 @@ export const BlockDurationModal = ({
                     <View className="w-full">
                       <View
                         style={blockbg}
-                        className={`h-12 w-full rounded-full ${isDarkMode ? 'bg-[#213048]' : 'bg-[#ECF0FF]'} relative overflow-hidden`}
+                        className={`h-12 w-full rounded-full ${isDarkMode ? 'bg-[#FFFFFF]' : 'bg-[#ECF0FF]'} relative overflow-hidden`}
                         onLayout={(e) => setSliderW(e.nativeEvent.layout.width)}>
                         <LinearGradient
                           colors={
                             Array.isArray(blockgradient)
                               ? blockgradient
                               : (isDarkMode
-                                  ? (blockgradient?.dark ?? ['#213048', '#7EA6E0'])
+                                  ? (blockgradient?.dark ?? ['#ECF0FF', '#7EA9E5'])
                                   : (blockgradient?.light ?? ['#ECF0FF', '#7EA6E0']))
                           }
                           start={{ x: 0, y: 0 }}
@@ -220,12 +220,15 @@ export const BlockDurationModal = ({
                           step={1}
                           onSlidingStart={() => { libDraggingRef.current = true; }}
                           onValueChange={(v: number) => {
-                            if (libDraggingRef.current) setSelectedIdx(Math.round(v));
+                            setSelectedIdx(Math.round(v));
                           }}
                           onSlidingComplete={(v: number) => {
                             setSelectedIdx(Math.round(v));
                             libDraggingRef.current = false;
                           }}
+                          animateTransitions={false}
+                          tapToSeek={Platform.OS === 'android' ? true : undefined}
+                          thumbTouchSize={{ width: 80, height: 80 }}
                           minimumTrackTintColor="transparent"
                           maximumTrackTintColor="transparent"
                           thumbTintColor="transparent"
@@ -245,7 +248,7 @@ export const BlockDurationModal = ({
                             width: THUMB_SIZE,
                             height: THUMB_SIZE,
                             borderRadius: THUMB_SIZE / 2,
-                            backgroundColor: (blockcircle?.backgroundColor) || (isDarkMode ? '#64748B' : '#5D8BCC'),
+                            backgroundColor: (blockcircle?.backgroundColor) || (isDarkMode ? '#5D8BCC' : '#5D8BCC'),
                             top: (42 - THUMB_SIZE) / 2,
                             left:
                               sliderW && CHOICES.length > 1
