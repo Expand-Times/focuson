@@ -58,7 +58,7 @@ export default function AppModal({
               className={`mb-4 mt-[4%] text-center text-xl font-bold ${
                 isDarkMode ? 'text-[#DADFE5]' : 'text-gray-900'
               }`}>
-              Open {selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
+              <Text className={`font-regular ${isDarkMode ? 'text-[#728099]' : 'text-[#A3B8D9]'}`}>Open </Text>{selectedApp ? appRenames[selectedApp.packageName] || selectedApp.label : ''}
             </Text>
 
             {selectedApp?.icon && (
@@ -68,7 +68,29 @@ export default function AppModal({
                 resizeMode="contain"
               />
             )}
-
+            <View className="mb-1">
+              <Text
+                allowFontScaling={false}
+                className={`text-center text-[12px] ${isDarkMode ? 'text-[#728099]' : 'text-[#6B7280]'}`}>
+                TO: <Text className="font-semibold text-[#F59E0B]">
+                  {(() => {
+                    const c = selectedApp?.launchCount ?? 0;
+                    return c === 1 ? '1 time' : `${c} times`;
+                  })()}
+                </Text>
+                {'  '}
+                ||
+                {'  '}
+                TU: <Text className="font-semibold text-[#F59E0B]">
+                  {(() => {
+                    const ms = selectedApp?.usageTime ?? 0;
+                    const h = Math.floor(ms / 3600000);
+                    const m = Math.floor((ms % 3600000) / 60000);
+                    return h > 0 ? `${h}h ${m.toString().padStart(2,'0')}m` : `${m} minutes`;
+                  })()}
+                </Text>
+              </Text>
+            </View>
             <Text
               allowFontScaling={false}
               style={select}

@@ -138,25 +138,28 @@ class TimerOverlayService : Service() {
             val event = UsageEvents.Event()
             
             var totalTime = 0L
-            var lastStartTime = 0L
+            var lastStartTime = -1L
             var openCount = 0
             
             while (events.hasNextEvent()) {
                 events.getNextEvent(event)
                 if (event.packageName == packageName) {
                     if (event.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND) {
-                        lastStartTime = event.timeStamp
-                        openCount++
+                        // Count only when a new session actually starts (no active session)
+                        if (lastStartTime <= 0L) {
+                            lastStartTime = event.timeStamp
+                            openCount++
+                        }
                     } else if (event.eventType == UsageEvents.Event.MOVE_TO_BACKGROUND) {
-                        if (lastStartTime != 0L) {
+                        if (lastStartTime > 0L) {
                             totalTime += (event.timeStamp - lastStartTime)
-                            lastStartTime = 0L
+                            lastStartTime = -1L
                         }
                     }
                 }
             }
             
-            if (lastStartTime != 0L) {
+            if (lastStartTime > 0L) {
                 totalTime += (System.currentTimeMillis() - lastStartTime)
             }
             

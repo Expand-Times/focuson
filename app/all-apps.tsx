@@ -23,6 +23,7 @@ import {
 } from 'react-native-gesture-handler';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
+import Launcher from '../modules/launcher';
 
 type FlatListHeader = { type: 'header'; title: string };
 type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
@@ -75,6 +76,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     apps: rawApps,
     homeApps,
     updateHomeApps,
+    refreshApps,
     pinnedPackageNames,
     togglePinApp,
     blockedPackageNames,
@@ -437,10 +439,11 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const handleUninstall = async () => {
     if (!selectedApp) return;
     try {
-      await IntentLauncher.startActivityAsync('android.intent.action.DELETE', {
-        data: 'package:' + selectedApp.packageName,
-      });
+      Launcher.uninstallApp(selectedApp.packageName);
       setOptionsModalVisible(false);
+      setTimeout(() => {
+        refreshApps();
+      }, 2500);
     } catch (e) {
       console.error(e);
     }
