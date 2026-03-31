@@ -362,7 +362,6 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const handleBlock = () => {
     if (!selectedApp) return;
     setBlockModalVisible(true);
-    setOptionsModalVisible(false);
   };
 
   const handleConfirmBlock = async (durationMs: number) => {
@@ -371,6 +370,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       const until = Date.now() + durationMs;
       await setTimedBlock(selectedApp.packageName, until);
       setBlockModalVisible(false);
+      setOptionsModalVisible(false);
     } catch (e) {
       console.error(e);
     }
@@ -668,7 +668,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
             isDarkMode={isDarkMode}
             theme={fontConfig}
           />
-
+          {/* Options Modal */}
           {optionsModalVisible && (
             <View className="absolute inset-0 z-50 items-center justify-center">
               <Pressable
@@ -833,7 +833,9 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       </GestureDetector>
       <BlockDurationModal
         visible={blockModalVisible}
-        onClose={() => setBlockModalVisible(false)}
+        onClose={() => {
+          setBlockModalVisible(false);
+        }}
         onConfirm={handleConfirmBlock}
         isDarkMode={isDarkMode}
         theme={fontConfig}

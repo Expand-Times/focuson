@@ -703,7 +703,7 @@ export default function AllAppListByCategoryScreen({
                     className={`mb-6 text-[16px] font-medium ${
                       isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'
                     }`}>
-                    {selectedApp.label} Optionss
+                    {selectedApp.label} Options
                   </Text>
                   <View className="mb-8 h-16 w-16 rounded-full">
                     <Image
