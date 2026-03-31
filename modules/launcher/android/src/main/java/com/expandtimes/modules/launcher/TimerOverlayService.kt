@@ -226,7 +226,7 @@ class TimerOverlayService : Service() {
         val h = TimeUnit.MILLISECONDS.toHours(totalUsageToday)
         val m = TimeUnit.MILLISECONDS.toMinutes(totalUsageToday) % 60
         val timeStr = if (h > 0) String.format("%dh %02dm", h, m) else String.format("%d minutes", m)
-        val openStr = "$openCount times"
+        val openStr = if (openCount == 1) "1 time" else "$openCount times"
         
         val fullText = "TO: $openStr  ||  TU: $timeStr"
         val spannable = android.text.SpannableString(fullText)

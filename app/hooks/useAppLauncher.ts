@@ -59,7 +59,7 @@ export const useAppLauncher = () => {
       }
 
       // Start the overlay timer
-      const durationMs = durationMinutes * 15 * 1000; // 15 seconds per "minute" unit? Or is it 15 min?
+      const durationMs = durationMinutes * 60 * 1000; // 15 seconds per "minute" unit? Or is it 15 min?
       // Re-reading original code: const durationMs = durationMinutes * 15 * 1000;
       // It seems "durationMinutes" is actually a unit multiplier where 1 unit = 15 seconds?
       // Or maybe it's just a calculation. I will keep it exactly as is.

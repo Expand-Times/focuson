@@ -108,9 +108,13 @@ export default function Screenmodal({
     () => ({
       backgroundGradientFrom: '#1E293B',
       backgroundGradientTo: '#1E293B',
-      decimalPlaces: 1,
       color: (opacity = 1) => (`rgba(203,213,225,${opacity})`),
       labelColor: (opacity = 1) => (`rgba(203,213,225,${opacity})`),
+      formatYLabel: (y: string) => {
+        const v = Number(y);
+        const rounded = Math.round(v * 10) / 10;
+        return rounded.toFixed(1);
+      },
       propsForDots: {
         r: '4',
         strokeWidth: '2',
@@ -119,6 +123,17 @@ export default function Screenmodal({
     }),
     [isDarkMode]
   );
+
+  const formatPointLabel = (ms: number) => {
+    if (!ms || ms <= 0) return '';
+    if (ms < 60 * 60 * 1000) {
+      const m = Math.round(ms / 60000);
+      return `${m}m`;
+    }
+    const h = ms / 3600000;
+    const v = h >= 10 ? Math.round(h).toString() : h.toFixed(1);
+    return `${v}h`;
+  };
 
   return (
     <Modal animationType="fade" transparent={true} visible={visible} onRequestClose={onClose}>
@@ -150,6 +165,25 @@ export default function Screenmodal({
                     bezier
                     yAxisSuffix="h"
                     fromZero
+                    renderDotContent={({ x, y, index }: any) => {
+                      const ms = dailyMs?.[index] ?? 0;
+                      const label = formatPointLabel(ms);
+                      if (!label) return null;
+                      return (
+                        <Text
+                          key={`dot-${index}`}
+                          style={{
+                            position: 'absolute',
+                            top: y - 16,
+                            left: x - 12,
+                            color: isDarkMode ? '#DBDFE5' : '#2E3B4D',
+                            fontSize: 10,
+                            fontWeight: '600',
+                          }}>
+                          {label}
+                        </Text>
+                      );
+                    }}
                     style={{ borderRadius: 16 }}
                   />
                 </View>
