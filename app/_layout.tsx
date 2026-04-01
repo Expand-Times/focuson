@@ -4,6 +4,38 @@ import { Stack } from 'expo-router';
 import { ColorProvider } from './context/ColorContext';
 import { AppProvider } from './context/AppContext';
 import { useFonts } from 'expo-font';
+import { Poppins_700Bold, Poppins_400Regular, Poppins_300Light } from '@expo-google-fonts/poppins';
+import { Imprima_400Regular } from '@expo-google-fonts/imprima';
+import { RobotoMono_700Bold, RobotoMono_400Regular, RobotoMono_300Light } from '@expo-google-fonts/roboto-mono';
+import { Monoton_400Regular } from '@expo-google-fonts/monoton';
+import { RampartOne_400Regular } from '@expo-google-fonts/rampart-one';
+import { RubikMoonrocks_400Regular } from '@expo-google-fonts/rubik-moonrocks';
+import { NovaFlat_400Regular } from '@expo-google-fonts/nova-flat';
+import { Codystar_400Regular } from '@expo-google-fonts/codystar';
+import { LeagueGothic_400Regular } from '@expo-google-fonts/league-gothic';
+import { GreatVibes_400Regular } from '@expo-google-fonts/great-vibes';
+import { FingerPaint_400Regular } from '@expo-google-fonts/finger-paint';
+import { GajrajOne_400Regular } from '@expo-google-fonts/gajraj-one';
+import { NovaRound_400Regular } from '@expo-google-fonts/nova-round';
+import { Nunito_700Bold, Nunito_400Regular, Nunito_300Light } from '@expo-google-fonts/nunito';
+import { FredokaOne_400Regular } from '@expo-google-fonts/fredoka-one';
+import { Comfortaa_400Regular, Comfortaa_700Bold, Comfortaa_300Light } from '@expo-google-fonts/comfortaa';
+import { RubikBurned_400Regular } from '@expo-google-fonts/rubik-burned';
+import { RubikScribble_400Regular } from '@expo-google-fonts/rubik-scribble';
+import { Caprasimo_400Regular } from '@expo-google-fonts/caprasimo';
+import { Oxanium_400Regular } from '@expo-google-fonts/oxanium';
+import { Gugi_400Regular } from '@expo-google-fonts/gugi';
+import { PlaywriteUSModern_400Regular } from '@expo-google-fonts/playwrite-us-modern';
+import { Shizuru_400Regular } from '@expo-google-fonts/shizuru';
+import { MontserratAlternates_400Regular } from '@expo-google-fonts/montserrat-alternates';
+import { UnicaOne_400Regular } from '@expo-google-fonts/unica-one';
+import { Goldman_400Regular, Goldman_700Bold } from '@expo-google-fonts/goldman';
+import { LobsterTwo_400Regular, LobsterTwo_700Bold } from '@expo-google-fonts/lobster-two';
+import { Sacramento_400Regular } from '@expo-google-fonts/sacramento';
+import { RobotoSlab_400Regular } from '@expo-google-fonts/roboto-slab';
+import { CourierPrime_400Regular, CourierPrime_700Bold } from '@expo-google-fonts/courier-prime';
+import { Dangrek_400Regular } from '@expo-google-fonts/dangrek';
+import { DynaPuff_400Regular } from '@expo-google-fonts/dynapuff';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
@@ -15,49 +47,49 @@ export default function Layout() {
   const isDarkMode = colorScheme === 'dark';
 
   const [loaded, error] = useFonts({
-    'Poppins-Bold': require('../assets/fonts/Poppins-Bold.ttf'),
-    'Poppins-Regular': require('../assets/fonts/Poppins-Regular.ttf'),
-    'Poppins-Light': require('../assets/fonts/Poppins-Light.ttf'),
-    'Imprima-Regular': require('../assets/fonts/Imprima-Regular.ttf'),
-    'RobotoMono-Bold': require('../assets/fonts/RobotoMono-Bold.ttf'),
-    'RobotoMono-Regular': require('../assets/fonts/RobotoMono-Regular.ttf'),
-    'RobotoMono-Light': require('../assets/fonts/RobotoMono-Light.ttf'),
-    'Monoton-Regular': require('../assets/fonts/Monoton-Regular.ttf'),
-    'RampartOne-Regular': require('../assets/fonts/RampartOne-Regular.ttf'),
-    'RubikMoonrocks-Regular': require('../assets/fonts/RubikMoonrocks-Regular.ttf'),
-    'NovaFlat-Regular': require('../assets/fonts/NovaFlat-Regular.ttf'),
-    'Codystar-Regular': require('../assets/fonts/Codystar-Regular.ttf'),
-    'LeagueGothic-Regular': require('../assets/fonts/LeagueGothic-Regular.ttf'),
-    'GreatVibes-Regular': require('../assets/fonts/GreatVibes-Regular.ttf'),
-    'FingerPaint-Regular': require('../assets/fonts/FingerPaint-Regular.ttf'),
-    'GajrajOne-Regular': require('../assets/fonts/GajrajOne-Regular.ttf'),
-    'NovaRound-Regular': require('../assets/fonts/NovaRound-Regular.ttf'),
-    'Nunito-Bold': require('../assets/fonts/Nunito-Bold.ttf'),
-    'Nunito-Regular': require('../assets/fonts/Nunito-Regular.ttf'),
-    'Nunito-Light': require('../assets/fonts/Nunito-Light.ttf'),
-    'FredokaOne-Regular': require('../assets/fonts/FredokaOne-Regular.ttf'),
-    'Comfortaa-Regular': require('../assets/fonts/Comfortaa-Regular.ttf'),
-    'Comfortaa-Bold': require('../assets/fonts/Comfortaa-Bold.ttf'),
-    'Comfortaa-Light': require('../assets/fonts/Comfortaa-Light.ttf'),
-    'RubikBurned-Regular': require('../assets/fonts/RubikBurned-Regular.ttf'),
-    'RubikScribble-Regular': require('../assets/fonts/RubikScribble-Regular.ttf'),
-    'Caprasimo-Regular': require('../assets/fonts/Caprasimo-Regular.ttf'),
-    'Oxanium-Regular': require('../assets/fonts/Oxanium-Regular.ttf'),
-    'Gugi-Regular': require('../assets/fonts/Gugi-Regular.ttf'),
-    'PlaywriteUSModern-Regular': require('../assets/fonts/PlaywriteUSModern-Regular.ttf'),
-    'Shizuru-Regular': require('../assets/fonts/Shizuru-Regular.ttf'),
-    'MontserratAlternates-Regular': require('../assets/fonts/MontserratAlternates-Regular.ttf'),
-    'UnicaOne-Regular': require('../assets/fonts/UnicaOne-Regular.ttf'),
-    'Goldman-Regular': require('../assets/fonts/Goldman-Regular.ttf'),
-    'Goldman-Bold': require('../assets/fonts/Goldman-Bold.ttf'),
-    'LobsterTwo-Regular': require('../assets/fonts/LobsterTwo-Regular.ttf'),
-    'LobsterTwo-Bold': require('../assets/fonts/LobsterTwo-Bold.ttf'),
-    'Sacramento-Regular': require('../assets/fonts/Sacramento-Regular.ttf'),
-    'RobotoSlab-Regular': require('../assets/fonts/RobotoSlab-Regular.ttf'),
-    'CourierPrime-Regular': require('../assets/fonts/CourierPrime-Regular.ttf'),
-    'CourierPrime-Bold': require('../assets/fonts/CourierPrime-Bold.ttf'),
-    'Dangrek-Regular': require('../assets/fonts/Dangrek-Regular.ttf'),
-    'DynaPuff-Regular': require('../assets/fonts/DynaPuff-Regular.ttf'),
+    Poppins_700Bold,
+    Poppins_400Regular,
+    Poppins_300Light,
+    Imprima_400Regular,
+    RobotoMono_700Bold,
+    RobotoMono_400Regular,
+    RobotoMono_300Light,
+    Monoton_400Regular,
+    RampartOne_400Regular,
+    RubikMoonrocks_400Regular,
+    NovaFlat_400Regular,
+    Codystar_400Regular,
+    LeagueGothic_400Regular,
+    GreatVibes_400Regular,
+    FingerPaint_400Regular,
+    GajrajOne_400Regular,
+    NovaRound_400Regular,
+    Nunito_700Bold,
+    Nunito_400Regular,
+    Nunito_300Light,
+    FredokaOne_400Regular,
+    Comfortaa_400Regular,
+    Comfortaa_700Bold,
+    Comfortaa_300Light,
+    RubikBurned_400Regular,
+    RubikScribble_400Regular,
+    Caprasimo_400Regular,
+    Oxanium_400Regular,
+    Gugi_400Regular,
+    PlaywriteUSModern_400Regular,
+    Shizuru_400Regular,
+    MontserratAlternates_400Regular,
+    UnicaOne_400Regular,
+    Goldman_400Regular,
+    Goldman_700Bold,
+    LobsterTwo_400Regular,
+    LobsterTwo_700Bold,
+    Sacramento_400Regular,
+    RobotoSlab_400Regular,
+    CourierPrime_400Regular,
+    CourierPrime_700Bold,
+    Dangrek_400Regular,
+    DynaPuff_400Regular,
   });
 
   useEffect(() => {
