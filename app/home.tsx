@@ -37,6 +37,7 @@ import { useColorContext } from './context/ColorContext';
 import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import LottieView from 'lottie-react-native';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -892,19 +893,20 @@ export default function Home() {
           className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
           {/* Step 0: Swipe Left (Show on Home) */}
           {tutorialStep === 0 && (
-            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
-              <Image
-                source={require('../assets/Animation/icons8-drag-left.gif')}
-                className="h-24 w-24"
-                resizeMode="contain"
+            <View className="items-center rounded-3xl bg-transparent p-6">
+              <LottieView
+                autoPlay
+                loop
+                source={require('../assets/Animation/drag-left.json')}
+                style={{ width: 96, height: 96 }}
               />
               <Text
-                className="mt-4 text-2xl font-bold italic text-black/40"
+                className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
                 allowFontScaling={false}>
                 Swipe Left
               </Text>
               <Text
-                className="font-regular mt-2 justify-center text-center text-base text-black/40"
+                className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
                 allowFontScaling={false}>
                 To see All Apps list
               </Text>
@@ -913,21 +915,22 @@ export default function Home() {
 
           {/* Step 2: Swipe Right (Show on Home) */}
           {tutorialStep === 2 && (
-            <View className="items-center rounded-3xl bg-white p-6 backdrop-blur-md">
-              <Image
-                source={require('../assets/Animation/icons8-drag-right.gif')}
-                className="h-24 w-24"
-                resizeMode="contain"
+            <View className="items-center rounded-3xl bg-transparent p-6">
+              <LottieView
+                autoPlay
+                loop
+                source={require('../drag-right-JSN.json')}
+                style={{ width: 96, height: 96 }}
               />
               <Text
-                className="mt-4 text-2xl font-bold italic text-black/40"
+                className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
                 allowFontScaling={false}>
                 Swipe Right
               </Text>
               <Text
-                className="font-regular mt-2 justify-center text-center text-base text-black/40"
+                className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
                 allowFontScaling={false}>
-                To see Apps list by {'\n'} Category
+                To see Apps list by Category
               </Text>
             </View>
           )}
