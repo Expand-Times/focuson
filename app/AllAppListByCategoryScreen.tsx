@@ -247,6 +247,20 @@ export default function AllAppListByCategoryScreen({
   };
 
   const handleCreateCategory = async () => {
+    if (!isPremium && customCategories.length >= 2) {
+      Alert.alert(
+        'Premium Feature',
+        'Free users can only create up to 2 custom categories. Please upgrade to Premium to create more.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
+        ]
+      );
+      setCreateCategoryModalVisible(false);
+      setNewCategoryName('');
+      return;
+    }
+
     const trimmedName = newCategoryName.trim();
     if (!trimmedName) return;
 

@@ -98,11 +98,12 @@ export default function PremiumPackageScreen() {
 
   const features = [
     'Up to 6 Favorite Apps',
-    'Up to 6 Color Scheme',
-    'Unlimited App/Category Rename',
-    'Unlimited Hide Privacy App',
-    'Set Home Background Image',
-    'Upcoming premium features',
+    'Up to 22 themes',
+    'Unlimited app Rename',
+    'Category Rename',
+    'Add Category',
+    'Unlimited Hide Privacy app',
+    'Upcoming Premium Features'
   ];
 
   const renderPlanCard = (type: 'monthly' | 'yearly' | 'lifetime', label: string) => {
