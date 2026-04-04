@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Launcher from '../../modules/launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import PermissionAccessScreen from './PermissionAccessScreen';
+//import PermissionAccessScreen from './PermissionAccessScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -82,6 +82,10 @@ export default function IntroUnified() {
         }
       };
       fetchStats();
+    }
+
+    if(step === 8) {
+      router.replace('/home');
     }
   }, [step]);
 
@@ -329,8 +333,8 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      case 8: // Permissions
-        return <PermissionAccessScreen />;
+      //case 8: // Permissions
+        //return <PermissionAccessScreen />;
       default:
         return null;
     }
@@ -408,9 +412,9 @@ export default function IntroUnified() {
     return null;
   };
 
-  if (step === 8) {
-    return <PermissionAccessScreen />;
-  }
+  // if (step === 8) {
+  //   return <PermissionAccessScreen />;
+  // }
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EBF1F7]'}`}>
