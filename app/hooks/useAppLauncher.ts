@@ -91,3 +91,5 @@ export const useAppLauncher = () => {
     checkPermissions
   };
 };
+
+export default function useAppLauncherRoute() { return null; }

@@ -409,3 +409,5 @@ export const BlockedInfoModal = ({
     </Modal>
   );
 };
+
+export default function BlockModals() { return null; }

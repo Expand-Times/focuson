@@ -58,3 +58,5 @@ export async function hasUserRated(): Promise<boolean> {
     return false;
   }
 }
+
+export default function rateAppRoute() { return null; }

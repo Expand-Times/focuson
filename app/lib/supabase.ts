@@ -23,3 +23,5 @@ AppState.addEventListener('change', (state) => {
     supabase.auth.stopAutoRefresh()
   }
 })
+
+export default function supabaseRoute() { return null; }

@@ -24,3 +24,5 @@ export const getFilteredThemeColors = (theme: any): Record<string, string> => {
 
   return themeColors;
 };
+
+export default function themeUtilsRoute() { return null; }
