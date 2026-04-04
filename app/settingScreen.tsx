@@ -1165,10 +1165,11 @@ export default function SettingScreen() {
               snapToInterval={width * 0.8} // ITEM_WIDTH + 2 * SPACING
               decelerationRate="fast"
               snapToAlignment="start"
+              scrollEventThrottle={16}
               initialNumToRender={3}
               maxToRenderPerBatch={3}
               windowSize={5}
-              removeClippedSubviews={Platform.OS === 'android'}
+              removeClippedSubviews={false}
               contentContainerStyle={{
                 paddingHorizontal: (width - width * 0.8) / 2,
               }}

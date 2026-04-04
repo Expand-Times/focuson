@@ -226,10 +226,11 @@ export default function AllAppListByCategoryScreen({
       groups[category].push(app);
     });
 
-    // Convert grouped object to array of Category objects, filter out empty categories,
+    // Convert grouped object to array of Category objects, filter out empty categories
+    // (except for custom categories so they remain visible when created),
     // and sort apps within each category alphabetically
     const result = Object.keys(groups)
-      .filter((title) => groups[title].length > 0)
+      .filter((title) => groups[title].length > 0 || customCategories.includes(title))
       .map((title) => ({
         title,
         data: groups[title].sort((a, b) =>
