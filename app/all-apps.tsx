@@ -439,11 +439,13 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const handleUninstall = async () => {
     if (!selectedApp) return;
     try {
-      Launcher.uninstallApp(selectedApp.packageName);
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
+        {
+          data: 'package:' + selectedApp.packageName,
+        }
+      );
       setOptionsModalVisible(false);
-      setTimeout(() => {
-        refreshApps();
-      }, 2500);
     } catch (e) {
       console.error(e);
     }

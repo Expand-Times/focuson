@@ -314,7 +314,7 @@ export default function AllAppListByCategoryScreen({
 
   const handleUninstall = () => {
     if (!selectedApp) return;
-    IntentLauncher.startActivityAsync('android.intent.action.DELETE', {
+    IntentLauncher.startActivityAsync('android.settings.APPLICATION_DETAILS_SETTINGS', {
       data: 'package:' + selectedApp.packageName,
     });
     closeModal();
