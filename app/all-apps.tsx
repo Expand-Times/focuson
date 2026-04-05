@@ -760,7 +760,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                       className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
                       onPress={handleHideApp}>
                       <Text style={number} className="font-medium text-white">
-                        Hide Away App
+                        Hide
                       </Text>
                     </TouchableOpacity>
                   </View>
