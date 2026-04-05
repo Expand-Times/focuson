@@ -451,6 +451,78 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     }
   };
 
+  const renderHeader = useCallback(() => {
+    return (
+      <View className="mb-4 w-full flex-row items-center justify-between">
+        <Text
+          allowFontScaling={false}
+          style={allappt}
+          className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
+            isImageWallpaper
+              ? 'text-white decoration-white'
+              : isDarkMode
+                ? 'text-[#DADFE5] decoration-[#DADFE5]'
+                : 'text-[#858E9D] decoration-[#858E9D]'
+          }`}>
+          {isSelectMode ? 'Select Apps' : 'All Apps'}
+        </Text>
+        {isSelectMode ? (
+          <View className="flex-row items-center gap-2">
+            <TouchableOpacity
+              className={`rounded-lg px-4 py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+              onPress={() => router.back()}>
+              <Text
+                allowFontScaling={false}
+                className={`text-[14px] font-medium ${
+                  isImageWallpaper
+                    ? 'text-white'
+                    : isDarkMode
+                      ? 'text-[#DADFE5]'
+                      : 'text-[#858E9D]'
+                }`}>
+                Cancel
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              className="items-center rounded-lg bg-[#7EA6E0] px-6 py-2"
+              onPress={handleSaveSelection}>
+              <Text
+                allowFontScaling={false}
+                className={`text-[14px] font-bold ${
+                  isImageWallpaper
+                    ? 'text-white'
+                    : isDarkMode
+                      ? 'text-[#DADFE5]'
+                      : 'text-[#FFFFFF]'
+                }`}>
+                Add
+              </Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <Link href="/settingScreen" asChild>
+            <TouchableOpacity
+              className="p-2"
+              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+              <View style={allappi}>
+                <Image
+                  source={require('../assets/images/SettingIcon.png')}
+                  style={{
+                    width: 30,
+                    height: 30,
+                    tintColor:
+                      allappi?.color ||
+                      (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                  }}
+                />
+              </View>
+            </TouchableOpacity>
+          </Link>
+        )}
+      </View>
+    );
+  }, [allappt, isImageWallpaper, isDarkMode, isSelectMode, router, handleSaveSelection, allappi]);
+
   const renderItem = useCallback(
     ({ item }: { item: FlatListDataItem }) => {
       if (item.type === 'header') {
@@ -518,7 +590,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       )}
       <GestureDetector gesture={rightSwipeGesture}>
         <View
-          className="flex-1 px-4 pt-12"
+          className="flex-1 px-4 pt-12 "
           style={[
             {
               backgroundColor: wallpaper
@@ -527,7 +599,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                   : 'transparent'
                 : isDarkMode
                   ? '#0D121A'
-                  : '#EBF0F7',
+                  : '#f7ebecff',
             },
             wallbg,
           ]}>
@@ -580,82 +652,14 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
             </View>
           </View>
 
-          {/* Header */}
-          <View className="mb-4 w-full flex-row items-center justify-between">
-            <Text
-              allowFontScaling={false}
-              style={allappt}
-              className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
-                isImageWallpaper
-                  ? 'text-white decoration-white'
-                  : isDarkMode
-                    ? 'text-[#DADFE5] decoration-[#DADFE5]'
-                    : 'text-[#858E9D] decoration-[#858E9D]'
-              }`}>
-              {isSelectMode ? 'Select Apps' : 'All Apps'}
-            </Text>
-            {isSelectMode ? (
-              <View className="flex-row items-center gap-2">
-                <TouchableOpacity
-                  className={`rounded-lg px-4 py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-                  onPress={() => router.back()}>
-                  <Text
-                    allowFontScaling={false}
-                    className={`text-[14px] font-medium ${
-                      isImageWallpaper
-                        ? 'text-white'
-                        : isDarkMode
-                          ? 'text-[#DADFE5]'
-                          : 'text-[#858E9D]'
-                    }`}>
-                    Cancel
-                  </Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  className="items-center rounded-lg bg-[#7EA6E0] px-6 py-2"
-                  onPress={handleSaveSelection}>
-                  <Text
-                    allowFontScaling={false}
-                    className={`text-[14px] font-bold ${
-                      isImageWallpaper
-                        ? 'text-white'
-                        : isDarkMode
-                          ? 'text-[#DADFE5]'
-                          : 'text-[#FFFFFF]'
-                    }`}>
-                    Add
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            ) : (
-              <Link href="/settingScreen" asChild>
-                <TouchableOpacity
-                  className="p-2"
-                  hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                  <View style={allappi}>
-                    <Image
-                      source={require('../assets/images/SettingIcon.png')}
-                      style={{
-                        width: 30,
-                        height: 30,
-                        tintColor:
-                          allappi?.color ||
-                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                      }}
-                    />
-                  </View>
-                </TouchableOpacity>
-              </Link>
-            )}
-          </View>
-
+          {/* Apps List */}
           <View className="flex-1 flex-row">
-            {/* Apps List */}
             <View className="w-full px-3 ">
               <FlatList
                 ref={listRef}
                 data={FlatListData}
                 renderItem={renderItem}
+                ListHeaderComponent={renderHeader}
                 keyExtractor={(item: FlatListDataItem) =>
                   item.type === 'header' ? `header-${item.title}` : item.data.packageName
                 }
@@ -925,7 +929,7 @@ const AppListItem = memo(
           <Text
             allowFontScaling={false}
             style={applist}
-            className={`font-regular text-[16px] ${
+            className={`font-regular text-[17px] ${
               isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
             }`}
             numberOfLines={1}>

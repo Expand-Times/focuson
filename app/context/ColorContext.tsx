@@ -81,7 +81,7 @@ const ColorProvider = ({children}: ColorProviderProps) => {
   const [timeFormat, setTimeFormatState] = useState<string>('HH:MM PM');
   const [dateFormat, setDateFormatState] = useState<string>('weekday, day month year');
   const [timeOffset, setTimeOffsetState] = useState<number>(0);
-  const [showStatusBar, setShowStatusBarState] = useState<boolean>(true);
+  const [showStatusBar, setShowStatusBarState] = useState<boolean>(false);
   const [showUsageInfo, setShowUsageInfoState] = useState<boolean>(false);
 
   useEffect(() => {

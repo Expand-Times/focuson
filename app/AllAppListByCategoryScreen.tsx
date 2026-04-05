@@ -519,71 +519,71 @@ export default function AllAppListByCategoryScreen({
               />
             </View>
 
-            {/* Header */}
-            <View className="mb-[6%] flex-row items-center justify-between">
-              <Text
-                allowFontScaling={false}
-                style={appC}
-                className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
-                  isImageWallpaper
-                    ? 'text-white decoration-white'
-                    : isDarkMode
-                      ? 'text-[#DBDFE4] decoration-slate-400'
-                      : 'text-[#142C4D] decoration-[#142C4D]'
-                }`}>
-                App Category
-              </Text>
-              <View className="flex-row items-center gap-4">
-                <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
-                  <View
-                    style={[
-                      appi,
-                      {
-                        borderColor:
-                          appi?.color ||
-                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                      },
-                    ]}
-                    className={`rounded-lg border border-2 ${
-                      isImageWallpaper
-                        ? 'border-white/50'
-                        : isDarkMode
-                          ? 'border-[#728099]'
-                          : 'border-[#858E9D]'
-                    }`}>
-                    <MaterialCommunityIcons
-                      name="plus"
-                      size={25}
-                      color={
-                        appi?.color ||
-                        (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
-                      }
-                    />
-                  </View>
-                </TouchableOpacity>
-                <Link href="/settingScreen" asChild>
-                  <TouchableOpacity>
-                    <View style={appi}>
-                      <Image
-                        source={require('../assets/images/SettingIcon.png')}
-                        style={{
-                          width: 30,
-                          height: 30,
-                          tintColor:
-                            appi?.color ||
-                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                        }}
-                      />
-                    </View>
-                  </TouchableOpacity>
-                </Link>
-              </View>
-            </View>
-
             <ScrollView
               showsVerticalScrollIndicator={false}
               keyboardShouldPersistTaps="handled"
               contentContainerStyle={{ paddingBottom: 40 }}>
+              {/* Header */}
+              <View className="mb-[6%] flex-row items-center justify-between">
+                <Text
+                  allowFontScaling={false}
+                  style={appC}
+                  className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
+                    isImageWallpaper
+                      ? 'text-white decoration-white'
+                      : isDarkMode
+                        ? 'text-[#DBDFE4] decoration-slate-400'
+                        : 'text-[#142C4D] decoration-[#142C4D]'
+                  }`}>
+                  App Category
+                </Text>
+                <View className="flex-row items-center gap-4">
+                  <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
+                    <View
+                      style={[
+                        appi,
+                        {
+                          borderColor:
+                            appi?.color ||
+                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                        },
+                      ]}
+                      className={`rounded-lg border border-2 ${
+                        isImageWallpaper
+                          ? 'border-white/50'
+                          : isDarkMode
+                            ? 'border-[#728099]'
+                            : 'border-[#858E9D]'
+                      }`}>
+                      <MaterialCommunityIcons
+                        name="plus"
+                        size={25}
+                        color={
+                          appi?.color ||
+                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
+                        }
+                      />
+                    </View>
+                  </TouchableOpacity>
+                  <Link href="/settingScreen" asChild>
+                    <TouchableOpacity>
+                      <View style={appi}>
+                        <Image
+                          source={require('../assets/images/SettingIcon.png')}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            tintColor:
+                              appi?.color ||
+                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                          }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </Link>
+                </View>
+              </View>
+
               {filteredCategories.map((category, index) => {
                 const displayTitle = renamedCategories[category.title] || category.title;
 
@@ -664,7 +664,7 @@ export default function AllAppListByCategoryScreen({
                             <Text
                               allowFontScaling={false}
                               style={[applistC, { maxWidth: '90%' }]}
-                              className={`font-regular text-[16px] ${
+                              className={`font-regular text-[17px] ${
                                 isImageWallpaper
                                   ? 'text-white'
                                   : isDarkMode

@@ -380,7 +380,18 @@ export default function Home() {
       });
     });
 
-  const composedGesture = Gesture.Race(mainPanGesture, doubleTap);
+  // Long Press Gesture
+  const longPress = Gesture.LongPress()
+    .minDuration(500)
+    .runOnJS(true)
+    .onStart(() => {
+      const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
+      if (isHome) {
+        router.push('/settingScreen');
+      }
+    });
+
+  const composedGesture = Gesture.Race(mainPanGesture, doubleTap, longPress);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
