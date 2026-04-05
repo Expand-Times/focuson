@@ -880,8 +880,8 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                   ⚙️ -&gt; Hide Away App
                 </Text>
 
-                <View className="flex-row justify-end gap-4 mt-2">
-                  <TouchableOpacity onPress={() => setHideAppModalVisible(false)}>
+                <View className="w-full flex-row gap-3">
+                  <TouchableOpacity className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`} onPress={() => setHideAppModalVisible(false)}>
                     <Text
                       allowFontScaling={false}
                       className={`font-medium ${
@@ -890,10 +890,10 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                       CANCEL
                     </Text>
                   </TouchableOpacity>
-                  <TouchableOpacity onPress={() => confirmHideApp(false)}>
+                  <TouchableOpacity className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3" onPress={() => confirmHideApp(false)}>
                     <Text
                       allowFontScaling={false}
-                      className={`font-bold ${
+                      className={`font-medium ${
                         isDarkMode ? 'text-slate-300' : 'text-slate-800'
                       }`}>
                       OK
