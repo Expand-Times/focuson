@@ -18,7 +18,7 @@ import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import Launcher from '../../modules/launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-//import PermissionAccessScreen from './PermissionAccessScreen';
+import PermissionAccessScreen from './PermissionAccessScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -84,9 +84,9 @@ export default function IntroUnified() {
       fetchStats();
     }
 
-    if(step === 8) {
-      router.replace('/home');
-    }
+    // if(step === 8) {
+    //   router.replace('/home');
+    // }
   }, [step]);
 
   // Chart Helper for Step 10
@@ -333,8 +333,8 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      //case 8: // Permissions
-        //return <PermissionAccessScreen />;
+      case 8: // Permissions
+        return <PermissionAccessScreen />;
       default:
         return null;
     }

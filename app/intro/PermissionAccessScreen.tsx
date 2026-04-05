@@ -68,6 +68,9 @@ export default function PermissionAccessScreen() {
 
   const requestUsageStats = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('usageStats');
+      }
       await startActivityAsync(ActivityAction.USAGE_ACCESS_SETTINGS);
     } catch (e) {
       console.error('Error opening usage settings:', e);
@@ -76,6 +79,9 @@ export default function PermissionAccessScreen() {
 
   const requestOverlay = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('overlay');
+      }
       await startActivityAsync(ActivityAction.MANAGE_OVERLAY_PERMISSION, {
         data: `package:${packageName}`,
       });
@@ -86,6 +92,7 @@ export default function PermissionAccessScreen() {
 
   const openAccessibility = async () => {
     try {
+      Launcher.prepareToReturnFromAccessibility();
       await startActivityAsync(ActivityAction.ACCESSIBILITY_SETTINGS);
     } catch (e) {
       console.error('Error opening accessibility settings:', e);
@@ -94,6 +101,9 @@ export default function PermissionAccessScreen() {
 
   const requestBattery = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('battery');
+      }
       await startActivityAsync(ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, {
         data: `package:${packageName}`,
       });
@@ -191,6 +201,14 @@ export default function PermissionAccessScreen() {
         {/* Permissions List */}
         <View className="px-4">
           <PermissionCard
+            icon={<Image source={require('@/assets/images/Accessibility.png')} style={{ width: 24, height: 28, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
+            title="Accessibility Service"
+            description="Required to access web distraction usage and block harmful surfing."
+            hasPermission={permissions.accessibility}
+            onPress={openAccessibility}
+          />
+
+          <PermissionCard
             icon={<Image source={require('@/assets/images/AppUsage.png')} style={{ width: 24, height: 26, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
             title="Access App Usage Data"
             description="Required to block distracting app. Also use to track screen time."
@@ -204,14 +222,6 @@ export default function PermissionAccessScreen() {
             description="Required to display an overlay over blocked distracting apps."
             hasPermission={permissions.overlay}
             onPress={requestOverlay}
-          />
-
-          <PermissionCard
-            icon={<Image source={require('@/assets/images/Accessibility.png')} style={{ width: 24, height: 28, tintColor: isDarkMode ? '#DADFE5' : '#7EA9E5' }} />}
-            title="Accessibility Service"
-            description="Required to access web distraction usage and block harmful surfing."
-            hasPermission={permissions.accessibility}
-            onPress={openAccessibility}
           />
 
           <PermissionCard

@@ -10,10 +10,12 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
   checkUsageStatsPermission(): boolean;
   openUsageAccessSettings(): void;
   checkOverlayPermission(): boolean;
+  watchPermissionAndReturn(permissionType: string): boolean;
   checkNotificationPermission(): boolean;
   openNotificationSettings(): void;
   isAccessibilityServiceEnabled(): boolean;
   openAccessibilitySettings(): void;
+  prepareToReturnFromAccessibility(): void;
   isIgnoringBatteryOptimizations(): boolean;
   isDefaultLauncher(): boolean;
   lockScreen(): boolean;

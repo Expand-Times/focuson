@@ -341,6 +341,15 @@ class LauncherModule : Module() {
         return@Function true
     }
 
+    Function("watchPermissionAndReturn") { permissionType: String ->
+        val service = LauncherAccessibilityService.instance?.get()
+        if (service != null) {
+            service.startWatchingPermission(permissionType)
+            return@Function true
+        }
+        return@Function false
+    }
+
     Function("isAccessibilityServiceEnabled") {
         val expectedComponentName = context.packageName + "/" + LauncherAccessibilityService::class.java.canonicalName
         val enabledServicesSetting = Settings.Secure.getString(context.contentResolver, Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES) ?: return@Function false
@@ -373,6 +382,11 @@ class LauncherModule : Module() {
         val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(intent)
+    }
+
+    Function("prepareToReturnFromAccessibility") {
+        val prefs = context.getSharedPreferences("LauncherPrefs", Context.MODE_PRIVATE)
+        prefs.edit().putLong("awaiting_accessibility_ts", System.currentTimeMillis()).apply()
     }
 
     Function("isIgnoringBatteryOptimizations") {

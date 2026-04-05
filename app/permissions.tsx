@@ -46,6 +46,9 @@ export default function Permissions() {
 
   const requestUsageStats = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('usageStats');
+      }
       await startActivityAsync(ActivityAction.USAGE_ACCESS_SETTINGS);
     } catch (e) {
       console.error("Error opening usage settings:", e);
@@ -54,6 +57,9 @@ export default function Permissions() {
 
   const requestOverlay = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('overlay');
+      }
       await startActivityAsync(ActivityAction.MANAGE_OVERLAY_PERMISSION, {
         data: `package:${packageName}`
       });
@@ -64,6 +70,9 @@ export default function Permissions() {
 
   const requestNotification = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('notification');
+      }
       if (Platform.OS === 'android' && Platform.Version >= 33) {
           // Android 13+ requires explicit request
           Launcher.openNotificationSettings();
@@ -78,6 +87,7 @@ export default function Permissions() {
 
   const openAccessibility = async () => {
     try {
+      Launcher.prepareToReturnFromAccessibility();
       await startActivityAsync(ActivityAction.ACCESSIBILITY_SETTINGS);
     } catch (e) {
       console.error("Error opening accessibility settings:", e);
@@ -86,6 +96,9 @@ export default function Permissions() {
 
   const requestBattery = async () => {
     try {
+      if (permissions.accessibility) {
+        Launcher.watchPermissionAndReturn('battery');
+      }
       await startActivityAsync(ActivityAction.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, {
         data: `package:${packageName}`
       });
@@ -133,6 +146,13 @@ export default function Permissions() {
         </Text>
 
         <PermissionItem 
+          title="Accessibility Service"  
+          description="Enable 'MinimalLife Accessibility' to support gestures and global actions."
+          hasPermission={permissions.accessibility}
+          onPress={openAccessibility}
+        />
+
+        <PermissionItem 
           title="App Usage Data" 
           description="Required to show your app usage statistics and time spent."
           hasPermission={permissions.usageStats}
@@ -151,13 +171,6 @@ export default function Permissions() {
           description="Required for the usage monitor service to run in the background."
           hasPermission={permissions.notification}
           onPress={requestNotification}
-        />
-
-        <PermissionItem 
-          title="Accessibility Service"  
-          description="Enable 'MinimalLife Accessibility' to support gestures and global actions."
-          hasPermission={permissions.accessibility}
-          onPress={openAccessibility}
         />
 
         <PermissionItem 
