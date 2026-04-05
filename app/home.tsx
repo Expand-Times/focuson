@@ -38,6 +38,7 @@ import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
+import { BlockedInfoModal } from './components/BlockModals';
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -48,7 +49,10 @@ export default function Home() {
     appRenames,
     pinnedPackageNames,
     blockedPackageNames,
+    hiddenApps,
     isExcludedFromTimer,
+    isTemporarilyBlocked,
+    timedBlocks,
   } = useAppContext();
   const {
     wallpaper,
@@ -188,6 +192,8 @@ export default function Home() {
   // Home Apps State
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
   useEffect(() => {
     // Update time immediately when timeOffset changes
@@ -605,7 +611,7 @@ export default function Home() {
                       ]}
                     />
 
-                    {homeApps.map((app) => (
+                    {homeApps.filter(app => !hiddenApps.includes(app.packageName)).map((app) => (
                       <View
                         key={app.packageName}
                         className="relative mb-4 w-full flex-row items-center py-2">
@@ -634,8 +640,12 @@ export default function Home() {
                         <TouchableOpacity
                           className="ml-auto w-[40%] items-start pl-6"
                           onPress={() => {
-                            if (isExcludedFromTimer(app.packageName)) {
-                              openApplication(app.packageName);
+                            if (isTemporarilyBlocked(app.packageName)) {
+                              setSelectedApp(app);
+                              setBlockedUntil(timedBlocks[app.packageName] || null);
+                              setBlockedInfoVisible(true);
+                            } else if (isExcludedFromTimer(app.packageName)) {
+                              Launcher.openApp(app.packageName);
                             } else {
                               setSelectedApp(app);
                               setModalVisible(true);
@@ -654,13 +664,17 @@ export default function Home() {
                     ))}
                   </View>
                 ) : (
-                  homeApps.map((app) => (
+                  homeApps.filter(app => !hiddenApps.includes(app.packageName)).map((app) => (
                     <TouchableOpacity
                       key={app.packageName}
                       className={`w-fulL mb-4  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}
                       onPress={() => {
-                        if (isExcludedFromTimer(app.packageName)) {
-                          openApplication(app.packageName);
+                        if (isTemporarilyBlocked(app.packageName)) {
+                          setSelectedApp(app);
+                          setBlockedUntil(timedBlocks[app.packageName] || null);
+                          setBlockedInfoVisible(true);
+                        } else if (isExcludedFromTimer(app.packageName)) {
+                          Launcher.openApp(app.packageName);
                         } else {
                           setSelectedApp(app);
                           setModalVisible(true);
@@ -669,7 +683,7 @@ export default function Home() {
                       <Text
                         allowFontScaling={false}
                         style={home}
-                        className={`font-regular text-[16px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                        className={`font-regular text-[17px] tracking-wide ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                         {(appRenames[app.packageName] || app.label).length > 15
                           ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
                           : appRenames[app.packageName] || app.label}
@@ -833,6 +847,15 @@ export default function Home() {
                 onLaunch={handleLaunchApp}
                 isDarkMode={isDarkMode}
                 theme={fontConfig}
+              />
+              <BlockedInfoModal
+                visible={blockedInfoVisible}
+                onClose={() => setBlockedInfoVisible(false)}
+                isDarkMode={isDarkMode}
+                theme={fontConfig}
+                appLabel={selectedApp?.label}
+                unblockAt={blockedUntil}
+                appIconBase64={selectedApp?.icon}
               />
             </View>
           </View>

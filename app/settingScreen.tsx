@@ -12,7 +12,9 @@ import {
   ActivityIndicator,
   Platform,
   Share,
+  FlatList,
 } from 'react-native';
+import { useAppContext } from './context/AppContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
 import { Link, useRouter } from 'expo-router';
@@ -23,6 +25,8 @@ import SignInWithGoogle from './SignInWithGoogle';
 import { openPlayStoreForRating } from './lib/rateApp';
 import { Dimensions } from 'react-native';
 import { StatusBar } from 'react-native';
+import { openApplication } from 'expo-intent-launcher';
+import { BlockedInfoModal } from './components/BlockModals';
 const { width } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -140,8 +144,9 @@ export default function SettingScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const [currentThemeIndex, setCurrentThemeIndex] = useState(0);
+  const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
 
-  const [reminderOption, setReminderOption] = useState('mindful'); // mindful, remind, quit
+  const [reminderOption, setReminderOption] = useState('quit'); // mindful, remind, quit
   const [isProcessing, setIsProcessing] = useState(false);
 
   useEffect(() => {
@@ -154,7 +159,7 @@ export default function SettingScreen() {
       if (stored) {
         setReminderOption(stored);
       } else {
-        setReminderOption('remind');
+        setReminderOption('quit');
       }
     } catch (e) {
       console.error('Failed to load reminder option', e);
@@ -188,6 +193,15 @@ export default function SettingScreen() {
     throw new Error('ColorContext is not available');
   }
   const {
+    apps,
+    appRenames,
+    hiddenApps,
+    toggleHideApp,
+    isTemporarilyBlocked,
+    timedBlocks,
+  } = useAppContext();
+
+  const {
     isDarkMode,
     isPremium,
     setWallpaper,
@@ -204,6 +218,32 @@ export default function SettingScreen() {
     showStatusBar,
     setShowStatusBar,
   } = useColorContext();
+
+  const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
+  const [selectedBlockedApp, setSelectedBlockedApp] = useState<{
+    label: string;
+    icon: string;
+    packageName: string;
+  } | null>(null);
+  const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+
+  const handleOpenHiddenApp = (pkg: string, app: any) => {
+    if (isTemporarilyBlocked(pkg)) {
+      setSelectedBlockedApp(app ? {
+        label: appRenames[pkg] || app.label,
+        icon: app.icon,
+        packageName: pkg
+      } : {
+        label: pkg,
+        icon: '',
+        packageName: pkg
+      });
+      setBlockedUntil(timedBlocks[pkg] || null);
+      setBlockedInfoVisible(true);
+    } else {
+      openApplication(pkg);
+    }
+  };
 
   const handleApplyTheme = () => {
     const isLocked = !isPremium && currentThemeIndex >= 4;
@@ -834,6 +874,21 @@ export default function SettingScreen() {
                 inActiveColor={isDarkMode ? '#4B5563' : '#A3B9D9'}
               />
             </View>
+            {/* Hide Away App */}
+            <TouchableOpacity 
+              className="mb-[4%] mt-[4%] flex-row items-center justify-between px-4"
+              onPress={() => setHideAppModalVisible(true)}>
+              <Text
+                allowFontScaling={false}
+                className={`text-[16px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+                Hide Away App
+              </Text>
+              <MaterialCommunityIcons
+                name="chevron-right"
+                size={24}
+                color={isDarkMode ? '#4B5563' : '#A3B9D9'}
+              />
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -1211,23 +1266,7 @@ export default function SettingScreen() {
                         isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
                       }`}>
                       <Image source={item.img} className="h-full w-full" resizeMode="cover" />
-                      {!isPremium && index >= 4 && (
-                        <View
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
-                            backgroundColor: 'rgba(0,0,0,0.4)',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                          }}>
-                          <Text allowFontScaling={false} className="text-white text-base font-semibold">
-                            Premium
-                          </Text>
-                        </View>
-                      )}
+                     
                     </View>
                   </Animated.View>
                 );
@@ -1280,6 +1319,98 @@ export default function SettingScreen() {
           )}
         </SafeAreaView>
       </Modal>
+
+      {/* Hidden Apps Modal */}
+      <Modal
+        visible={hideAppModalVisible}
+        animationType="slide"
+        onRequestClose={() => setHideAppModalVisible(false)}>
+        <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0F172A]' : 'bg-[#E1EAF5]'}`}>
+          <View className="flex-row items-center justify-between px-4 py-4">
+            <TouchableOpacity onPress={() => setHideAppModalVisible(false)}>
+              <Ionicons name="close" size={28} color={isDarkMode ? '#DBDFE5' : '#2E3B4D'} />
+            </TouchableOpacity>
+            <Text
+              allowFontScaling={false}
+              className={`text-xl font-bold ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+              Hidden Apps
+            </Text>
+            <View className="w-7" />
+          </View>
+
+          <FlatList
+              data={hiddenApps}
+              keyExtractor={(pkg) => pkg}
+              contentContainerStyle={{ paddingHorizontal: 16, paddingBottom: 20 }}
+              renderItem={({ item: pkg }) => {
+                // If app is not found in apps list, we can at least show the package name
+                // so the user can still unhide it
+                const app = apps.find((a) => a.packageName === pkg);
+
+                return (
+                  <View
+                    className={`mb-3 flex-row items-center justify-between rounded-xl p-4 shadow-sm ${
+                      isDarkMode ? 'bg-[#131B27]' : 'bg-white'
+                    }`}>
+                    <View className="flex-1 flex-row items-center">
+                      {app?.icon && (
+                        <Image
+                          source={{ uri: `data:image/png;base64,${app.icon}` }}
+                          className="mr-3 h-10 w-10 rounded-full"
+                        />
+                      )}
+                      <Text
+                        allowFontScaling={false}
+                        className={`text-[16px] font-medium ${
+                          isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'
+                        }`}>
+                        {app ? (appRenames[app.packageName] || app.label) : pkg}
+                      </Text>
+                    </View>
+                    <View className="flex-row items-center gap-2">
+                      <TouchableOpacity
+                        className="rounded-lg bg-[#5B8BDF] px-4 py-2"
+                        onPress={() => handleOpenHiddenApp(pkg, app)}>
+                        <Text allowFontScaling={false} className="font-medium text-white">
+                          Open
+                        </Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        className="rounded-lg bg-[#7EA9E5] px-4 py-2"
+                        onPress={async () => {
+                          await toggleHideApp(pkg);
+                        }}>
+                        <Text allowFontScaling={false} className="font-medium text-white">
+                          Unhide
+                        </Text>
+                      </TouchableOpacity>
+                    </View>
+                   
+                  </View>
+                );
+              }}
+            ListEmptyComponent={
+              <View className="mt-10 items-center justify-center">
+                <Text
+                  allowFontScaling={false}
+                  className={`text-[16px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  No hidden apps.
+                </Text>
+              </View>
+            }
+          />
+        </SafeAreaView>
+      </Modal>
+
+      {/* Blocked Info Modal */}
+      <BlockedInfoModal
+        visible={blockedInfoVisible}
+        onClose={() => setBlockedInfoVisible(false)}
+        isDarkMode={isDarkMode}
+        appLabel={selectedBlockedApp?.label}
+        unblockAt={blockedUntil}
+        appIconBase64={selectedBlockedApp?.icon}
+      />
     </View>
   );
 }

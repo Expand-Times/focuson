@@ -21,6 +21,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import Launcher from '../modules/launcher';
@@ -83,6 +84,8 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     toggleBlockApp,
     appRenames,
     renameApp,
+    hiddenApps,
+    toggleHideApp,
     isExcludedFromTimer,
     setTimedBlock,
     isTemporarilyBlocked,
@@ -107,6 +110,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [newName, setNewName] = useState('');
   const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
@@ -156,8 +160,10 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
-    // Filter blocked apps
-    const visibleApps = apps.filter((app) => !blockedPackageNames.includes(app.packageName));
+    // Filter blocked and hidden apps
+    const visibleApps = apps.filter(
+      (app) => !blockedPackageNames.includes(app.packageName) && !hiddenApps.includes(app.packageName)
+    );
 
     // Separate pinned and unpinned, and apply renames
     const pinned: AppItem[] = [];
@@ -225,7 +231,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     }
 
     return result;
-  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, appRenames]);
+  }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, hiddenApps, appRenames]);
 
   const FlatListData = useMemo(() => {
     const data: FlatListDataItem[] = [];
@@ -275,7 +281,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
           setBlockedUntil(timedBlocks[app.packageName] || null);
           setBlockedInfoVisible(true);
         } else if (isExcludedFromTimer(app.packageName)) {
-          openApplication(app.packageName);
+          Launcher.openApp(app.packageName);
         } else {
           setSelectedApp(app);
           setModalVisible(true);
@@ -387,9 +393,8 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       ]);
       return;
     }
-    setNewName(selectedApp.label);
+    setNewName(appRenames[selectedApp.packageName] || selectedApp.label);
     setRenameModalVisible(true);
-    setOptionsModalVisible(false);
     setSoftInputEnabled(false);
   };
 
@@ -436,15 +441,16 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     }
   };
 
-  const handleUninstall = async () => {
+  const handleHideApp = async () => {
+    if (!selectedApp) return;
+    setHideAppModalVisible(true);
+  };
+
+  const confirmHideApp = async (dontShowAgain: boolean) => {
     if (!selectedApp) return;
     try {
-      await IntentLauncher.startActivityAsync(
-        IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
-        {
-          data: 'package:' + selectedApp.packageName,
-        }
-      );
+      await toggleHideApp(selectedApp.packageName);
+      setHideAppModalVisible(false);
       setOptionsModalVisible(false);
     } catch (e) {
       console.error(e);
@@ -752,9 +758,9 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                     <TouchableOpacity
                       style={numberbg}
                       className={`w-[48%] items-center rounded-xl py-3 ${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#7EA9E5]'}`}
-                      onPress={handleUninstall}>
+                      onPress={handleHideApp}>
                       <Text style={number} className="font-medium text-white">
-                        Uninstall
+                        Hide Away App
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -838,6 +844,66 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
               </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
           </Modal>
+
+          {/* Hide App Modal */}
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={hideAppModalVisible}
+            onRequestClose={() => setHideAppModalVisible(false)}>
+            <View className="flex-1 items-center justify-center bg-black/50 px-4">
+              <View
+                style={modalbg}
+                className={`w-full max-w-[320px] rounded-2xl p-6 shadow-lg ${
+                  isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+                }`}>
+                <Text
+                  style={appC}
+                  allowFontScaling={false}
+                  className={`mb-4 text-xl font-bold ${
+                    isDarkMode ? 'text-slate-300' : 'text-slate-800'
+                  }`}>
+                  Hidden apps
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  className={`mb-2 text-[16px] ${
+                    isDarkMode ? 'text-slate-400' : 'text-slate-600'
+                  }`}>
+                  You can find all your hidden apps in
+                </Text>
+                <Text
+                  allowFontScaling={false}
+                  className={`mb-6 text-[16px] font-medium ${
+                    isDarkMode ? 'text-slate-300' : 'text-slate-800'
+                  }`}>
+                  ⚙️ -&gt; Hide Away App
+                </Text>
+
+                <View className="flex-row justify-end gap-4 mt-2">
+                  <TouchableOpacity onPress={() => setHideAppModalVisible(false)}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`font-medium ${
+                        isDarkMode ? 'text-slate-300' : 'text-slate-600'
+                      }`}>
+                      CANCEL
+                    </Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => confirmHideApp(false)}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`font-bold ${
+                        isDarkMode ? 'text-slate-300' : 'text-slate-800'
+                      }`}>
+                      OK
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
+            </View>
+          </Modal>
+
         </View>
       </GestureDetector>
       <BlockDurationModal
@@ -901,7 +967,7 @@ const AppListItem = memo(
         } ${isSelectMode && isSelected ? '' : ''}`}
         onPress={() => onPress(item)}
         onLongPress={() => onLongPress(item)}
-        delayLongPress={100}
+        delayLongPress={300}
         android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
         <View className="flex-1 flex-row items-center">
           {isSelectMode && (

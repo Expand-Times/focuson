@@ -19,6 +19,9 @@ type AppContextType = {
   blockedPackageNames: string[];
   toggleBlockApp: (packageName: string) => Promise<void>;
 
+  hiddenApps: string[];
+  toggleHideApp: (packageName: string) => Promise<void>;
+
   appRenames: Record<string, string>;
   renameApp: (packageName: string, newName: string) => Promise<void>;
 
@@ -70,6 +73,9 @@ const AppContext = createContext<AppContextType>({
   blockedPackageNames: [],
   toggleBlockApp: async () => {},
 
+  hiddenApps: [],
+  toggleHideApp: async () => {},
+
   appRenames: {},
   renameApp: async () => {},
 
@@ -82,7 +88,7 @@ const AppContext = createContext<AppContextType>({
   renamedCategories: {},
   renameCategory: async () => {},
 
-  reminderOption: 'remind',
+  reminderOption: 'quit',
   setReminderOptionState: async () => {},
 
   isExcludedFromTimer: () => true,
@@ -99,11 +105,12 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const [homeApps, setHomeApps] = useState<AppItem[]>([]);
   const [pinnedPackageNames, setPinnedPackageNames] = useState<string[]>([]);
   const [blockedPackageNames, setBlockedPackageNames] = useState<string[]>([]);
+  const [hiddenApps, setHiddenApps] = useState<string[]>([]);
   const [appRenames, setAppRenames] = useState<Record<string, string>>({});
   const [customCategories, setCustomCategories] = useState<string[]>([]);
   const [categoryOverrides, setCategoryOverrides] = useState<Record<string, string>>({});
   const [renamedCategories, setRenamedCategories] = useState<Record<string, string>>({});
-  const [reminderOption, setReminderOption] = useState<'mindful' | 'remind' | 'quit'>('remind');
+  const [reminderOption, setReminderOption] = useState<'mindful' | 'remind' | 'quit'>('quit');
   const [timedBlocks, setTimedBlocks] = useState<Record<string, number>>({});
 
   const fetchApps = async () => {
@@ -124,6 +131,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         storedHomeApps,
         storedPinned,
         storedBlocked,
+        storedHidden,
         storedRenames,
         storedCustomCats,
         storedCatOverrides,
@@ -134,6 +142,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
         AsyncStorage.getItem('homeApps'),
         AsyncStorage.getItem('pinnedApps'),
         AsyncStorage.getItem('blockedApps'),
+        AsyncStorage.getItem('hiddenApps'),
         AsyncStorage.getItem('appRenames'),
         AsyncStorage.getItem('customCategories'),
         AsyncStorage.getItem('categoryOverrides'),
@@ -145,6 +154,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       if (storedHomeApps) setHomeApps(JSON.parse(storedHomeApps));
       if (storedPinned) setPinnedPackageNames(JSON.parse(storedPinned));
       if (storedBlocked) setBlockedPackageNames(JSON.parse(storedBlocked));
+      if (storedHidden) setHiddenApps(JSON.parse(storedHidden));
       if (storedRenames) setAppRenames(JSON.parse(storedRenames));
       if (storedCustomCats) setCustomCategories(JSON.parse(storedCustomCats));
       if (storedCatOverrides) setCategoryOverrides(JSON.parse(storedCatOverrides));
@@ -204,6 +214,14 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
       : [...blockedPackageNames, packageName];
     setBlockedPackageNames(newBlocked);
     await AsyncStorage.setItem('blockedApps', JSON.stringify(newBlocked));
+  };
+
+  const toggleHideApp = async (packageName: string) => {
+    const newHidden = hiddenApps.includes(packageName)
+      ? hiddenApps.filter(p => p !== packageName)
+      : [...hiddenApps, packageName];
+    setHiddenApps(newHidden);
+    await AsyncStorage.setItem('hiddenApps', JSON.stringify(newHidden));
   };
 
   const renameApp = async (packageName: string, newName: string) => {
@@ -291,6 +309,8 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     togglePinApp,
     blockedPackageNames,
     toggleBlockApp,
+    hiddenApps,
+    toggleHideApp,
     appRenames,
     renameApp,
     customCategories,
@@ -312,6 +332,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
     homeApps,
     pinnedPackageNames,
     blockedPackageNames,
+    hiddenApps,
     appRenames,
     customCategories,
     categoryOverrides,

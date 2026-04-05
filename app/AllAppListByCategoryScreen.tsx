@@ -1,3 +1,4 @@
+
 import { useAppLauncher } from './hooks/useAppLauncher';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -59,6 +60,8 @@ export default function AllAppListByCategoryScreen({
     renameCategory,
     categoryOverrides,
     setCategoryOverride,
+    hiddenApps,
+    toggleHideApp,
     appRenames,
     renameApp,
     customCategories,
@@ -90,6 +93,7 @@ export default function AllAppListByCategoryScreen({
   const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
   const [blockModalVisible, setBlockModalVisible] = useState(false);
+  const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [screenTimeVisible, setScreenTimeVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
@@ -122,10 +126,10 @@ export default function AllAppListByCategoryScreen({
   useEffect(() => {
     // Re-categorize when overrides or renames change
     if (!appsLoading) {
-      const categorized = categorizeApps(apps);
+      const categorized = categorizeApps(apps.filter(app => !hiddenApps.includes(app.packageName)));
       setCategories(categorized);
     }
-  }, [apps, appsLoading, categoryOverrides, appRenames, customCategories]);
+  }, [apps, appsLoading, categoryOverrides, appRenames, customCategories, hiddenApps]);
 
   const ensurePremium = () => {
     if (!isPremium) {
@@ -312,19 +316,26 @@ export default function AllAppListByCategoryScreen({
     closeModal();
   };
 
-  const handleUninstall = () => {
+  const handleUninstall = async () => {
     if (!selectedApp) return;
-    IntentLauncher.startActivityAsync('android.settings.APPLICATION_DETAILS_SETTINGS', {
-      data: 'package:' + selectedApp.packageName,
-    });
-    closeModal();
+    try {
+      await IntentLauncher.startActivityAsync(
+        IntentLauncher.ActivityAction.APPLICATION_DETAILS_SETTINGS,
+        {
+          data: 'package:' + selectedApp.packageName,
+        }
+      );
+      closeModal();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const startAppRenaming = () => {
     Keyboard.dismiss();
     if (!ensurePremium()) return;
     if (!selectedApp) return;
-    setTempAppName(selectedApp.label);
+    setTempAppName(appRenames[selectedApp.packageName] || selectedApp.label);
     setShowAppRenamer(true);
     setSoftInputEnabled(false);
   };
@@ -346,6 +357,22 @@ export default function AllAppListByCategoryScreen({
       console.error('Failed to save app rename', e);
     }
     closeModal();
+  };
+
+  const handleHideApp = async () => {
+    if (!selectedApp) return;
+    setHideAppModalVisible(true);
+  };
+
+  const confirmHideApp = async (dontShowAgain: boolean) => {
+    if (!selectedApp) return;
+    try {
+      await toggleHideApp(selectedApp.packageName);
+      setHideAppModalVisible(false);
+      closeModal();
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const handleConfirmBlock = async (durationMs: number) => {
@@ -646,7 +673,7 @@ export default function AllAppListByCategoryScreen({
                           }`}
                           onPress={() => handlePress(app)}
                           onLongPress={() => handleLongPress(app)}
-                          delayLongPress={100} // ⚡ ultra fast
+                          delayLongPress={300} // ⚡ ultra fast
                           android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
                           <View className="mr-2 flex-1 flex-row items-center">
                             {wallpaperIndex === 6 && (
@@ -876,6 +903,137 @@ export default function AllAppListByCategoryScreen({
             appLabel={selectedApp?.label}
             packageName={selectedApp?.packageName}
           />
+
+         
+
+          {/* Rename App Modal */}
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={showAppRenamer}
+            onRequestClose={() => setShowAppRenamer(false)}>
+            <KeyboardAvoidingView
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+              style={{ flex: 1 }}>
+              <TouchableWithoutFeedback onPress={() => setShowAppRenamer(false)}>
+                <View className="flex-1 items-center justify-center bg-black/50">
+                  <TouchableWithoutFeedback>
+                    <View
+                      style={modalbg}
+                      className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
+                      <Text
+                        style={appC}
+                        allowFontScaling={false}
+                        className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
+                        Rename App
+                      </Text>
+
+                      <TextInput
+                        value={tempAppName}
+                        onChangeText={setTempAppName}
+                        style={[appC, applistCbg]}
+                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
+                          isImageWallpaper
+                            ? 'border-white/20 text-white'
+                            : isDarkMode
+                              ? 'border-slate-600 bg-slate-800 text-slate-300'
+                              : 'border-slate-300 bg-slate-50 text-slate-700'
+                        }`}
+                        autoFocus
+                        showSoftInputOnFocus={softInputEnabled}
+                        onTouchEnd={() => setSoftInputEnabled(true)}
+                      />
+
+                      <View className="w-full flex-row gap-3">
+                        <TouchableOpacity
+                          className={`flex-1 items-center rounded-lg py-3 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
+                          onPress={() => setShowAppRenamer(false)}>
+                          <Text
+                            allowFontScaling={false}
+                            className={`font-medium ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
+                            Cancel
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          className="flex-1 items-center rounded-lg bg-[#7EA6E0] py-3"
+                          onPress={saveAppRename}>
+                          <Text allowFontScaling={false} className="font-medium text-white">
+                            Save
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </TouchableWithoutFeedback>
+                </View>
+              </TouchableWithoutFeedback>
+            </KeyboardAvoidingView>
+          </Modal>
+
+          {/* Category Selector Modal */}
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={showCategorySelector}
+            onRequestClose={() => setShowCategorySelector(false)}>
+            <View className="flex-1 items-center justify-center bg-black/50">
+              <View
+                style={modalbg}
+                className={`max-h-[50%] w-[85%]  rounded-2xl p-6 shadow-lg ${
+                  isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
+                }`}>
+                <Text
+                  style={appC}
+                  allowFontScaling={false}
+                  className={`mb-4 text-xl font-bold ${
+                    isDarkMode ? 'text-slate-300' : 'text-slate-800'
+                  }`}>
+                  Select Category
+                </Text>
+                <ScrollView showsVerticalScrollIndicator={false} className="w-full">
+                  {categories.map((category) => (
+                    <TouchableOpacity
+                      key={category.title}
+                      style={applistCbg}
+                      className={`mb-2 w-full flex-row items-center rounded-xl p-4 ${
+                        isImageWallpaper
+                          ? 'bg-white/10'
+                          : isDarkMode
+                            ? 'bg-slate-800/50'
+                            : 'bg-slate-50'
+                      }`}
+                      onPress={() => handleMoveApp(category.title)}>
+                      <Text
+                        style={appC}
+                        allowFontScaling={false}
+                        className={`text-[16px] font-medium ${
+                          isImageWallpaper
+                            ? 'text-white'
+                            : isDarkMode
+                              ? 'text-slate-300'
+                              : 'text-slate-700'
+                        }`}>
+                        {renamedCategories[category.title] || category.title}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </ScrollView>
+                <TouchableOpacity
+                  style={quitbg}
+                  className={`mt-4 w-full items-center rounded-xl py-3 ${
+                    isDarkMode ? 'bg-[#212D41]' : 'bg-[#5B8BDF]'
+                  }`}
+                  onPress={() => setShowCategorySelector(false)}>
+                  <Text
+                    style={quit}
+                    allowFontScaling={false}
+                    className={`font-medium ${isDarkMode ? 'text-slate-400' : 'text-white'}`}>
+                    Cancel
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          </Modal>
+
           {/* Rename Category Modal */}
           <Modal
             animationType="fade"

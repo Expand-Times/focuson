@@ -310,7 +310,7 @@ export default function AppModal({
                 style={quit}
                 allowFontScaling={false}
                 className="text-base font-medium text-white">
-                Quit
+                {reminderOption === 'remind' ? 'Remind' : 'Quit'}
               </Text>
             </TouchableOpacity>
           </View>

@@ -66,7 +66,7 @@ interface ColorProviderProps {
 
 // Default color constants
 const DEFAULT_COLOR = '#7EA9E5';
-const DEFAULT_PREMIUM = false;
+const DEFAULT_PREMIUM = true;
 
 const ColorProvider = ({children}: ColorProviderProps) => {
   const [selectedColor, setSelectedColorState] = useState<string>(DEFAULT_COLOR);
