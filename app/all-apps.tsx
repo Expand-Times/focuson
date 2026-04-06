@@ -875,7 +875,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                 <Text
                   allowFontScaling={false}
                   className={`mb-6 text-[16px] font-medium ${
-                    isDarkMode ? 'text-slate-300' : 'text-slate-800'
+                    isDarkMode ? 'text-slate-400' : 'text-slate-600'
                   }`}>
                   ⚙️ -&gt; Hide Away App
                 </Text>

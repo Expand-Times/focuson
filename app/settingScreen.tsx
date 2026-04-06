@@ -27,6 +27,9 @@ import { Dimensions } from 'react-native';
 import { StatusBar } from 'react-native';
 import { openApplication } from 'expo-intent-launcher';
 import { BlockedInfoModal } from './components/BlockModals';
+import LottieView from 'lottie-react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+
 const { width } = Dimensions.get('window');
 const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
@@ -108,26 +111,26 @@ const CustomSwitch = React.memo(({
 });
 
 const THEME_DATA = [
-  { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Pitch Black' },
-  { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Clean White' },
-  { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Desert Dusk' },
-  { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Desert Dusk' },
-  { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Neon City' },
-  { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Midnight Purple' },
-  { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Forest Green' },
-  { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Ocean Blue' },
-  { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Sunset Vibes' },
-  { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Minimal Grey' },
-  { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Deep Space' },
-  { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'Mountain Peak' },
-  { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Abstract Waves' },
-  { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Urban Jungle' },
-  { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'Calm Water' },
-  { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Retro Vibe' },
-  { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Dark Matter' },
-  { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'Golden Hour' },
-  { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Golden Hour' },
-  { id: 19, img: require('../assets/Themes/20.jpg'), wallpaperIndex: 19, name: 'Golden Hour' },
+  { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Midnight Focus' },
+  { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Cloud Clarity' },
+  { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Arctic Blue' },
+  { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Milky Star' },
+  { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Fluid Glow' },
+  { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Lone Sunset' },
+  { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Twilighty Path' },
+  { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Quiet Waters' },
+  { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Secret Heart' },
+  { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Inner Glow' },
+  { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Zenith Branch' },
+  { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'The Alchemist' },
+  { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Sweet Dream' },
+  { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Lov Lovely Break' },
+  { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'The Mastermind' },
+  { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Autumn Contrast' },
+  { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Contrast Black' },
+  { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'True White' },
+  { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Shadow Mode' },
+  { id: 19, img: require('../assets/Themes/20.png'), wallpaperIndex: 19, name: 'Flourish Firefly' },
 ];
 
 export default function SettingScreen() {
@@ -263,7 +266,7 @@ export default function SettingScreen() {
       setIsProcessing(false);
       router.push('/home');
       setThemeModalVisible(false);
-    });
+    }, 10000);
   };
 
   const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
@@ -363,11 +366,11 @@ export default function SettingScreen() {
   };
 
   const cycleTimeFormat = () => {
-    const formats = ['HH:MM', 'HH:MM PM', 'HH:MM:SS', 'HH:MM:SS PM'];
+    const formats = ['12h', '12h PM', '24h', '24h PM'];
     // Normalize current format if it's legacy
     let current = timeFormat;
-    if (timeFormat === '12h') current = 'HH:MM PM';
-    if (timeFormat === '24h') current = 'HH:MM';
+    if (timeFormat === 'HH:MM PM' || timeFormat === 'HH:MM:SS PM') current = '12h PM';
+    if (timeFormat === 'HH:MM' || timeFormat === 'HH:MM:SS') current = '24h';
 
     const currentIndex = formats.indexOf(current);
     const nextIndex = (currentIndex + 1) % formats.length;
@@ -471,30 +474,27 @@ export default function SettingScreen() {
 
     // Normalize legacy formats
     let currentFormat = timeFormat;
-    if (timeFormat === '12h') currentFormat = 'HH:MM PM';
-    if (timeFormat === '24h') currentFormat = 'HH:MM';
+    if (timeFormat === 'HH:MM PM' || timeFormat === 'HH:MM:SS PM') currentFormat = '12h PM';
+    if (timeFormat === 'HH:MM' || timeFormat === 'HH:MM:SS') currentFormat = '24h';
 
-    if (currentFormat === 'HH:MM') {
+    const ampm = h >= 12 ? 'PM' : 'AM';
+    const h12 = h % 12 || 12;
+
+    if (currentFormat === '12h') {
+      return `${h12}:${z(m)}`;
+    }
+    if (currentFormat === '12h PM') {
+      return `${h12}:${z(m)} ${ampm}`;
+    }
+    if (currentFormat === '24h') {
       return `${z(h)}:${z(m)}`;
     }
-    if (currentFormat === 'HH:MM PM') {
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      const h12 = h % 12 || 12;
-      return `${z(h12)}:${z(m)} ${ampm}`;
-    }
-    if (currentFormat === 'HH:MM:SS') {
-      return `${z(h)}:${z(m)}:${z(s)}`;
-    }
-    if (currentFormat === 'HH:MM:SS PM') {
-      const ampm = h >= 12 ? 'PM' : 'AM';
-      const h12 = h % 12 || 12;
-      return `${z(h12)}:${z(m)}:${z(s)} ${ampm}`;
+    if (currentFormat === '24h PM') {
+      return `${z(h)}:${z(m)} ${ampm}`;
     }
 
-    // Fallback
-    if (timeFormat === '12h')
-      return now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-    return now.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: false });
+    // Fallback to 24h
+    return `${z(h)}:${z(m)}`;
   };
 
   return (
@@ -518,7 +518,7 @@ export default function SettingScreen() {
         </TouchableOpacity>
         <Text
           allowFontScaling={false}
-          className={`text-[18px] font-bold ${isDarkMode ? 'text-white' : '#2E3B4D'}`}>
+          className={`text-[18px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
           Settings
         </Text>
         <TouchableOpacity>
@@ -743,11 +743,51 @@ export default function SettingScreen() {
             </TouchableOpacity>
           </View>
         </Modal>
+        {/* Premium Feature Modal */}
+        
+        {/* Profile Section */}
+         <View className="mt-4 px-4">
+          <Text
+            allowFontScaling={false}
+           className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+            Profile
+          </Text>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => !isPremium && router.push('/PremiumPackageScreen')}>
+            <LinearGradient
+              colors={
+                isPremium
+                  ? ['#FFDD33', '#7FDCE5', ] // Gradient for Premium (Yellow to Greenish Teal)
+                  : ['#7FDCE5', '#FFFFFF'] // Gradient for Free (Teal to White)
+              }
+              start={{ x: 0, y: 0.5 }}
+              end={{ x: 1, y: 0.5 }}
+              className="w-full rounded-xl overflow-hidden h-[64px] flex-row items-center justify-between pl-8">
+              <Text
+                allowFontScaling={false}
+                style={isPremium ? { fontFamily: 'Galada_400Regular',color:'#E53834'} : {fontWeight:600}}
+                className="text-[18px] text-[#2E3B4D]">
+                {isPremium ? 'Premium User' : 'Free Version'}
+              </Text>
+              <Image
+                source={
+                  isPremium
+                    ? require('../assets/images/Premium_User.png')
+                    : require('../assets/images/Free_Version.png')
+                }
+                className="h-[48px]"
+                resizeMode="contain"
+              />
+            </LinearGradient>
+          </TouchableOpacity>
+        </View>
+
         {/* Home Screen Section */}
         <View className="mt-4 px-4">
           <Text
             allowFontScaling={false}
-            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : '#2E3B4D'}`}>
+            className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
             Home Screen
           </Text>
           {/* phone */}
@@ -1282,6 +1322,7 @@ export default function SettingScreen() {
               className={`w-full items-center rounded-2xl bg-[#7EA9E5] py-4 shadow-lg active:opacity-90 ${
                 isProcessing ? 'opacity-70' : ''
               }`}>
+                
               <Text allowFontScaling={false} className="font-regular text-[16px] text-white">
                 {isProcessing ? 'Processing...' : 'Apply this theme'}
               </Text>
@@ -1297,21 +1338,21 @@ export default function SettingScreen() {
                 bottom: 0,
                 left: 0,
                 right: 0,
-                backgroundColor: 'rgba(0,0,0,0.5)',
+                
                 justifyContent: 'center',
                 alignItems: 'center',
                 zIndex: 50,
               }}>
-              <View className="items-center justify-center rounded-2xl bg-white p-6 shadow-xl">
-                <Image
-                  source={require('../assets/images/Logo.png')}
-                  style={{ width: 80, height: 80, marginBottom: 20 }}
-                  resizeMode="contain"
+              <View className="items-center justify-center bg-black/50 rounded-2xl p-6 ">
+               <LottieView
+                  source={require('../assets/Animation/fo.json')}
+                  autoPlay
+                  loop
+                  style={{ width: 120, height: 120 }}
                 />
-                <ActivityIndicator size="large" color="#7EA9E5" />
                 <Text
                   allowFontScaling={false}
-                  className="mt-4 text-[16px] font-medium text-[#2E3B4D]">
+                  className="mt-2 text-[18px] font-medium text-[#fff]">
                   Processing...
                 </Text>
               </View>

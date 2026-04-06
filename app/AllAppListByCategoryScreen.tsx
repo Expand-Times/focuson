@@ -1,4 +1,3 @@
-
 import { useAppLauncher } from './hooks/useAppLauncher';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
@@ -126,7 +125,9 @@ export default function AllAppListByCategoryScreen({
   useEffect(() => {
     // Re-categorize when overrides or renames change
     if (!appsLoading) {
-      const categorized = categorizeApps(apps.filter(app => !hiddenApps.includes(app.packageName)));
+      const categorized = categorizeApps(
+        apps.filter((app) => !hiddenApps.includes(app.packageName))
+      );
       setCategories(categorized);
     }
   }, [apps, appsLoading, categoryOverrides, appRenames, customCategories, hiddenApps]);
@@ -904,8 +905,6 @@ export default function AllAppListByCategoryScreen({
             packageName={selectedApp?.packageName}
           />
 
-         
-
           {/* Rename App Modal */}
           <Modal
             animationType="fade"
@@ -1047,8 +1046,10 @@ export default function AllAppListByCategoryScreen({
                 <View className="flex-1 items-center justify-center bg-black/50">
                   <TouchableWithoutFeedback>
                     <View
+                      style={modalbg}
                       className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                       <Text
+                        style={appC}
                         allowFontScaling={false}
                         className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                         Rename Category
@@ -1059,7 +1060,14 @@ export default function AllAppListByCategoryScreen({
                         onChangeText={setTempCategoryName}
                         placeholder="Category Name"
                         placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
-                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-50 text-slate-700'}`}
+                        style={[appC, applistCbg]}
+                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
+                          isImageWallpaper
+                            ? 'border-white/20 text-white'
+                            : isDarkMode
+                              ? 'border-slate-600 bg-slate-800 text-slate-300'
+                              : 'border-slate-300 bg-slate-50 text-slate-700'
+                        }`}
                         autoFocus
                       />
 
@@ -1101,8 +1109,10 @@ export default function AllAppListByCategoryScreen({
                 <View className="flex-1 items-center justify-center bg-black/50">
                   <TouchableWithoutFeedback>
                     <View
+                      style={modalbg}
                       className={`w-[320px] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#1E293B]' : 'bg-white'}`}>
                       <Text
+                        style={appC}
                         allowFontScaling={false}
                         className={`mb-4 text-xl font-semibold ${isDarkMode ? 'text-slate-300' : 'text-slate-800'}`}>
                         Create New Category
@@ -1113,7 +1123,14 @@ export default function AllAppListByCategoryScreen({
                         onChangeText={setNewCategoryName}
                         placeholder="Category Name"
                         placeholderTextColor={isDarkMode ? '#64748B' : '#94A3B8'}
-                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${isDarkMode ? 'border-slate-600 bg-slate-800 text-slate-300' : 'border-slate-300 bg-slate-50 text-slate-700'}`}
+                       style={[appC, applistCbg]}
+                        className={`mb-6 w-full rounded-lg border px-4 py-3 text-lg ${
+                          isImageWallpaper
+                            ? 'border-white/20 text-white'
+                            : isDarkMode
+                              ? 'border-slate-600 bg-slate-800 text-slate-300'
+                              : 'border-slate-300 bg-slate-50 text-slate-700'
+                        }`}
                         autoFocus
                       />
 

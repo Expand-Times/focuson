@@ -27,7 +27,7 @@ export default function IntroOne() {
         <View className="">
             {/* Composition for "Figure with Rays" */}
             <View className="items-center justify-center relative">
-                <Image source={require('@/assets/images/Logo.png')} style={{
+                <Image source={require('@/assets/images/icon.png')} style={{
                     width: width * 0.5, // screen এর 90%
                     height: height * 0.5, 
                   }}

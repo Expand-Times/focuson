@@ -8,8 +8,6 @@ import {
   Image,
   StatusBar,
   Alert,
-  Modal,
-  ScrollView,
 } from 'react-native';
 import { Stack, Link, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -79,7 +77,6 @@ export default function Home() {
   // 5: Done
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
-  const [showWelcome, setShowWelcome] = useState(false);
 
   useEffect(() => {
     checkTutorialStatus();
@@ -87,33 +84,9 @@ export default function Home() {
 
   const checkTutorialStatus = async () => {
     try {
-      const hasShownWelcome = await AsyncStorage.getItem('hasShownWelcome');
-      if (!hasShownWelcome) {
-        setShowWelcome(true);
-        return;
-      }
-
       const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
       if (!hasShown) {
         // Load saved step if exists
-        const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
-        if (savedStep) {
-          setTutorialStep(parseInt(savedStep));
-        }
-        setShowTutorial(true);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleWelcomeComplete = async () => {
-    try {
-      await AsyncStorage.setItem('hasShownWelcome', 'true');
-      setShowWelcome(false);
-
-      const hasShown = await AsyncStorage.getItem('hasShownTutorial_v5');
-      if (!hasShown) {
         const savedStep = await AsyncStorage.getItem('tutorialStep_v5');
         if (savedStep) {
           setTutorialStep(parseInt(savedStep));
@@ -410,19 +383,17 @@ export default function Home() {
     const z = (n: number) => n.toString().padStart(2, '0');
 
     let format = timeFormat;
-    if (format === '12h') format = 'HH:MM PM';
-    if (format === '24h') format = 'HH:MM';
+    if (format === 'HH:MM PM' || format === 'HH:MM:SS PM') format = '12h PM';
+    if (format === 'HH:MM' || format === 'HH:MM:SS') format = '24h';
 
-    if (format === 'HH:MM') return { main: `${z(h)}:${z(m)}` };
-    if (format === 'HH:MM PM') {
-      const h12 = h % 12 || 12;
-      return { main: `${h12}:${z(m)}`, suffix: h >= 12 ? 'PM' : 'AM' };
-    }
-    if (format === 'HH:MM:SS') return { main: `${z(h)}:${z(m)}:${z(s)}` };
-    if (format === 'HH:MM:SS PM') {
-      const h12 = h % 12 || 12;
-      return { main: `${h12}:${z(m)}:${z(s)}`, suffix: h >= 12 ? 'PM' : 'AM' };
-    }
+    const h12 = h % 12 || 12;
+    const suffix = h >= 12 ? 'PM' : 'AM';
+
+    if (format === '12h') return { main: `${h12}:${z(m)}` };
+    if (format === '12h PM') return { main: `${h12}:${z(m)}`, suffix };
+    if (format === '24h') return { main: `${z(h)}:${z(m)}` };
+    if (format === '24h PM') return { main: `${z(h)}:${z(m)}`, suffix };
+
     return { main: `${z(h)}:${z(m)}` };
   };
 
@@ -564,7 +535,7 @@ export default function Home() {
 
               {/* Header: Time, Date */}
               <View
-                className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 || wallpaperIndex === 19 ? 'items-start' : 'items-center'}`}>
                 <View className="flex-row items-baseline">
                   <Text
                     allowFontScaling={false}
@@ -865,61 +836,6 @@ export default function Home() {
         </Animated.View>
       </GestureDetector>
 
-      {/* Welcome Popup */}
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={showWelcome}
-        onRequestClose={handleWelcomeComplete}>
-        <View className="flex-1 items-center justify-center bg-black/80">
-          <View
-            className='relative max-h-[80%] w-[90%] rounded-3xl p-6 shadow-2xl bg-[#1E293B] '>
-            <Text
-              allowFontScaling={false}
-              className='mb-8 text-center text-xl font-bold text-white'>
-              Welcome to Focus On: Minimalist Launcher
-            </Text>
-
-            <ScrollView
-              className="mb-6"
-              showsVerticalScrollIndicator={false}
-              contentContainerStyle={{ alignItems: 'center' }}>
-              <Image
-                source={require('../assets/Animation/NoDataTheft.png')}
-                className="mb-4 h-24 w-24"
-                resizeMode="contain"
-              />
-              <Text
-                allowFontScaling={false}
-                className='mb-6 text-center text-base leading-6 text-slate-300'>
-                We do not collect, share or sell your data. All data is stored only on your device.
-              </Text>
-
-              <Image
-                source={require('../assets/Animation/noads.png')}
-                className="mb-4 h-24 w-24"
-                resizeMode="contain"
-              />
-              <Text
-                allowFontScaling={false}
-                className='mb-6 text-center text-base leading-6 text-slate-300'>
-                We do not show any third-party ads. And it&apos;s free to use.
-                {'\n\n'}
-                Stay with us. 💖 Thank you
-              </Text>
-            </ScrollView>
-
-            <TouchableOpacity
-              className="w-full items-center rounded-xl bg-[#7EA6E0] py-3"
-              onPress={handleWelcomeComplete}>
-              <Text allowFontScaling={false} className="font-semibold text-white">
-                Go
-              </Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
       {/* Tutorial Overlay */}
       {showTutorial && (
         <View
@@ -931,7 +847,7 @@ export default function Home() {
               <LottieView
                 autoPlay
                 loop
-                source={require('../assets/Animation/drag-left.json')}
+                source={require('../assets/Animation/dragleft.json')}
                 style={{ width: 96, height: 96 }}
               />
               <Text
@@ -953,7 +869,7 @@ export default function Home() {
               <LottieView
                 autoPlay
                 loop
-                source={require('../drag-right-JSN.json')}
+                source={require('../assets/Animation/dragright.json')}
                 style={{ width: 96, height: 96 }}
               />
               <Text

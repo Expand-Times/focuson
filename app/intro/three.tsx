@@ -19,6 +19,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Launcher from '../../modules/launcher';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PermissionAccessScreen from './PermissionAccessScreen';
+import PrivacyScreen from './PrivacyScreen';
 
 const { width, height } = Dimensions.get('window');
 
@@ -333,7 +334,9 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      case 8: // Permissions
+      case 8: // Privacy
+        return <PrivacyScreen onContinue={() => setStep(9)} />;
+      case 9: // Permissions
         return <PermissionAccessScreen />;
       default:
         return null;
@@ -406,13 +409,13 @@ export default function IntroUnified() {
       );
     }
     
-    // Step 8 (Permissions) - handled by component itself
-    if (step === 8) return null;
+    // Step 8 and 9 (Privacy and Permissions) - handled by component itself
+    if (step >= 8) return null;
 
     return null;
   };
 
-  // if (step === 8) {
+  // if (step === 9) {
   //   return <PermissionAccessScreen />;
   // }
 
@@ -424,7 +427,7 @@ export default function IntroUnified() {
           <Text allowFontScaling={false} className="text-[16px] font-bold text-white">Your Screen Time</Text>
         </View>
       )}
-      <View className={`flex-1 ${step === 8 ? '' : 'px-6 pt-8'}`}>
+      <View className={`flex-1 ${step >= 8 ? '' : 'px-6 pt-8'}`}>
         {renderContent()}
         {renderFooter()}
       </View>

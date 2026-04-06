@@ -14,6 +14,7 @@ import { NovaFlat_400Regular } from '@expo-google-fonts/nova-flat';
 import { Codystar_400Regular } from '@expo-google-fonts/codystar';
 import { LeagueGothic_400Regular } from '@expo-google-fonts/league-gothic';
 import { GreatVibes_400Regular } from '@expo-google-fonts/great-vibes';
+import { KumarOne_400Regular } from '@expo-google-fonts/kumar-one';
 import { FingerPaint_400Regular } from '@expo-google-fonts/finger-paint';
 import { GajrajOne_400Regular } from '@expo-google-fonts/gajraj-one';
 import { NovaRound_400Regular } from '@expo-google-fonts/nova-round';
@@ -36,6 +37,10 @@ import { RobotoSlab_400Regular } from '@expo-google-fonts/roboto-slab';
 import { CourierPrime_400Regular, CourierPrime_700Bold } from '@expo-google-fonts/courier-prime';
 import { Dangrek_400Regular } from '@expo-google-fonts/dangrek';
 import { DynaPuff_400Regular } from '@expo-google-fonts/dynapuff';
+import { RammettoOne_400Regular } from '@expo-google-fonts/rammetto-one';
+import { Frijole_400Regular } from '@expo-google-fonts/frijole';
+import { Pacifico_400Regular } from '@expo-google-fonts/pacifico';
+import { Galada_400Regular } from '@expo-google-fonts/galada';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
 import { useColorScheme } from 'react-native';
@@ -47,6 +52,7 @@ export default function Layout() {
   const isDarkMode = colorScheme === 'dark';
 
   const [loaded, error] = useFonts({
+    KumarOne_400Regular,
     Poppins_700Bold,
     Poppins_400Regular,
     Poppins_300Light,
@@ -90,6 +96,10 @@ export default function Layout() {
     CourierPrime_700Bold,
     Dangrek_400Regular,
     DynaPuff_400Regular,
+    RammettoOne_400Regular,
+    Frijole_400Regular,
+    Pacifico_400Regular,
+    Galada_400Regular,
   });
 
   useEffect(() => {
