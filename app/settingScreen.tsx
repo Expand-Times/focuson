@@ -766,7 +766,7 @@ export default function SettingScreen() {
               className="w-full rounded-xl overflow-hidden h-[64px] flex-row items-center justify-between pl-8">
               <Text
                 allowFontScaling={false}
-                style={isPremium ? { fontFamily: 'Galada_400Regular',color:'#E53834'} : {fontWeight:600}}
+                style={isPremium ? { fontFamily: 'Galada_400Regular',color:'#E53834',fontSize:20} : {fontWeight:600}}
                 className="text-[18px] text-[#2E3B4D]">
                 {isPremium ? 'Premium User' : 'Free Version'}
               </Text>
