@@ -634,22 +634,40 @@ export default function SettingScreen() {
               <Text
                 allowFontScaling={false}
                 className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                Our Goal
+                {infoModalType === 'privacy' ? 'Data Safety' : 'Our Goal'}
               </Text>
 
               <ScrollView className="mb-6" showsVerticalScrollIndicator={false}>
                 <Text
                   allowFontScaling={false}
                   className={`text-base leading-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                  Our goal is to help you reduce digital distractions and focus on what truly
-                  matters in your life.
-                  {'\n\n'}
-                  We believe that technology should serve us, not the other way around. By
-                  providing a clean, minimal interface, we hope to encourage mindfulness and
-                  intentionality in your daily smartphone usage.
-                  {'\n\n'}
-                  Thank you for being a part of our journey towards a simpler, more focused
-                  life.
+                  {infoModalType === 'privacy' ? (
+                    <>
+                      Focus On: Minimalist Launcher does not collect, share or sell any data. All
+                      data is stored only on your device.
+                      {'\n\n'}
+                      Your privacy is our promise; Your info is sacred. We’ve no action, no
+                      intention to collect/share/sell ever.
+                      {'\n\n'}
+                      Use with 100% confident: your data will always be safe on your device.
+                      {'\n\n'}
+                      Thank you 💖
+                      {'\n\n'}
+                     
+                    </>
+                  ) : (
+                    <>
+                      Our goal is to help you reduce digital distractions and focus on what truly
+                      matters in your life.
+                      {'\n\n'}
+                      We believe that technology should serve us, not the other way around. By
+                      providing a clean, minimal interface, we hope to encourage mindfulness and
+                      intentionality in your daily smartphone usage.
+                      {'\n\n'}
+                      Thank you for being a part of our journey towards a simpler, more focused
+                      life.
+                    </>
+                  )}
                 </Text>
               </ScrollView>
 
@@ -1195,22 +1213,35 @@ export default function SettingScreen() {
             Rate on Google Play
           </Text>
         </TouchableOpacity>
+        {/* Footer Actions */}
+        <View className="mb-8 flex-row items-center justify-center">
+          {/* Privacy Policy */}
+          <TouchableOpacity
+            onPress={() => {
+              setInfoModalType('privacy');
+              setInfoModalVisible(true);
+            }}
+            className="flex-row items-center px-4">
+            <Text
+              allowFontScaling={false}
+              className={`mr-2 text-[14px] font-regular ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+              Data Safety
+            </Text>
+          </TouchableOpacity>
 
-        {/* App Permissions */}
-        <TouchableOpacity
-          className="mb-8 flex-row items-center justify-center"
-          onPress={() => router.push('/permissions')}>
-          <Text
-            allowFontScaling={false}
-            className={`mr-2 text-[16px] font-semibold ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-            App Permissions
-          </Text>
-          <MaterialCommunityIcons
-            name="shield-check-outline"
-            size={24}
-            color={isDarkMode ? '#728099' : '#2E3B4D'}
-          />
-        </TouchableOpacity>
+          <View className={`h-4 w-[1px] ${isDarkMode ? 'bg-[#434C59]' : 'bg-[#DBDFE5]'}`} />
+
+          {/* App Permissions */}
+          <TouchableOpacity
+            className="flex-row items-center px-4"
+            onPress={() => router.push('/permissions')}>
+            <Text
+              allowFontScaling={false}
+              className={`mr-2 text-[14px] font-light ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
+              App Permissions
+            </Text>
+          </TouchableOpacity>
+        </View>
       </ScrollView>
 
       {/* Theme Selection Modal */}
