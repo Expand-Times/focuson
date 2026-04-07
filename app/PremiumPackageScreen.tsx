@@ -84,8 +84,7 @@ export default function PremiumPackageScreen() {
         // and then call finishTransaction
         await IAP.finishTransaction({ purchase: purchase as any });
         await unlockPremium();
-        Alert.alert('Success', 'Thank you for your purchase!');
-        router.back();
+        router.replace('/intro/PremiumUnlockedScreen');
       }
     } catch (error: any) {
       if (error.code !== 'E_USER_CANCELLED' && error.code !== 'user-cancelled') {
