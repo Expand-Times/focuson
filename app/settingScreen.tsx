@@ -634,40 +634,22 @@ export default function SettingScreen() {
               <Text
                 allowFontScaling={false}
                 className={`mb-4 text-center text-xl font-bold ${isDarkMode ? 'text-white' : 'text-slate-800'}`}>
-                {infoModalType === 'privacy' ? 'Privacy Policy' : 'Our Goal'}
+                Our Goal
               </Text>
 
               <ScrollView className="mb-6" showsVerticalScrollIndicator={false}>
                 <Text
                   allowFontScaling={false}
                   className={`text-base leading-6 ${isDarkMode ? 'text-slate-300' : 'text-slate-600'}`}>
-                  {infoModalType === 'privacy' ? (
-                    <>
-                      Focus On: Minimalist Launcher does not collect, share or sell any data. All
-                      data is stored only on your device.
-                      {'\n\n'}
-                      Your privacy is our promise; Your info is sacred. We’ve no action, no
-                      intention to collect/share/sell ever.
-                      {'\n\n'}
-                      Use with 100% confident: your data will always be safe on your device.
-                      {'\n\n'}
-                      Thank you 💖
-                      {'\n\n'}
-                      <Link href="https://minimallife.vercel.app/privacy">Read More...</Link>
-                    </>
-                  ) : (
-                    <>
-                      Our goal is to help you reduce digital distractions and focus on what truly
-                      matters in your life.
-                      {'\n\n'}
-                      We believe that technology should serve us, not the other way around. By
-                      providing a clean, minimal interface, we hope to encourage mindfulness and
-                      intentionality in your daily smartphone usage.
-                      {'\n\n'}
-                      Thank you for being a part of our journey towards a simpler, more focused
-                      life.
-                    </>
-                  )}
+                  Our goal is to help you reduce digital distractions and focus on what truly
+                  matters in your life.
+                  {'\n\n'}
+                  We believe that technology should serve us, not the other way around. By
+                  providing a clean, minimal interface, we hope to encourage mindfulness and
+                  intentionality in your daily smartphone usage.
+                  {'\n\n'}
+                  Thank you for being a part of our journey towards a simpler, more focused
+                  life.
                 </Text>
               </ScrollView>
 
@@ -1129,8 +1111,7 @@ export default function SettingScreen() {
               <TouchableOpacity
                 className="mb-[6%] mt-[6%] flex-1 items-center border-r border-[#728099]"
                 onPress={() => {
-                  setInfoModalType('privacy');
-                  setInfoModalVisible(true);
+                  Linking.openURL('https://focuson.expandtimes.com/privacy-policy.html');
                 }}>
                 <Text
                   allowFontScaling={false}
