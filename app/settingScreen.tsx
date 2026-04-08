@@ -111,26 +111,26 @@ const CustomSwitch = React.memo(({
 });
 
 const THEME_DATA = [
-  { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Midnight Focus' },
-  { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Cloud Clarity' },
-  { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Arctic Blue' },
-  { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Milky Star' },
-  { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Fluid Glow' },
-  { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Lone Sunset' },
-  { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Twilighty Path' },
-  { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Quiet Waters' },
-  { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Secret Heart' },
-  { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Inner Glow' },
-  { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Zenith Branch' },
-  { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'The Alchemist' },
-  { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Sweet Dream' },
-  { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Lov Lovely Break' },
-  { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'The Mastermind' },
-  { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Autumn Contrast' },
-  { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Contrast Black' },
-  { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'True White' },
-  { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Shadow Mode' },
-  { id: 19, img: require('../assets/Themes/20.png'), wallpaperIndex: 19, name: 'Flourish Firefly' },
+  { id: 0, img: require('../assets/Themes/1.jpg'), wallpaperIndex: 0, name: 'Midnight Focus', premium: false },
+  { id: 1, img: require('../assets/Themes/2.jpg'), wallpaperIndex: 1, name: 'Cloud Clarity', premium: false },
+  { id: 2, img: require('../assets/Themes/3.jpg'), wallpaperIndex: 2, name: 'Arctic Blue', premium: false },
+  { id: 3, img: require('../assets/Themes/4.jpg'), wallpaperIndex: 3, name: 'Milky Star', premium: false },
+  { id: 4, img: require('../assets/Themes/5.jpg'), wallpaperIndex: 4, name: 'Fluid Glow', premium: true },
+  { id: 5, img: require('../assets/Themes/6.jpg'), wallpaperIndex: 5, name: 'Lone Sunset', premium: true },
+  { id: 6, img: require('../assets/Themes/7.jpg'), wallpaperIndex: 6, name: 'Twilighty Path', premium: true },
+  { id: 7, img: require('../assets/Themes/8.jpg'), wallpaperIndex: 7, name: 'Quiet Waters', premium: true },
+  { id: 8, img: require('../assets/Themes/9.jpg'), wallpaperIndex: 8, name: 'Secret Heart', premium: true },
+  { id: 9, img: require('../assets/Themes/10.jpg'), wallpaperIndex: 9, name: 'Inner Glow', premium: true },
+  { id: 10, img: require('../assets/Themes/11.jpg'), wallpaperIndex: 10, name: 'Zenith Branch', premium: true },
+  { id: 11, img: require('../assets/Themes/12.jpg'), wallpaperIndex: 11, name: 'The Alchemist', premium: true },
+  { id: 12, img: require('../assets/Themes/13.jpg'), wallpaperIndex: 12, name: 'Sweet Dream', premium: true },
+  { id: 13, img: require('../assets/Themes/14.jpg'), wallpaperIndex: 13, name: 'Lov Lovely Break', premium: true },
+  { id: 14, img: require('../assets/Themes/15.jpg'), wallpaperIndex: 14, name: 'The Mastermind', premium: true },
+  { id: 15, img: require('../assets/Themes/16.jpg'), wallpaperIndex: 15, name: 'Autumn Contrast', premium: true },
+  { id: 16, img: require('../assets/Themes/17.jpg'), wallpaperIndex: 16, name: 'Contrast Black', premium: true },
+  { id: 17, img: require('../assets/Themes/18.jpg'), wallpaperIndex: 17, name: 'True White', premium: true },
+  { id: 18, img: require('../assets/Themes/19.jpg'), wallpaperIndex: 18, name: 'Shadow Mode', premium: true },
+  { id: 19, img: require('../assets/Themes/20.png'), wallpaperIndex: 19, name: 'Flourish Firefly', premium: true },
 ];
 
 export default function SettingScreen() {
@@ -249,7 +249,8 @@ export default function SettingScreen() {
   };
 
   const handleApplyTheme = () => {
-    const isLocked = !isPremium && currentThemeIndex >= 4;
+    const selectedTheme = THEME_DATA[currentThemeIndex];
+    const isLocked = !isPremium && selectedTheme?.premium;
     if (isLocked) {
       setModalVisible(true);
       return;
@@ -257,7 +258,6 @@ export default function SettingScreen() {
     setIsProcessing(true);
 
     // Apply logic here
-    const selectedTheme = THEME_DATA[currentThemeIndex];
     if (selectedTheme) {
       setWallpaper(AVAILABLE_WALLPAPERS[selectedTheme.wallpaperIndex]);
     }
@@ -747,11 +747,7 @@ export default function SettingScreen() {
         
         {/* Profile Section */}
          <View className="mt-4 px-4">
-          <Text
-            allowFontScaling={false}
-           className={`mb-[5%] mt-[5%] text-[18px] font-medium ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-            Profile
-          </Text>
+          
           <TouchableOpacity
             activeOpacity={0.8}
             onPress={() => !isPremium && router.push('/PremiumPackageScreen')}>
@@ -1318,7 +1314,19 @@ export default function SettingScreen() {
                         isDarkMode ? 'bg-[#1E293B]' : 'bg-white'
                       }`}>
                       <Image source={item.img} className="h-full w-full" resizeMode="cover" />
-                     
+                      {item.premium && !isPremium && (
+                        <Image
+                          source={require('../assets/Animation/premium.png')}
+                          style={{
+                            position: 'absolute',
+                            top: 12,
+                            right: 20,
+                            width: 24,
+                            height: 24,
+                          }}
+                          resizeMode="contain"
+                        />
+                      )}
                     </View>
                   </Animated.View>
                 );

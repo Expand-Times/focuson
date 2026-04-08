@@ -37,6 +37,8 @@ import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 import { BlockedInfoModal } from './components/BlockModals';
+import { PremiumModal } from './components/PremiumModal';
+
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
   const insets = useSafeAreaInsets();
@@ -164,6 +166,8 @@ export default function Home() {
 
   // Home Apps State
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
+  const [premiumModalVisible, setPremiumModalVisible] = useState(false);
+  const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
   const [modalVisible, setModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
@@ -670,17 +674,11 @@ export default function Home() {
                     const max = isPremium ? 6 : 3;
                     if (homeApps.length >= max) {
                       if (!isPremium) {
-                        Alert.alert(
-                          'Limit Reached',
-                          'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
-                          [
-                            { text: 'Cancel', style: 'cancel' },
-                            {
-                              text: 'Upgrade',
-                              onPress: () => router.push('/PremiumPackageScreen'),
-                            },
-                          ]
-                        );
+                        setPremiumModalConfig({
+                          title: 'Limit Reached',
+                          description: 'Free users can add 3 shortcuts to the Home Screen'
+                        });
+                        setPremiumModalVisible(true);
                       } else {
                         Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
                       }
@@ -827,6 +825,12 @@ export default function Home() {
                 appLabel={selectedApp?.label}
                 unblockAt={blockedUntil}
                 appIconBase64={selectedApp?.icon}
+              />
+              <PremiumModal
+                visible={premiumModalVisible}
+                onClose={() => setPremiumModalVisible(false)}
+                title={premiumModalConfig.title}
+                description={premiumModalConfig.description}
               />
             </View>
           </View>

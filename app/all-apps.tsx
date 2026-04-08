@@ -37,6 +37,7 @@ import { useAppContext } from './context/AppContext';
 import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
+import { PremiumModal } from './components/PremiumModal';
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -102,6 +103,12 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
   // Selection Mode State
   const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
+  const selectedPackageNamesRef = useRef<string[]>([]);
+
+  useEffect(() => {
+    selectedPackageNamesRef.current = selectedPackageNames;
+  }, [selectedPackageNames]);
+
   const selectedSet = useMemo(() => new Set(selectedPackageNames), [selectedPackageNames]);
 
   // New State for Features
@@ -113,6 +120,18 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [selectModalVisible, setSelectModalVisible] = useState(false);
+  const [premiumModalVisible, setPremiumModalVisible] = useState(false);
+  const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
+  const [lastAction, setLastAction] = useState<'added' | 'removed' | null>(null);
+  const selectModalTimerRef = useRef<any>(null);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
+    };
+  }, []);
 
   const router = useRouter();
   const params = useLocalSearchParams();
@@ -129,24 +148,22 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
   const handleSaveSelection = async () => {
     try {
+      const currentSelected = selectedPackageNamesRef.current;
       const max = isPremium ? 6 : 3;
-      if (selectedPackageNames.length > max) {
+      if (currentSelected.length > max) {
         if (!isPremium) {
-          Alert.alert(
-            'Limit Reached',
-            'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-            ]
-          );
+          setPremiumModalConfig({
+            title: 'Limit Reached',
+            description: 'Free users can add up to 3 favorite apps. Upgrade to add up to 6.'
+          });
+          setPremiumModalVisible(true);
         } else {
           Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
         }
         return;
       }
       // Filter the full apps list to get the full AppItem objects for selected packages
-      const selectedAppItems = apps.filter((app) => selectedPackageNames.includes(app.packageName));
+      const selectedAppItems = apps.filter((app) => currentSelected.includes(app.packageName));
       await updateHomeApps(selectedAppItems);
       router.back();
     } catch (e) {
@@ -252,29 +269,40 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const handleAppPress = useCallback(
     (app: AppItem) => {
       if (isSelectMode) {
-        if (selectedPackageNames.includes(app.packageName)) {
+        const currentSelected = selectedPackageNamesRef.current;
+        const isAlreadySelected = currentSelected.includes(app.packageName);
+
+        if (isAlreadySelected) {
           // Deselect
           setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
+          setLastAction('removed');
         } else {
           // Select
           const max = isPremium ? 6 : 3;
-          if (selectedPackageNames.length >= max) {
+          if (currentSelected.length >= max) {
             if (!isPremium) {
-              Alert.alert(
-                'Limit Reached',
-                'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
-                [
-                  { text: 'Cancel', style: 'cancel' },
-                  { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-                ]
-              );
+              setPremiumModalConfig({
+                title: 'Limit Reached',
+                description: 'Free users can add up to 3 favorite apps. Upgrade to add up to 6.'
+              });
+              setPremiumModalVisible(true);
             } else {
               Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
             }
             return;
           }
           setSelectedPackageNames((prev) => [...prev, app.packageName]);
+          setLastAction('added');
         }
+
+        setSelectedApp(app);
+        setSelectModalVisible(true);
+
+        // Auto-close modal after 3 seconds
+        if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
+        selectModalTimerRef.current = setTimeout(() => {
+          setSelectModalVisible(false);
+        }, 2000);
       } else {
         if (isTemporarilyBlocked(app.packageName)) {
           setSelectedApp(app);
@@ -290,11 +318,9 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     },
     [
       isSelectMode,
-      selectedPackageNames,
       isExcludedFromTimer,
       isTemporarilyBlocked,
       timedBlocks,
-      appRenames,
       isPremium,
     ]
   );
@@ -329,14 +355,12 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       const max = isPremium ? 6 : 3;
       if (currentHomeApps.length >= max) {
         if (!isPremium) {
-          Alert.alert(
-            'Limit Reached',
-            'Free users can add up to 3 favorite apps. Upgrade to add up to 6.',
-            [
-              { text: 'Cancel', style: 'cancel' },
-              { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-            ]
-          );
+          setOptionsModalVisible(false);
+          setPremiumModalConfig({
+            title: 'Limit Reached',
+            description: 'Free users can add up to 3 favorite apps. Upgrade to add up to 6.'
+          });
+          setPremiumModalVisible(true);
         } else {
           Alert.alert('Limit Reached', 'Home screen is full (max 6 apps).');
         }
@@ -387,10 +411,12 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const handleRename = () => {
     if (!selectedApp) return;
     if (!isPremium) {
-      Alert.alert('Premium Feature', 'Renaming apps is available for premium users only.', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-      ]);
+      setOptionsModalVisible(false);
+      setPremiumModalConfig({
+        title: 'Premium Feature',
+        description: 'Renaming apps is available for premium users only.'
+      });
+      setPremiumModalVisible(true);
       return;
     }
     setNewName(appRenames[selectedApp.packageName] || selectedApp.label);
@@ -457,6 +483,15 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     }
   };
 
+  const getItemLayout = useCallback((data: any, index: number) => {
+    let offset = 0;
+    for (let i = 0; i < index; i++) {
+      offset += data?.[i]?.type === 'header' ? 44 : 56;
+    }
+    const length = data?.[index]?.type === 'header' ? 44 : 56;
+    return { length, offset, index };
+  }, []);
+
   const renderHeader = useCallback(() => {
     return (
       <View className="mb-4 w-full flex-row items-center justify-between">
@@ -501,7 +536,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                       ? 'text-[#DADFE5]'
                       : 'text-[#FFFFFF]'
                 }`}>
-                Add
+                Save
               </Text>
             </TouchableOpacity>
           </View>
@@ -577,11 +612,6 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     });
 
   const RootContainer = enableGestures ? GestureHandlerRootView : View;
-
-  console.log(
-    `[${new Date().toLocaleTimeString()}.${new Date().getMilliseconds()}] Rendering all-apps FlatList, FlatListData length:`,
-    FlatListData?.length
-  );
 
   return (
     <RootContainer style={{ flex: 1 }}>
@@ -671,6 +701,11 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
                 }
                 contentContainerStyle={{ paddingBottom: 20 }}
                 showsVerticalScrollIndicator={false}
+                initialNumToRender={20}
+                maxToRenderPerBatch={20}
+                windowSize={11}
+                removeClippedSubviews={Platform.OS === 'android'}
+                getItemLayout={getItemLayout}
               />
             </View>
           </View>
@@ -782,6 +817,41 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
               </View>
             </View>
           )}
+
+          {/* Select Mode App Options Modal */}
+          <Modal
+            animationType="fade"
+            transparent={true}
+            visible={selectModalVisible && selectedApp !== null}
+            onRequestClose={() => setSelectModalVisible(false)}>
+            <View className="absolute inset-0 z-50 items-center justify-center">
+              <Pressable className="absolute inset-0 bg-black/70" onPress={() => setSelectModalVisible(false)} />
+              <View
+                style={modalbg}
+                className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
+                <View className="w-full max-w-[520px] items-center">
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-6 text-center text-[16px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
+                    {lastAction === 'added' ? 'Added Successfully!' : 'Removed Successfully!'}
+                  </Text>
+                  <View className="mb-4 h-20 w-20 rounded-full">
+                    {selectedApp?.icon && (
+                      <Image
+                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
+                        className="h-full w-full rounded-full"
+                      />
+                    )}
+                  </View>
+                  <Text
+                    allowFontScaling={false}
+                    className={`mb-6 text-center text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <Text className="font-bold">{selectedApp?.label}</Text> has been {lastAction === 'added' ? 'added to' : 'removed from'} your home screen.
+                  </Text>
+                </View>
+              </View>
+            </View>
+          </Modal>
 
           <Modal
             animationType="fade"
@@ -927,6 +997,13 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
         appLabel={selectedApp?.label}
         unblockAt={blockedUntil}
         appIconBase64={selectedApp?.icon}
+      />
+
+      <PremiumModal
+        visible={premiumModalVisible}
+        onClose={() => setPremiumModalVisible(false)}
+        title={premiumModalConfig.title}
+        description={premiumModalConfig.description}
       />
     </RootContainer>
   );

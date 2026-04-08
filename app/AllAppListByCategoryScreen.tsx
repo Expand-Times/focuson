@@ -37,6 +37,7 @@ import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import AppModal from './context/Modal';
 import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
 import Screenmodal from './components/Screenmodal';
+import { PremiumModal } from './components/PremiumModal';
 
 type Category = {
   title: string;
@@ -96,6 +97,8 @@ export default function AllAppListByCategoryScreen({
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [screenTimeVisible, setScreenTimeVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [premiumModalVisible, setPremiumModalVisible] = useState(false);
+  const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
 
   // wallpaperFontConfig
   const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
@@ -134,10 +137,11 @@ export default function AllAppListByCategoryScreen({
 
   const ensurePremium = () => {
     if (!isPremium) {
-      Alert.alert('Premium Feature', 'This feature is available for premium users only.', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-      ]);
+      setPremiumModalConfig({
+        title: 'Premium Feature',
+        description: 'This feature is available for premium users only.'
+      });
+      setPremiumModalVisible(true);
       return false;
     }
     return true;
@@ -253,16 +257,13 @@ export default function AllAppListByCategoryScreen({
 
   const handleCreateCategory = async () => {
     if (!isPremium && customCategories.length >= 2) {
-      Alert.alert(
-        'Premium Feature',
-        'Free users can only create up to 2 custom categories. Please upgrade to Premium to create more.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          { text: 'Upgrade', onPress: () => router.push('/PremiumPackageScreen') },
-        ]
-      );
       setCreateCategoryModalVisible(false);
       setNewCategoryName('');
+      setPremiumModalConfig({
+        title: 'Premium Feature',
+        description: 'Free users can only create up to 2 custom categories. Please upgrade to Premium to create more.'
+      });
+      setPremiumModalVisible(true);
       return;
     }
 
@@ -566,7 +567,12 @@ export default function AllAppListByCategoryScreen({
                   App Category
                 </Text>
                 <View className="flex-row items-center gap-4">
-                  <TouchableOpacity onPress={() => setCreateCategoryModalVisible(true)}>
+                  <TouchableOpacity
+                    onPress={() => {
+                      if (ensurePremium()) {
+                        setCreateCategoryModalVisible(true);
+                      }
+                    }}>
                     <View
                       style={[
                         appi,
@@ -764,10 +770,12 @@ export default function AllAppListByCategoryScreen({
                       }`}
                       onPress={() => {
                         if (!isPremium) {
-                          Alert.alert(
-                            'Premium Feature',
-                            'Moving apps between categories is a premium feature.'
-                          );
+                          setModalVisible(false);
+                          setPremiumModalConfig({
+                            title: 'Premium Feature',
+                            description: 'Moving apps between categories is a premium feature.'
+                          });
+                          setPremiumModalVisible(true);
                           return;
                         }
                         setShowCategorySelector(true);
@@ -1158,6 +1166,13 @@ export default function AllAppListByCategoryScreen({
               </TouchableWithoutFeedback>
             </KeyboardAvoidingView>
           </Modal>
+
+          <PremiumModal
+            visible={premiumModalVisible}
+            onClose={() => setPremiumModalVisible(false)}
+            title={premiumModalConfig.title}
+            description={premiumModalConfig.description}
+          />
         </View>
       </GestureDetector>
     </RootContainer>
