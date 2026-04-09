@@ -76,8 +76,10 @@ export default function Home() {
   // 1: Wait for return to Home (All Apps -> Home)
   // 2: Swipe Right (Home -> Category)
   // 3: Wait for return to Home (Category -> Home)
-  // 4: Sidebar (Home -> Sidebar)
-  // 5: Done
+  // 4: Swipe Down (Quick Settings)
+  // 5: Tap and Hold (Settings Screen)
+  // 6: Double Tap (Lock Screen)
+  // 7: Done
   const [showTutorial, setShowTutorial] = useState(false);
   const [tutorialStep, setTutorialStep] = useState(0);
 
@@ -106,7 +108,7 @@ export default function Home() {
     if (step > tutorialStep) {
       setTutorialStep(step);
       AsyncStorage.setItem('tutorialStep_v5', step.toString());
-      if (step === 5) {
+      if (step === 7) {
         handleTutorialComplete();
       }
     }
@@ -159,7 +161,7 @@ export default function Home() {
       // Step 3: Wait for return to Home (Category -> Home)
       // Target: translateX approaches -SCREEN_WIDTH
       if (tutorialStep === 3 && currentX < -SCREEN_WIDTH * 0.9) {
-        runOnJS(updateTutorialStep)(5);
+        runOnJS(updateTutorialStep)(4);
       }
     },
     [showTutorial, tutorialStep]
@@ -316,6 +318,9 @@ export default function Home() {
     .onEnd(() => {
       const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
       if (isHome) {
+        if (showTutorial && tutorialStep === 6) {
+          updateTutorialStep(7);
+        }
         handleLockScreen();
       }
     });
@@ -334,10 +339,13 @@ export default function Home() {
         // Tutorial Constraints
         if (showTutorialSV.value) {
           if (tutorialStepSV.value <= 1) {
+            // Step 0 & 1: All Apps <-> Home
             nextPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, nextPos));
-          } else if (tutorialStepSV.value <= 3) {
+          } else if (tutorialStepSV.value === 2 || tutorialStepSV.value === 3) {
+            // Step 2 & 3: Home <-> Category
             nextPos = Math.max(-SCREEN_WIDTH, Math.min(0, nextPos));
-          } else if (tutorialStepSV.value === 4) {
+          } else if (tutorialStepSV.value >= 4 && tutorialStepSV.value <= 6) {
+            // Step 4, 5, 6: Lock to Home Screen
             nextPos = -SCREEN_WIDTH;
           }
         }
@@ -353,6 +361,9 @@ export default function Home() {
       if (isHome && e.translationY > 50 && Math.abs(e.translationY) > Math.abs(e.translationX)) {
         if (e.translationY > 250) {
           runOnJS(handleOpenQuickSettings)();
+          if (showTutorial && tutorialStep === 4) {
+            runOnJS(updateTutorialStep)(5);
+          }
         } else {
           runOnJS(handleOpenNotifications)();
         }
@@ -377,10 +388,13 @@ export default function Home() {
         // Tutorial Constraints
         if (showTutorialSV.value) {
           if (tutorialStepSV.value <= 1) {
+            // Step 0 & 1: All Apps <-> Home
             targetPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, targetPos));
-          } else if (tutorialStepSV.value <= 3) {
+          } else if (tutorialStepSV.value === 2 || tutorialStepSV.value === 3) {
+            // Step 2 & 3: Home <-> Category
             targetPos = Math.max(-SCREEN_WIDTH, Math.min(0, targetPos));
-          } else if (tutorialStepSV.value === 4) {
+          } else if (tutorialStepSV.value >= 4 && tutorialStepSV.value <= 6) {
+            // Step 4, 5, 6: Lock to Home Screen
             targetPos = -SCREEN_WIDTH;
           }
         }
@@ -404,6 +418,9 @@ export default function Home() {
     .onStart(() => {
       const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
       if (isHome) {
+        if (showTutorial && tutorialStep === 5) {
+          updateTutorialStep(6);
+        }
         router.push('/settingScreen');
       }
     });
@@ -879,6 +896,145 @@ export default function Home() {
                 title={premiumModalConfig.title}
                 description={premiumModalConfig.description}
               />
+
+              {/* Tutorial Overlay inside Home Screen View */}
+              {showTutorial && (
+                <View
+                  pointerEvents="none"
+                  className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
+                  {/* Step 0: Swipe Left (Show on Home) */}
+                  {tutorialStep === 0 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/dragleft.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Swipe Left
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To see All Apps list
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Step 2: Swipe Right (Show on Home) */}
+                  {tutorialStep === 2 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/dragright.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Swipe Right
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To see Apps list by Category
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Step 3: Wait for return to Home */}
+                  {tutorialStep === 3 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/dragleft.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Swipe Left
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To return to Home Screen
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Step 4: Swipe Down (Show on Home) */}
+                  {tutorialStep === 4 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/SwipedownE.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Swipe Down
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To see Quick Settings
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Step 5: Tap and Hold (Show on Home) */}
+                  {tutorialStep === 5 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/TapHold.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Tap and Hold
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To open Settings Screen
+                      </Text>
+                    </View>
+                  )}
+
+                  {/* Step 6: Double Tap (Show on Home) */}
+                  {tutorialStep === 6 && (
+                    <View className="items-center rounded-3xl bg-transparent p-6">
+                      <LottieView
+                        autoPlay
+                        loop
+                        source={require('../assets/Animation/doubletapE.json')}
+                        style={{ width: 96, height: 96 }}
+                      />
+                      <Text
+                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        Double Tap
+                      </Text>
+                      <Text
+                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
+                        allowFontScaling={false}>
+                        To Lock or Unlock Screen
+                      </Text>
+                    </View>
+                  )}
+                </View>
+              )}
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
@@ -886,57 +1042,6 @@ export default function Home() {
           </View>
         </Animated.View>
       </GestureDetector>
-
-      {/* Tutorial Overlay */}
-      {showTutorial && (
-        <View
-          pointerEvents="none"
-          className="absolute inset-0 z-[200] items-center justify-center bg-transparent">
-          {/* Step 0: Swipe Left (Show on Home) */}
-          {tutorialStep === 0 && (
-            <View className="items-center rounded-3xl bg-transparent p-6">
-              <LottieView
-                autoPlay
-                loop
-                source={require('../assets/Animation/dragleft.json')}
-                style={{ width: 96, height: 96 }}
-              />
-              <Text
-                className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                allowFontScaling={false}>
-                Swipe Left
-              </Text>
-              <Text
-                className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                allowFontScaling={false}>
-                To see All Apps list
-              </Text>
-            </View>
-          )}
-
-          {/* Step 2: Swipe Right (Show on Home) */}
-          {tutorialStep === 2 && (
-            <View className="items-center rounded-3xl bg-transparent p-6">
-              <LottieView
-                autoPlay
-                loop
-                source={require('../assets/Animation/dragright.json')}
-                style={{ width: 96, height: 96 }}
-              />
-              <Text
-                className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                allowFontScaling={false}>
-                Swipe Right
-              </Text>
-              <Text
-                className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                allowFontScaling={false}>
-                To see Apps list by Category
-              </Text>
-            </View>
-          )}
-           </View>
-      )}
     </GestureHandlerRootView>
   );
 }

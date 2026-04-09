@@ -413,14 +413,14 @@ export default function AllAppListByCategoryScreen({
     return `${mins} min`;
   };
 
-  const handleLongPress = useCallback((app: AppItem) => {
-    Keyboard.dismiss();
-    setModalVisible(true);
-    setSelectedApp(app);
-  }, []);
-
   const handlePress = useCallback((app: AppItem) => {
     onAppPress(app);
+  }, [onAppPress]);
+
+  const handleLongPress = useCallback((app: AppItem) => {
+    Keyboard.dismiss();
+    setSelectedApp(app);
+    setModalVisible(true);
   }, []);
 
   const closeModal = () => {
