@@ -19,6 +19,8 @@ declare class LauncherModule extends NativeModule<LauncherModuleEvents> {
   isIgnoringBatteryOptimizations(): boolean;
   isDefaultLauncher(): boolean;
   lockScreen(): boolean;
+  openNotifications(): boolean;
+  openQuickSettings(): boolean;
 
   getInstalledApps(): AppItem[];
   launchApp(packageName: string): boolean;

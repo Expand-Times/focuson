@@ -366,10 +366,10 @@ export default function SettingScreen() {
   };
 
   const cycleTimeFormat = () => {
-    const formats = ['12h', '12h PM', '24h', '24h PM'];
+    const formats = ['12h PM', '24h'];
     // Normalize current format if it's legacy
     let current = timeFormat;
-    if (timeFormat === 'HH:MM PM' || timeFormat === 'HH:MM:SS PM') current = '12h PM';
+    if (timeFormat === 'HH:MM PM' || timeFormat === 'HH:MM:SS PM' || timeFormat === '12h') current = '12h PM';
     if (timeFormat === 'HH:MM' || timeFormat === 'HH:MM:SS') current = '24h';
 
     const currentIndex = formats.indexOf(current);
@@ -378,7 +378,7 @@ export default function SettingScreen() {
   };
 
   const is12HourFormat = (format: string) => {
-    return format === '12h' || format.includes('PM');
+    return format.includes('PM');
   };
 
   const cycleDateFormat = () => {
@@ -477,20 +477,14 @@ export default function SettingScreen() {
     if (timeFormat === 'HH:MM PM' || timeFormat === 'HH:MM:SS PM') currentFormat = '12h PM';
     if (timeFormat === 'HH:MM' || timeFormat === 'HH:MM:SS') currentFormat = '24h';
 
-    const ampm = h >= 12 ? 'PM' : 'AM';
+    const ampm = h >= 12 ? 'pm' : 'am';
     const h12 = h % 12 || 12;
 
-    if (currentFormat === '12h') {
-      return `${h12}:${z(m)}`;
+    if (currentFormat === '12h' || currentFormat === '12h PM') {
+      return `${h12}:${z(m)}${ampm}`;
     }
-    if (currentFormat === '12h PM') {
-      return `${h12}:${z(m)} ${ampm}`;
-    }
-    if (currentFormat === '24h') {
+    if (currentFormat === '24h' || currentFormat === '24h PM') {
       return `${z(h)}:${z(m)}`;
-    }
-    if (currentFormat === '24h PM') {
-      return `${z(h)}:${z(m)} ${ampm}`;
     }
 
     // Fallback to 24h

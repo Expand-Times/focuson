@@ -14,7 +14,7 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
 import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { Gesture, GestureDetector, GestureHandlerRootView, Directions } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   useSharedValue,
@@ -46,6 +46,7 @@ export default function Home() {
   const {
     apps: allApps,
     homeApps,
+    updateHomeApps,
     appRenames,
     pinnedPackageNames,
     blockedPackageNames,
@@ -268,6 +269,44 @@ export default function Home() {
     }
   }, []);
 
+  const handleOpenNotifications = useCallback(() => {
+    const success = Launcher.openNotifications();
+    if (!success) {
+      Alert.alert(
+        'Permission Required',
+        'To use swipe down for notifications, please enable the Accessibility Service for Minimal Life Launcher.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Launcher.openAccessibilitySettings();
+            },
+          },
+        ]
+      );
+    }
+  }, []);
+
+  const handleOpenQuickSettings = useCallback(() => {
+    const success = Launcher.openQuickSettings();
+    if (!success) {
+      Alert.alert(
+        'Permission Required',
+        'To use swipe down for quick settings, please enable the Accessibility Service for Minimal Life Launcher.',
+        [
+          { text: 'Cancel', style: 'cancel' },
+          {
+            text: 'Open Settings',
+            onPress: () => {
+              Launcher.openAccessibilitySettings();
+            },
+          },
+        ]
+      );
+    }
+  }, []);
+
   // Double Tap Gesture
   const doubleTap = Gesture.Tap()
     .numberOfTaps(2)
@@ -281,86 +320,81 @@ export default function Home() {
       }
     });
 
-  // Main Navigation Pan Gesture
-  const mainPanGesture = Gesture.Pan()
-    .activeOffsetX([-20, 20])
-    .failOffsetY([-20, 20])
+  // Main Navigation Pan Gesture (Horizontal and Vertical)
+  const homePanGesture = Gesture.Pan()
+    .minDistance(30)
     .onStart(() => {
       context.value = { startX: translateX.value };
     })
     .onUpdate((e) => {
-      let nextPos = context.value.startX + e.translationX;
+      // Horizontal page swipe (only if horizontal movement is dominant)
+      if (Math.abs(e.translationX) > Math.abs(e.translationY)) {
+        let nextPos = context.value.startX + e.translationX;
 
-      // Tutorial Constraints
-      if (showTutorialSV.value) {
-        if (tutorialStepSV.value <= 1) {
-          // Step 0 & 1: Swipe Left (Home <-> All Apps)
-          // Range: [-2W, -1W]
-          nextPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, nextPos));
-        } else if (tutorialStepSV.value <= 3) {
-          // Step 2 & 3: Swipe Right (Home <-> Category)
-          // Range: [-1W, 0]
-          nextPos = Math.max(-SCREEN_WIDTH, Math.min(0, nextPos));
-        } else if (tutorialStepSV.value === 4) {
-          // Step 4: Sidebar (Lock to Home)
-          nextPos = -SCREEN_WIDTH;
+        // Tutorial Constraints
+        if (showTutorialSV.value) {
+          if (tutorialStepSV.value <= 1) {
+            nextPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, nextPos));
+          } else if (tutorialStepSV.value <= 3) {
+            nextPos = Math.max(-SCREEN_WIDTH, Math.min(0, nextPos));
+          } else if (tutorialStepSV.value === 4) {
+            nextPos = -SCREEN_WIDTH;
+          }
         }
-      }
 
-      // Clamp between -SCREEN_WIDTH * 2 (All Apps) and 0 (Category)
-      translateX.value = Math.max(-SCREEN_WIDTH * 2, Math.min(0, nextPos));
+        // Clamp between -SCREEN_WIDTH * 2 (All Apps) and 0 (Category)
+        translateX.value = Math.max(-SCREEN_WIDTH * 2, Math.min(0, nextPos));
+      }
     })
     .onEnd((e) => {
-      const currentPos = translateX.value;
+      const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
 
-      // Determine target position based on velocity and position
-      let targetPos = -SCREEN_WIDTH; // Default to Home
+      // Handle Vertical Swipe for Notifications/Quick Settings
+      if (isHome && e.translationY > 50 && Math.abs(e.translationY) > Math.abs(e.translationX)) {
+        if (e.translationY > 250) {
+          runOnJS(handleOpenQuickSettings)();
+        } else {
+          runOnJS(handleOpenNotifications)();
+        }
+        return;
+      }
 
-      if (currentPos > -SCREEN_WIDTH * 0.5) {
-        // Closer to Category (0)
-        if (e.velocityX < -500) {
-          targetPos = -SCREEN_WIDTH; // Fling left -> Home
+      // Handle Horizontal Page Swipe Snap
+      if (Math.abs(e.translationX) > Math.abs(e.translationY)) {
+        const currentPos = translateX.value;
+        let targetPos = -SCREEN_WIDTH;
+
+        if (currentPos > -SCREEN_WIDTH * 0.5) {
+          targetPos = e.velocityX < -500 ? -SCREEN_WIDTH : 0;
+        } else if (currentPos < -SCREEN_WIDTH * 1.5) {
+          targetPos = e.velocityX > 500 ? -SCREEN_WIDTH : -SCREEN_WIDTH * 2;
         } else {
-          targetPos = 0; // Category
+          if (e.velocityX > 500) targetPos = 0;
+          else if (e.velocityX < -500) targetPos = -SCREEN_WIDTH * 2;
+          else targetPos = -SCREEN_WIDTH;
         }
-      } else if (currentPos < -SCREEN_WIDTH * 1.5) {
-        // Closer to AllApps (-2 * width)
-        if (e.velocityX > 500) {
-          targetPos = -SCREEN_WIDTH; // Fling right -> Home
-        } else {
-          targetPos = -SCREEN_WIDTH * 2; // AllApps
+
+        // Tutorial Constraints
+        if (showTutorialSV.value) {
+          if (tutorialStepSV.value <= 1) {
+            targetPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, targetPos));
+          } else if (tutorialStepSV.value <= 3) {
+            targetPos = Math.max(-SCREEN_WIDTH, Math.min(0, targetPos));
+          } else if (tutorialStepSV.value === 4) {
+            targetPos = -SCREEN_WIDTH;
+          }
         }
+
+        translateX.value = withSpring(targetPos, {
+          damping: 50,
+          stiffness: 1000,
+          overshootClamping: true,
+          mass: 0.8,
+        });
       } else {
-        // Middle zone (Home)
-        if (e.velocityX > 500) {
-          targetPos = 0; // Fling right -> Category
-        } else if (e.velocityX < -500) {
-          targetPos = -SCREEN_WIDTH * 2; // Fling left -> AllApps
-        } else {
-          targetPos = -SCREEN_WIDTH; // Stay Home
-        }
+        // Reset to Home if it wasn't a horizontal swipe
+        translateX.value = withSpring(-SCREEN_WIDTH);
       }
-
-      // Apply Tutorial Constraints to Target
-      if (showTutorialSV.value) {
-        if (tutorialStepSV.value <= 1) {
-          // Lock to [-2W, -1W]
-          targetPos = Math.max(-SCREEN_WIDTH * 2, Math.min(-SCREEN_WIDTH, targetPos));
-        } else if (tutorialStepSV.value <= 3) {
-          // Lock to [-1W, 0]
-          targetPos = Math.max(-SCREEN_WIDTH, Math.min(0, targetPos));
-        } else if (tutorialStepSV.value === 4) {
-          // Lock to Home
-          targetPos = -SCREEN_WIDTH;
-        }
-      }
-
-      translateX.value = withSpring(targetPos, {
-        damping: 50,
-        stiffness: 1000,
-        overshootClamping: true,
-        mass: 0.8,
-      });
     });
 
   // Long Press Gesture
@@ -374,7 +408,7 @@ export default function Home() {
       }
     });
 
-  const composedGesture = Gesture.Race(mainPanGesture, doubleTap, longPress);
+  const composedGesture = Gesture.Race(doubleTap, longPress, homePanGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: translateX.value }],
@@ -391,12 +425,10 @@ export default function Home() {
     if (format === 'HH:MM' || format === 'HH:MM:SS') format = '24h';
 
     const h12 = h % 12 || 12;
-    const suffix = h >= 12 ? 'PM' : 'AM';
+    const suffix = h >= 12 ? 'pm' : 'am';
 
-    if (format === '12h') return { main: `${h12}:${z(m)}` };
-    if (format === '12h PM') return { main: `${h12}:${z(m)}`, suffix };
-    if (format === '24h') return { main: `${z(h)}:${z(m)}` };
-    if (format === '24h PM') return { main: `${z(h)}:${z(m)}`, suffix };
+    if (format === '12h' || format === '12h PM') return { main: `${h12}:${z(m)}${suffix}` };
+    if (format === '24h' || format === '24h PM') return { main: `${z(h)}:${z(m)}` };
 
     return { main: `${z(h)}:${z(m)}` };
   };
@@ -540,21 +572,13 @@ export default function Home() {
               {/* Header: Time, Date */}
               <View
                 className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 || wallpaperIndex === 19 ? 'items-start' : 'items-center'}`}>
-                <View className="flex-row items-baseline">
+                <View className="flex-row  items-baseline">
                   <Text
                     allowFontScaling={false}
                     style={time}
-                    className={`font-regular text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                    className={`font-regular  text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                     {timeDisplay.main}
                   </Text>
-                  {timeDisplay.suffix && (
-                    <Text
-                      allowFontScaling={false}
-                      style={pm}
-                      className={`font-regular ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                      {timeDisplay.suffix}
-                    </Text>
-                  )}
                 </View>
                 <Text
                   allowFontScaling={false}
@@ -620,12 +644,30 @@ export default function Home() {
                               setBlockedUntil(timedBlocks[app.packageName] || null);
                               setBlockedInfoVisible(true);
                             } else if (isExcludedFromTimer(app.packageName)) {
-                              Launcher.openApp(app.packageName);
+                              openApplication(app.packageName);
                             } else {
                               setSelectedApp(app);
                               setModalVisible(true);
                             }
-                          }}>
+                          }}
+                          onLongPress={() => {
+                            Alert.alert(
+                              'Remove Shortcut',
+                              `Do you want to remove ${appRenames[app.packageName] || app.label} from home screen?`,
+                              [
+                                { text: 'Cancel', style: 'cancel' },
+                                {
+                                  text: 'Remove',
+                                  style: 'destructive',
+                                  onPress: async () => {
+                                    const updated = homeApps.filter(a => a.packageName !== app.packageName);
+                                    await updateHomeApps(updated);
+                                  }
+                                }
+                              ]
+                            );
+                          }}
+                        >
                           <Text
                             allowFontScaling={false}
                             style={home}
@@ -649,12 +691,30 @@ export default function Home() {
                           setBlockedUntil(timedBlocks[app.packageName] || null);
                           setBlockedInfoVisible(true);
                         } else if (isExcludedFromTimer(app.packageName)) {
-                          Launcher.openApp(app.packageName);
+                          openApplication(app.packageName);
                         } else {
                           setSelectedApp(app);
                           setModalVisible(true);
                         }
-                      }}>
+                      }}
+                      onLongPress={() => {
+                        Alert.alert(
+                          'Remove Shortcut',
+                          `Do you want to remove ${appRenames[app.packageName] || app.label} from home screen?`,
+                          [
+                            { text: 'Cancel', style: 'cancel' },
+                            {
+                              text: 'Remove',
+                              style: 'destructive',
+                              onPress: async () => {
+                                const updated = homeApps.filter(a => a.packageName !== app.packageName);
+                                await updateHomeApps(updated);
+                              }
+                            }
+                          ]
+                        );
+                      }}
+                    >
                       <Text
                         allowFontScaling={false}
                         style={home}
@@ -671,19 +731,6 @@ export default function Home() {
                 <TouchableOpacity
                   className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}
                   onPress={() => {
-                    const max = isPremium ? 6 : 3;
-                    if (homeApps.length >= max) {
-                      if (!isPremium) {
-                        setPremiumModalConfig({
-                          title: 'Limit Reached',
-                          description: 'Free users can add 3 shortcuts to the Home Screen'
-                        });
-                        setPremiumModalVisible(true);
-                      } else {
-                        Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
-                      }
-                      return;
-                    }
                     router.push('/all-apps?mode=select');
                   }}>
                   <MaterialCommunityIcons

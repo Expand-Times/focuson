@@ -121,4 +121,12 @@ class LauncherAccessibilityService : AccessibilityService() {
             false
         }
     }
+
+    fun openNotifications(): Boolean {
+        return performGlobalAction(GLOBAL_ACTION_NOTIFICATIONS)
+    }
+
+    fun openQuickSettings(): Boolean {
+        return performGlobalAction(GLOBAL_ACTION_QUICK_SETTINGS)
+    }
 }

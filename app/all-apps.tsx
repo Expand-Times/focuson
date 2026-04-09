@@ -309,7 +309,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
           setBlockedUntil(timedBlocks[app.packageName] || null);
           setBlockedInfoVisible(true);
         } else if (isExcludedFromTimer(app.packageName)) {
-          Launcher.openApp(app.packageName);
+          openApplication(app.packageName);
         } else {
           setSelectedApp(app);
           setModalVisible(true);

@@ -322,6 +322,22 @@ class LauncherModule : Module() {
         return@Function false
     }
 
+    Function("openNotifications") {
+        val service = LauncherAccessibilityService.instance?.get()
+        if (service != null) {
+            return@Function service.openNotifications()
+        }
+        return@Function false
+    }
+
+    Function("openQuickSettings") {
+        val service = LauncherAccessibilityService.instance?.get()
+        if (service != null) {
+            return@Function service.openQuickSettings()
+        }
+        return@Function false
+    }
+
     Function("checkUsageStatsPermission") {
         val appOps = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode = appOps.checkOpNoThrow(AppOpsManager.OPSTR_GET_USAGE_STATS, Process.myUid(), context.packageName)

@@ -66,6 +66,7 @@ export default function AllAppListByCategoryScreen({
     renameApp,
     customCategories,
     addCustomCategory,
+    blockedPackageNames,
     isExcludedFromTimer,
     setTimedBlock,
     isTemporarilyBlocked,
@@ -129,11 +130,11 @@ export default function AllAppListByCategoryScreen({
     // Re-categorize when overrides or renames change
     if (!appsLoading) {
       const categorized = categorizeApps(
-        apps.filter((app) => !hiddenApps.includes(app.packageName))
+        apps.filter((app) => !hiddenApps.includes(app.packageName) && !blockedPackageNames.includes(app.packageName))
       );
       setCategories(categorized);
     }
-  }, [apps, appsLoading, categoryOverrides, appRenames, customCategories, hiddenApps]);
+  }, [apps, appsLoading, categoryOverrides, appRenames, customCategories, hiddenApps, blockedPackageNames]);
 
   const ensurePremium = () => {
     if (!isPremium) {
