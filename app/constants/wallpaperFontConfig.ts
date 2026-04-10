@@ -86,7 +86,7 @@ const wallpaperFontConfig: Record<number, {
   3: { // Wallpaper/4.jpg
     // home
      time: {'fontFamily': 'RubikMoonrocks_400Regular', fontSize: 56,color: '#CEDDF2'},
-     pm: {'fontFamily': 'Codystar_400Regular', fontSize: 16,color: '#CEDDF2'},
+     pm: {'fontFamily': 'NovaRound_400Regular', fontSize: 16,color: '#CEDDF2'},
      date: {'fontFamily': 'Poppins_400Regular', fontSize: 16,color: '#738099'},
      battery: {color: '#7FA8E5'}, 
      home: {fontFamily: 'Codystar_400Regular', fontSize: 20,color: '#CEDDF2'}, 

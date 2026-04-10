@@ -30,9 +30,9 @@ export default function IntroUnified() {
   const [step, setStep] = useState(0);
 
   // State for Step 9 (Inputs)
-  const [hours, setHours] = useState(3.5);
-  const [inputValue, setInputValue] = useState('3.5');
-  const [unlocks, setUnlocks] = useState(25);
+  const [hours, setHours] = useState(1.5);
+  const [inputValue, setInputValue] = useState('1.5');
+  const [unlocks, setUnlocks] = useState(15);
   const [showKeyboard, setShowKeyboard] = useState(false);
   const [sliderWidth, setSliderWidth] = useState(0);
 
@@ -67,7 +67,7 @@ export default function IntroUnified() {
 
   // Step 10 Logic
   useEffect(() => {
-    if (step === 7) { // Index 7 is IntroTen
+    if (step === 9) { // Index 9 is IntroTen
       const fetchStats = async () => {
         try {
           if (Launcher?.checkUsageStatsPermission?.()) {
@@ -84,10 +84,6 @@ export default function IntroUnified() {
       };
       fetchStats();
     }
-
-    // if(step === 8) {
-    //   router.replace('/home');
-    // }
   }, [step]);
 
   // Chart Helper for Step 10
@@ -123,7 +119,7 @@ export default function IntroUnified() {
           <View className="flex-1 items-center justify-center">
             <View className="mt-[10%] items-center">
               <Text allowFontScaling={false} className={`mb-4 text-center text-[18px] font-bold ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3B4D]'}`}>
-                No icons in Minimal Life
+                No icons in FocusOn
               </Text>
               <Text allowFontScaling={false} className={`px-2 text-center font-light text-[12px] leading-6 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
                 Apps are shown by name with your{'\n'}usage data
@@ -213,7 +209,7 @@ export default function IntroUnified() {
             </View>
             <View className="mb-[25%]">
               <Text allowFontScaling={false} className={`px-8 text-center mb-[5%] text-[14px] font-bold leading-6 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-                MinimalLife will always remain free, No ads, No data breach. {' '}
+                FocusOn will always remain free, No ads, No data breach. {' '}
               </Text>
               <Text allowFontScaling={false} className={`px-4 text-center text-[12px] font-light leading-5 ${isDarkMode ? 'text-[#8698B2]' : 'text-[#8698B2]'}`}>
                 Give it only a week, and you'll discover why this is{'\n'}your must-have app.
@@ -221,7 +217,11 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      case 6: // IntroNine
+      case 6: // Privacy
+        return <PrivacyScreen onContinue={() => setStep(7)} />;
+      case 7: // Permissions
+        return <PermissionAccessScreen onContinue={() => setStep(8)} />;
+      case 8: // IntroNine
         return (
           <View className="flex-1 items-center justify-start pt-12">
             <View className="w-full items-center">
@@ -283,7 +283,7 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      case 7: // IntroTen
+      case 9: // IntroTen
         return (
           <View className="flex-1 items-center justify-center">
              <View className="mt-4 w-full">
@@ -314,14 +314,14 @@ export default function IntroUnified() {
                     <Text allowFontScaling={false} className={`text-[10px] ${isDarkMode ? 'text-[#132C4D]' : 'text-[#2E3B4D]'}`}>2.5h</Text>
                   </View>
                   <View className="top-0.5 w-12 rounded-t-sm bg-[#8CD6C3]" style={{ height: getHeight(2.5) }} />
-                  <Text allowFontScaling={false} className={`font-regular mt-2 h-8 text-center text-[7px] ${isDarkMode ? 'text-[#738099]' : 'text-[#2E3B4D]'}`}>with <Text className="font-bold">Minimal Life</Text></Text>
+                  <Text allowFontScaling={false} className={`font-regular mt-2 h-8 text-center text-[7px] ${isDarkMode ? 'text-[#738099]' : 'text-[#2E3B4D]'}`}>with <Text className="font-bold">FocusOn</Text></Text>
                 </View>
                 <View className="z-10 w-1/4 items-center">
                   <View className={`${isDarkMode ? 'bg-[#7EA9E5]' : 'bg-[#9FB7E3]'} mb-1 rounded px-2 py-1`}>
                     <Text allowFontScaling={false} className={`text-[10px] ${isDarkMode ? 'text-[#132C4D]' : 'text-[#2E3B4D]'}`}>1.5h</Text>
                   </View>
                   <View className="top-0.5 w-12 rounded-t-sm bg-[#93D093]" style={{ height: getHeight(1.5) }} />
-                  <Text allowFontScaling={false} className={`mt-2 h-8 text-center text-[7px] ${isDarkMode ? 'text-[#738099]' : 'text-[#2E3B4D]'}`}><Text className="font-bold">Minimal Life</Text>{'\n'}<Text className="font-regular">+Iron will</Text></Text>
+                  <Text allowFontScaling={false} className={`mt-2 h-8 text-center text-[7px] ${isDarkMode ? 'text-[#738099]' : 'text-[#2E3B4D]'}`}><Text className="font-bold">FocusOn</Text>{'\n'}<Text className="font-regular">+Iron will</Text></Text>
                 </View>
               </View>
             </View>
@@ -334,10 +334,6 @@ export default function IntroUnified() {
             </View>
           </View>
         );
-      case 8: // Privacy
-        return <PrivacyScreen onContinue={() => setStep(9)} />;
-      case 9: // Permissions
-        return <PermissionAccessScreen />;
       default:
         return null;
     }
@@ -349,7 +345,7 @@ export default function IntroUnified() {
       return (
         <View className="w-full items-center pb-8 pt-4">
           <Text allowFontScaling={false} className={`mb-8 px-4 text-center text-[13px] font-light leading-5 ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>
-            Introducing <Text className={`font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>Minimal Launcher</Text> notification filter.{'\n'}You won't miss important notifications, block{'\n'}unnecessary, and stay focused.
+            Introducing <Text className={`font-medium ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#8698B2]'}`}>FocusOn</Text> notification filter.{'\n'}You won't miss important notifications, block{'\n'}unnecessary, and stay focused.
           </Text>
           <View className="mb-8 flex-row space-x-3">
             {[...Array(6)].map((_, i) => (
@@ -381,8 +377,11 @@ export default function IntroUnified() {
       );
     }
 
-    // Step 6 (IntroNine) has Submit button
-    if (step === 6) {
+    // Step 6 and 7 (Privacy and Permissions) - handled by component itself
+    if (step === 6 || step === 7) return null;
+
+    // Step 8 (IntroNine) has Submit button
+    if (step === 8) {
       return (
         <View className="w-full items-center pb-8 pt-4">
           <TouchableOpacity activeOpacity={1} className={`w-full py-4 rounded-full items-center justify-center mb-4 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA6E0]'}`} onPress={() => setStep(step + 1)}>
@@ -395,13 +394,13 @@ export default function IntroUnified() {
       );
     }
 
-    // Step 7 (IntroTen) has Got It button
-    if (step === 7) {
+    // Step 9 (IntroTen) has Got It button
+    if (step === 9) {
       return (
         <View className="w-full items-center px-4 pb-8 pt-4">
           <TouchableOpacity activeOpacity={1} className={`mb-8 w-full items-center justify-center rounded-full py-4 shadow-sm ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#7EA6E0]'}`} onPress={async () => {
               try { await AsyncStorage.setItem('hasSeenIntro', 'true'); } catch (e) { console.error('Failed to set intro flag', e); }
-              setStep(8);
+              router.replace('/home');
             }}>
             <Text allowFontScaling={false} className="font-regular text-[16px] text-white">Got It!</Text>
           </TouchableOpacity>
@@ -409,8 +408,8 @@ export default function IntroUnified() {
       );
     }
     
-    // Step 8 and 9 (Privacy and Permissions) - handled by component itself
-    if (step >= 8) return null;
+    // Steps 10+
+    if (step >= 10) return null;
 
     return null;
   };
@@ -421,13 +420,13 @@ export default function IntroUnified() {
 
   return (
     <SafeAreaView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#EBF1F7]'}`}>
-      <StatusBar backgroundColor={isDarkMode ? '#0D121A' : step === 7 ? '#5C8BCC' : '#EBF1F7'} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
-      {step === 7 && (
+      <StatusBar backgroundColor={isDarkMode ? '#0D121A' : step === 9 ? '#5C8BCC' : '#EBF1F7'} barStyle={isDarkMode ? 'light-content' : 'dark-content'} />
+      {step === 9 && (
         <View className={`w-full items-center justify-center py-6 ${isDarkMode ? 'bg-[#131B26]' : 'bg-[#5C8BCC]'}`}>
           <Text allowFontScaling={false} className="text-[16px] font-bold text-white">Your Screen Time</Text>
         </View>
       )}
-      <View className={`flex-1 ${step >= 8 ? '' : 'px-6 pt-8'}`}>
+      <View className={`flex-1 ${step === 6 || step === 7 ? '' : 'px-6 pt-8'}`}>
         {renderContent()}
         {renderFooter()}
       </View>

@@ -19,7 +19,7 @@ import Constants from 'expo-constants';
 
 const { width } = Dimensions.get('window');
 
-export default function PermissionAccessScreen() {
+export default function PermissionAccessScreen({ onContinue }: { onContinue?: () => void }) {
   const router = useRouter();
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -164,7 +164,11 @@ export default function PermissionAccessScreen() {
 
   useEffect(() => {
     if (missingCount === 0) {
-      router.replace('/home');
+      if (onContinue) {
+        onContinue();
+      } else {
+        router.replace('/home');
+      }
     }
   }, [missingCount]);
 
@@ -189,7 +193,7 @@ export default function PermissionAccessScreen() {
           </Text>
 
           <Text allowFontScaling={false} className={`px-2 text-center text-[10px] font-regular leading-4 ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>
-            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>Minimal Life</Text> requires permission to track your screen
+            <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>FocusOn</Text> requires permission to track your screen
             time and distraction blocking features.{'\n\n'}
             We don't collect or share your personal data. Your{' '}
             <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>data store</Text> on your{' '}

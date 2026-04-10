@@ -444,12 +444,12 @@ export default function Home() {
     if (format === 'HH:MM' || format === 'HH:MM:SS') format = '24h';
 
     const h12 = h % 12 || 12;
-    const suffix = h >= 12 ? 'pm' : 'am';
+    const suffix = h >= 12 ? 'PM' : 'AM';
 
-    if (format === '12h' || format === '12h PM') return { main: `${h12}:${z(m)}${suffix}` };
-    if (format === '24h' || format === '24h PM') return { main: `${z(h)}:${z(m)}` };
+    if (format === '12h' || format === '12h PM') return { main: `${h12}:${z(m)}`, suffix: ` ${suffix}` };
+    if (format === '24h' || format === '24h PM') return { main: `${z(h)}:${z(m)}`, suffix: '' };
 
-    return { main: `${z(h)}:${z(m)}` };
+    return { main: `${z(h)}:${z(m)}`, suffix: '' };
   };
 
   const getFormattedDate = (date: Date) => {
@@ -595,9 +595,17 @@ export default function Home() {
                   <Text
                     allowFontScaling={false}
                     style={time}
-                    className={`font-regular  text-[32px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                    className={`font-regular  text-[36px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
                     {timeDisplay.main}
                   </Text>
+                  {timeDisplay.suffix ? (
+                    <Text
+                      allowFontScaling={false}
+                      style={pm}
+                      className={`font-regular ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+                      {timeDisplay.suffix}
+                    </Text>
+                  ) : null}
                 </View>
                 <Text
                   allowFontScaling={false}

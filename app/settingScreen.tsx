@@ -27,6 +27,7 @@ import { Dimensions } from 'react-native';
 import { StatusBar } from 'react-native';
 import { openApplication } from 'expo-intent-launcher';
 import { BlockedInfoModal } from './components/BlockModals';
+import { PremiumModal } from './components/PremiumModal';
 import LottieView from 'lottie-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -502,26 +503,21 @@ export default function SettingScreen() {
       />
       {/* Header */}
       <View
-        className={`flex-row items-center justify-between px-4 py-3 ${isDarkMode ? 'bg-[]' : 'bg-[#EBF1F7]'}`}>
-        <TouchableOpacity onPress={() => router.push('/home')}>
+        className={`flex-row items-center px-4 py-3 ${isDarkMode ? 'bg-[]' : 'bg-[#EBF1F7]'}`}>
+        <TouchableOpacity onPress={() => router.push('/home')} className="absolute left-4 z-10">
           <MaterialCommunityIcons
             name="arrow-left"
             size={26}
             color={isDarkMode ? '#E2E8F0' : '#8698B2'}
           />
         </TouchableOpacity>
-        <Text
-          allowFontScaling={false}
-          className={`text-[18px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
-          Settings
-        </Text>
-        <TouchableOpacity>
-          <MaterialCommunityIcons
-            name="magnify"
-            size={26}
-            color={isDarkMode ? '#94A3B8' : '#8698B2'}
-          />
-        </TouchableOpacity>
+        <View className="flex-1 items-center">
+          <Text
+            allowFontScaling={false}
+            className={`text-[18px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
+            Settings
+          </Text>
+        </View>
       </View>
       <View className="border-b border-[#A3B9D940]"></View>
       <ScrollView
@@ -676,68 +672,11 @@ export default function SettingScreen() {
           </View>
         </Modal>
         {/* Premium Feature Modal */}
-        <Modal
-          animationType="fade"
-          transparent={true}
+        <PremiumModal
           visible={modalVisible}
-          onRequestClose={() => setModalVisible(false)}>
-          <View
-            className="h-full items-center justify-center "
-            style={[{ backgroundColor: 'rgba(32, 41, 56, 0.85)' }]}>
-            <TouchableOpacity
-              activeOpacity={0.8}
-              onPress={() => {
-                setModalVisible(false);
-                router.push('/PremiumPackageScreen');
-              }}>
-              <View
-                className=" rounded-full  py-6 shadow-md"
-                style={{
-                  backgroundColor: selectedColor,
-                  width: screenWidth * 0.8,
-                  height: screenHeight * 0.1,
-                  alignSelf: 'center',
-                }}>
-                <View className="flex-row items-center justify-center">
-                  <View>
-                    <Image
-                      source={require('../assets/images/PremiumFeature.png')}
-                      className="h-[40px] w-[40px]"
-                      resizeMode="contain"
-                    />
-                  </View>
-                  <View>
-                    <Text
-                      allowFontScaling={false}
-                      className="bottom-3 text-center text-[20px] font-medium tracking-[1px] text-white">
-                      Premium Feature!
-                    </Text>
-                    <Text
-                      allowFontScaling={false}
-                      className="bottom-2 text-center text-[10px] font-normal tracking-[1px] text-[#C6CEDD]">
-                      Only premium user can use this feature
-                    </Text>
-                  </View>
-                </View>
-
-                <Pressable
-                  onPress={() => {
-                    setModalVisible(false);
-                    router.push('/PremiumPackageScreen');
-                  }}
-                  className="bottom-3 mt-4 h-8 self-center rounded-md bg-white px-4">
-                  <Text
-                    allowFontScaling={false}
-                    className="top-2 text-[12px] font-medium tracking-[1px]"
-                    style={{ color: selectedColor }}>
-                    Discover
-                  </Text>
-                </Pressable>
-              </View>
-            </TouchableOpacity>
-          </View>
-        </Modal>
-        {/* Premium Feature Modal */}
+          onClose={() => setModalVisible(false)}
+          selectedColor={selectedColor}
+        />
         
         {/* Profile Section */}
          <View className="mt-4 px-4">
@@ -1221,14 +1160,14 @@ export default function SettingScreen() {
 
           <View className={`h-4 w-[1px] ${isDarkMode ? 'bg-[#434C59]' : 'bg-[#DBDFE5]'}`} />
 
-          {/* App Permissions */}
+          {/* Device Setting*/}
           <TouchableOpacity
             className="flex-row items-center px-4"
-            onPress={() => router.push('/permissions')}>
+            onPress={() => Linking.openSettings()}>
             <Text
               allowFontScaling={false}
               className={`mr-2 text-[14px] font-light ${isDarkMode ? 'text-[#DBDFE5]' : 'text-[#2E3B4D]'}`}>
-              App Permissions
+              Device Setting
             </Text>
           </TouchableOpacity>
         </View>
