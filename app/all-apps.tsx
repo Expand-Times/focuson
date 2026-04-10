@@ -11,7 +11,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   StatusBar,
-  FlatList,
+  ScrollView,
   Pressable,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -29,7 +29,8 @@ import Launcher from '../modules/launcher';
 type FlatListHeader = { type: 'header'; title: string };
 type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
 type FlatListDataItem = FlatListHeader | FlatListItem;
-import { useRouter, useLocalSearchParams, Link } from 'expo-router';
+import { FlatList } from 'react-native';
+import { useRouter, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorContext } from './context/ColorContext';
@@ -101,16 +102,6 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
 
-  // Selection Mode State
-  const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
-  const selectedPackageNamesRef = useRef<string[]>([]);
-
-  useEffect(() => {
-    selectedPackageNamesRef.current = selectedPackageNames;
-  }, [selectedPackageNames]);
-
-  const selectedSet = useMemo(() => new Set(selectedPackageNames), [selectedPackageNames]);
-
   // New State for Features
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
   const [renameModalVisible, setRenameModalVisible] = useState(false);
@@ -120,56 +111,10 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
-  const [selectModalVisible, setSelectModalVisible] = useState(false);
   const [premiumModalVisible, setPremiumModalVisible] = useState(false);
   const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
-  const [lastAction, setLastAction] = useState<'added' | 'removed' | null>(null);
-  const selectModalTimerRef = useRef<any>(null);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
-    };
-  }, []);
 
   const router = useRouter();
-  const params = useLocalSearchParams();
-  const isSelectMode = params.mode === 'select';
-
-  const listRef = useRef<FlatList<FlatListDataItem>>(null);
-
-  useEffect(() => {
-    if (isSelectMode) {
-      // Initialize selection with current home apps
-      setSelectedPackageNames(homeApps.map((a) => a.packageName));
-    }
-  }, [isSelectMode, homeApps]);
-
-  const handleSaveSelection = async () => {
-    try {
-      const currentSelected = selectedPackageNamesRef.current;
-      const max = isPremium ? 6 : 3;
-      if (currentSelected.length > max) {
-        if (!isPremium) {
-          setPremiumModalConfig({
-            title: 'Limit Reached',
-            description: 'Free users can add up to 3 favorite apps. Upgrade to add up to 6.'
-          });
-          setPremiumModalVisible(true);
-        } else {
-          Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
-        }
-        return;
-      }
-      // Filter the full apps list to get the full AppItem objects for selected packages
-      const selectedAppItems = apps.filter((app) => currentSelected.includes(app.packageName));
-      await updateHomeApps(selectedAppItems);
-      router.back();
-    } catch (e) {
-      console.error('Failed to save selection', e);
-    }
-  };
 
   // Track the previous active letter to determine if data actually needs to change
   const prevActiveLetterRef = useRef<string | null>(null);
@@ -250,89 +195,34 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, hiddenApps, appRenames]);
 
-  const FlatListData = useMemo(() => {
-    const data: FlatListDataItem[] = [];
 
-    // Do NOT filter the list data here anymore. Let the full list remain rendered
-    // so FlatList can scroll to the correct index without recreating the entire list.
-    const filteredSections = sections;
-
-    filteredSections.forEach((section) => {
-      data.push({ type: 'header', title: section.title });
-      section.data.forEach((item) => {
-        data.push({ type: 'item', data: item, sectionTitle: section.title });
-      });
-    });
-    return data;
-  }, [sections]);
 
   const handleAppPress = useCallback(
     (app: AppItem) => {
-      if (isSelectMode) {
-        const currentSelected = selectedPackageNamesRef.current;
-        const isAlreadySelected = currentSelected.includes(app.packageName);
-
-        if (isAlreadySelected) {
-          // Deselect
-          setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
-          setLastAction('removed');
-        } else {
-          // Select
-          const max = isPremium ? 6 : 3;
-          if (currentSelected.length >= max) {
-            if (!isPremium) {
-              setPremiumModalConfig({
-                title: 'Limit Reached',
-                description: 'Free users can add up to 3 favorite apps. Upgrade to add up to 6.'
-              });
-              setPremiumModalVisible(true);
-            } else {
-              Alert.alert('Limit Reached', 'You cannot add more than 6 favorite apps.');
-            }
-            return;
-          }
-          setSelectedPackageNames((prev) => [...prev, app.packageName]);
-          setLastAction('added');
-        }
-
+      if (isTemporarilyBlocked(app.packageName)) {
         setSelectedApp(app);
-        setSelectModalVisible(true);
-
-        // Auto-close modal after 3 seconds
-        if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
-        selectModalTimerRef.current = setTimeout(() => {
-          setSelectModalVisible(false);
-        }, 2000);
+        setBlockedUntil(timedBlocks[app.packageName] || null);
+        setBlockedInfoVisible(true);
+      } else if (isExcludedFromTimer(app.packageName)) {
+        openApplication(app.packageName);
       } else {
-        if (isTemporarilyBlocked(app.packageName)) {
-          setSelectedApp(app);
-          setBlockedUntil(timedBlocks[app.packageName] || null);
-          setBlockedInfoVisible(true);
-        } else if (isExcludedFromTimer(app.packageName)) {
-          openApplication(app.packageName);
-        } else {
-          setSelectedApp(app);
-          setModalVisible(true);
-        }
+        setSelectedApp(app);
+        setModalVisible(true);
       }
     },
     [
-      isSelectMode,
       isExcludedFromTimer,
       isTemporarilyBlocked,
       timedBlocks,
-      isPremium,
     ]
   );
 
   const handleAppLongPress = useCallback(
     (app: AppItem) => {
-      if (!isSelectMode) {
-        setSelectedApp(app);
-        setOptionsModalVisible(true);
-      }
+      setSelectedApp(app);
+      setOptionsModalVisible(true);
     },
-    [isSelectMode]
+    []
   );
 
   const { launchAppWithTimer } = useAppLauncher();
@@ -483,126 +373,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     }
   };
 
-  const getItemLayout = useCallback((data: any, index: number) => {
-    let offset = 0;
-    for (let i = 0; i < index; i++) {
-      offset += data?.[i]?.type === 'header' ? 44 : 56;
-    }
-    const length = data?.[index]?.type === 'header' ? 44 : 56;
-    return { length, offset, index };
-  }, []);
-
-  const renderHeader = useCallback(() => {
-    return (
-      <View className="mb-4 w-full flex-row items-center justify-between">
-        <Text
-          allowFontScaling={false}
-          style={allappt}
-          className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
-            isImageWallpaper
-              ? 'text-white decoration-white'
-              : isDarkMode
-                ? 'text-[#DADFE5] decoration-[#DADFE5]'
-                : 'text-[#858E9D] decoration-[#858E9D]'
-          }`}>
-          {isSelectMode ? 'Select Apps' : 'All Apps'}
-        </Text>
-        {isSelectMode ? (
-          <View className="flex-row items-center gap-2">
-            <TouchableOpacity
-              className={`rounded-lg px-4 py-2 ${isDarkMode ? 'bg-slate-700' : 'bg-slate-200'}`}
-              onPress={() => router.back()}>
-              <Text
-                allowFontScaling={false}
-                className={`text-[14px] font-medium ${
-                  isImageWallpaper
-                    ? 'text-white'
-                    : isDarkMode
-                      ? 'text-[#DADFE5]'
-                      : 'text-[#858E9D]'
-                }`}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              className="items-center rounded-lg bg-[#7EA6E0] px-6 py-2"
-              onPress={handleSaveSelection}>
-              <Text
-                allowFontScaling={false}
-                className={`text-[14px] font-bold ${
-                  isImageWallpaper
-                    ? 'text-white'
-                    : isDarkMode
-                      ? 'text-[#DADFE5]'
-                      : 'text-[#FFFFFF]'
-                }`}>
-                Save
-              </Text>
-            </TouchableOpacity>
-          </View>
-        ) : (
-          <Link href="/settingScreen" asChild>
-            <TouchableOpacity
-              className="p-2"
-              hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-              <View style={allappi}>
-                <Image
-                  source={require('../assets/images/SettingIcon.png')}
-                  style={{
-                    width: 30,
-                    height: 30,
-                    tintColor:
-                      allappi?.color ||
-                      (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                  }}
-                />
-              </View>
-            </TouchableOpacity>
-          </Link>
-        )}
-      </View>
-    );
-  }, [allappt, isImageWallpaper, isDarkMode, isSelectMode, router, handleSaveSelection, allappi]);
-
-  const renderItem = useCallback(
-    ({ item }: { item: FlatListDataItem }) => {
-      if (item.type === 'header') {
-        return (
-          <Text
-            style={header}
-            className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
-              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
-            }`}>
-            {item.title}
-          </Text>
-        );
-      }
-      return (
-        <AppListItem
-          item={item.data}
-          isSelectMode={isSelectMode}
-          isSelected={selectedSet.has(item.data.packageName)}
-          onPress={handleAppPress}
-          onLongPress={handleAppLongPress}
-          isImageWallpaper={isImageWallpaper}
-          isDarkMode={isDarkMode}
-          theme={fontConfig}
-          wallpaperIndex={wallpaperIndex}
-        />
-      );
-    },
-    [
-      isSelectMode,
-      selectedSet,
-      handleAppPress,
-      handleAppLongPress,
-      isImageWallpaper,
-      isDarkMode,
-      fontConfig,
-      wallpaperIndex,
-      header,
-    ]
-  );
+  // removed renderItem and getItemLayout
 
   const rightSwipeGesture = Gesture.Fling()
     .direction(Directions.RIGHT)
@@ -691,22 +462,71 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
           {/* Apps List */}
           <View className="flex-1 flex-row">
             <View className="w-full px-3 ">
-              <FlatList
-                ref={listRef}
-                data={FlatListData}
-                renderItem={renderItem}
-                ListHeaderComponent={renderHeader}
-                keyExtractor={(item: FlatListDataItem) =>
-                  item.type === 'header' ? `header-${item.title}` : item.data.packageName
-                }
-                contentContainerStyle={{ paddingBottom: 20 }}
+              <ScrollView
                 showsVerticalScrollIndicator={false}
-                initialNumToRender={20}
-                maxToRenderPerBatch={20}
-                windowSize={11}
-                removeClippedSubviews={Platform.OS === 'android'}
-                getItemLayout={getItemLayout}
-              />
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 40 }}>
+                <View className="mb-4 w-full flex-row items-center justify-between">
+                  <Text
+                    allowFontScaling={false}
+                    style={allappt}
+                    className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
+                      isImageWallpaper
+                        ? 'text-white decoration-white'
+                        : isDarkMode
+                          ? 'text-[#DADFE5] decoration-[#DADFE5]'
+                          : 'text-[#858E9D] decoration-[#858E9D]'
+                    }`}>
+                    All Apps
+                  </Text>
+                  <Link href="/settingScreen" asChild>
+                    <TouchableOpacity
+                      className="p-2"
+                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                      <View style={allappi}>
+                        <Image
+                          source={require('../assets/images/SettingIcon.png')}
+                          style={{
+                            width: 30,
+                            height: 30,
+                            tintColor:
+                              allappi?.color ||
+                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                          }}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                  </Link>
+                </View>
+                {sections.map((section, index) => (
+                  <View key={index}>
+                    <Text
+                      style={header}
+                      className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
+                        isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                      }`}>
+                      {section.title}
+                    </Text>
+                    {section.data.map((app) => (
+                      <AppListItem
+                        key={app.packageName}
+                        item={app}
+                        onPress={handleAppPress}
+                        onLongPress={handleAppLongPress}
+                        isImageWallpaper={isImageWallpaper}
+                        isDarkMode={isDarkMode}
+                        theme={fontConfig}
+                        wallpaperIndex={wallpaperIndex}
+                      />
+                    ))}
+                  </View>
+                ))}
+                {sections.length === 0 && (
+                  <View className="mt-10 items-center">
+                    <Text className="text-slate-400">No apps found</Text>
+                  </View>
+                )}
+              </ScrollView>
             </View>
           </View>
 
@@ -817,41 +637,6 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
               </View>
             </View>
           )}
-
-          {/* Select Mode App Options Modal */}
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={selectModalVisible && selectedApp !== null}
-            onRequestClose={() => setSelectModalVisible(false)}>
-            <View className="absolute inset-0 z-50 items-center justify-center">
-              <Pressable className="absolute inset-0 bg-black/70" onPress={() => setSelectModalVisible(false)} />
-              <View
-                style={modalbg}
-                className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
-                <View className="w-full max-w-[520px] items-center">
-                  <Text
-                    allowFontScaling={false}
-                    className={`mb-6 text-center text-[16px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
-                    {lastAction === 'added' ? 'Added Successfully!' : 'Removed Successfully!'}
-                  </Text>
-                  <View className="mb-4 h-20 w-20 rounded-full">
-                    {selectedApp?.icon && (
-                      <Image
-                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                        className="h-full w-full rounded-full"
-                      />
-                    )}
-                  </View>
-                  <Text
-                    allowFontScaling={false}
-                    className={`mb-6 text-center text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    <Text className="font-bold">{selectedApp?.label}</Text> has been {lastAction === 'added' ? 'added to' : 'removed from'} your home screen.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </Modal>
 
           <Modal
             animationType="fade"
@@ -1025,8 +810,6 @@ const formatUsageTime = (millis?: number) => {
 const AppListItem = memo(
   ({
     item,
-    isSelectMode,
-    isSelected,
     onPress,
     onLongPress,
     isImageWallpaper,
@@ -1041,22 +824,12 @@ const AppListItem = memo(
         style={applistbg}
         className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
           isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
-        } ${isSelectMode && isSelected ? '' : ''}`}
+        }`}
         onPress={() => onPress(item)}
         onLongPress={() => onLongPress(item)}
         delayLongPress={300}
         android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
         <View className="flex-1 flex-row items-center">
-          {isSelectMode && (
-            <Ionicons
-              name={isSelected ? 'checkbox' : 'square-outline'}
-              size={20}
-              color={
-                applist?.color || (isImageWallpaper ? 'white' : isDarkMode ? '#DADFE5' : '#142C4D')
-              }
-              style={[{ marginRight: 8 }, applist]}
-            />
-          )}
           {wallpaperIndex === 6 && (
             <View
               style={{

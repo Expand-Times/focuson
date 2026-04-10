@@ -38,6 +38,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 import { BlockedInfoModal } from './components/BlockModals';
 import { PremiumModal } from './components/PremiumModal';
+import { SelectAppModal } from './components/SelectAppModal';
 
 const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
@@ -172,6 +173,7 @@ export default function Home() {
   const [premiumModalVisible, setPremiumModalVisible] = useState(false);
   const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectAppModalVisible, setSelectAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
 
@@ -748,7 +750,7 @@ export default function Home() {
                 <TouchableOpacity
                   className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}
                   onPress={() => {
-                    router.push('/all-apps?mode=select');
+                    setSelectAppModalVisible(true);
                   }}>
                   <MaterialCommunityIcons
                     name="plus-circle-outline"
@@ -895,6 +897,10 @@ export default function Home() {
                 onClose={() => setPremiumModalVisible(false)}
                 title={premiumModalConfig.title}
                 description={premiumModalConfig.description}
+              />
+              <SelectAppModal
+                visible={selectAppModalVisible}
+                onClose={() => setSelectAppModalVisible(false)}
               />
 
               {/* Tutorial Overlay inside Home Screen View */}
