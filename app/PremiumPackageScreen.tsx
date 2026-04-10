@@ -87,8 +87,15 @@ export default function PremiumPackageScreen() {
         router.replace('/intro/PremiumUnlockedScreen');
       }
     } catch (error: any) {
+      // console.log('Purchase Error:', error.code);
+
       if (error.code !== 'E_USER_CANCELLED' && error.code !== 'user-cancelled') {
-        Alert.alert('Purchase Error', error.message || 'Something went wrong');
+        if(error.code == 'already-owned') {
+          await unlockPremium();
+          router.replace('/intro/PremiumUnlockedScreen');
+        } else {
+          Alert.alert('Purchase Error', error.message || 'Something went wrong');
+        }
       }
     } finally {
       setIsPurchasing(false);
