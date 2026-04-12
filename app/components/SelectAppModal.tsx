@@ -437,3 +437,5 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
     </Modal>
   );
 };
+
+export default function SelectAppModalContainer() { return null; }

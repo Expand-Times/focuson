@@ -94,3 +94,5 @@ export function PremiumModal({
     </Modal>
   );
 }
+
+export default function PremiumModalContainer() { return null; }

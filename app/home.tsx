@@ -176,6 +176,7 @@ export default function Home() {
   const [selectAppModalVisible, setSelectAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
+  const [isDefaultLauncher, setIsDefaultLauncher] = useState(true);
 
   useEffect(() => {
     // Update time immediately when timeOffset changes
@@ -204,8 +205,12 @@ export default function Home() {
         try {
           const stats = Launcher.getTodayUsageStats();
           setTodayStats(stats);
+          
+          // Also check default launcher
+          const isDefault = Launcher.isDefaultLauncher();
+          setIsDefaultLauncher(isDefault);
         } catch (e) {
-          console.error('Failed to fetch usage stats', e);
+          console.error('Failed to fetch stats or check default launcher', e);
         }
       };
 
@@ -784,8 +789,39 @@ export default function Home() {
                 </TouchableOpacity>
               </View>
 
+              {/* Set as Default Launcher */}
+              
+
               {/* Footer Info */}
               <View className={`w-full ${wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                {!isDefaultLauncher && (
+                <View
+                  className={`mt-6 mb-2 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}>
+                  <TouchableOpacity
+                    className={`rounded-full border px-4 py-2 ${
+                      wallpaper && typeof wallpaper !== 'string'
+                        ? 'border-[#E6EBF2] bg-[#E6EBF2]/10'
+                        : isDarkMode
+                          ? 'border-[#738099] bg-[#738099]/10'
+                          : 'border-[#405B80] bg-[#405B80]/10'
+                    }`}
+                    onPress={() => {
+                      Launcher.openHomeSettings();
+                    }}>
+                    <Text
+                      allowFontScaling={false}
+                      className={`text-[13px] font-medium ${
+                        wallpaper && typeof wallpaper !== 'string'
+                          ? 'text-[#E6EBF2]'
+                          : isDarkMode
+                            ? 'text-[#DADFE5]'
+                            : 'text-[#405B80]'
+                      }`}>
+                      Set as Default Launcher
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                )}
                 <View
                   className={`mb-2 gap-4 ${wallpaperIndex === 15 ? 'flex-col items-start' : 'flex-row items-center'}`}>
                   <Text

@@ -400,6 +400,16 @@ class LauncherModule : Module() {
         context.startActivity(intent)
     }
 
+    Function("openHomeSettings") {
+        val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Intent(Settings.ACTION_HOME_SETTINGS)
+        } else {
+            Intent(Settings.ACTION_SETTINGS)
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(intent)
+    }
+
     Function("prepareToReturnFromAccessibility") {
         val prefs = context.getSharedPreferences("LauncherPrefs", Context.MODE_PRIVATE)
         prefs.edit().putLong("awaiting_accessibility_ts", System.currentTimeMillis()).apply()

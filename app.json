@@ -44,7 +44,7 @@
       },
       "package": "com.expandtimes.focuson.launcher",
       "edgeToEdgeEnabled": true,
-      "launchMode": "singleInstance"
+      "launchMode": "singleTask"
     }
   }
 }

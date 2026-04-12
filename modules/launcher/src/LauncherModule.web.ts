@@ -21,6 +21,8 @@ class LauncherModule extends NativeModule<LauncherModuleEvents> {
   checkNotificationPermission() { return true; }
   openNotificationSettings() {}
   isAccessibilityServiceEnabled() { return true; }
+  openAccessibilitySettings() {}
+  openHomeSettings() {}
   isIgnoringBatteryOptimizations() { return true; }
   isDefaultLauncher() { return true; }
   getInstalledApps() { return []; }
