@@ -16,7 +16,6 @@ export default function Permissions() {
     notification: false,
     accessibility: false,
     battery: false,
-    defaultLauncher: false,
   });
 
   const packageName = Constants.expoConfig?.android?.package || "com.expandtimes.minimallife";
@@ -30,7 +29,6 @@ export default function Permissions() {
           notification: Launcher.checkNotificationPermission(),
           accessibility: Launcher.isAccessibilityServiceEnabled(),
           battery: Launcher.isIgnoringBatteryOptimizations(),
-          defaultLauncher: Launcher.isDefaultLauncher(),
         });
       } catch (e) {
         console.error("Error checking permissions:", e);
@@ -107,14 +105,6 @@ export default function Permissions() {
     }
   };
 
-  const openHomeSettings = async () => {
-    try {
-      await startActivityAsync(ActivityAction.HOME_SETTINGS);
-    } catch (e) {
-      console.error("Error opening home settings:", e);
-    }
-  };
-
   const PermissionItem = ({ title, description, hasPermission, onPress }: { title: string, description: string, hasPermission: boolean, onPress: () => void }) => (
     <View className={`mb-6 p-4 rounded-lg border ${isDarkMode ? 'bg-[#131B26] border-[#2E3B4D]' : 'bg-gray-100 border-gray-200'}`}>
       <View className="flex-row justify-between items-center mb-2">
@@ -178,13 +168,6 @@ export default function Permissions() {
           description="Ensures the launcher stays active and reliable in the background."
           hasPermission={permissions.battery}
           onPress={requestBattery}
-        />
-
-        <PermissionItem 
-          title="Default Home App" 
-          description="Set MinimalLife as your default home launcher."
-          hasPermission={permissions.defaultLauncher}
-          onPress={openHomeSettings}
         />
         
         <TouchableOpacity 
