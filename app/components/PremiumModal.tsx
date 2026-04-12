@@ -34,7 +34,7 @@ export function PremiumModal({
           activeOpacity={0.8}
           onPress={() => {
             onClose();
-            router.push('/PremiumPackageScreen');
+            router.push('/premium');
           }}>
           <View
             className="rounded-full py-6 shadow-md"
@@ -71,7 +71,7 @@ export function PremiumModal({
             <Pressable
               onPress={() => {
                 onClose();
-                router.push('/PremiumPackageScreen');
+                router.push('/premium');
               }}
               className="absolute -bottom-3 self-center rounded-md bg-white px-6 py-1.5 shadow-sm">
               <Text
