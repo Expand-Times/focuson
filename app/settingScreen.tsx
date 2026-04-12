@@ -683,7 +683,7 @@ export default function SettingScreen() {
           
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => !isPremium && router.push('/PremiumPackageScreen')}>
+            onPress={() => !isPremium && router.push('/premium')}>
             <LinearGradient
               colors={
                 isPremium
@@ -1011,7 +1011,7 @@ export default function SettingScreen() {
                   Free Version
                 </Text>
                 <TouchableOpacity
-                  onPress={() => router.push('/PremiumPackageScreen')}
+                  onPress={() => router.push('/premium')}
                   className={`rounded-xl ${isDarkMode ? 'bg-[#7FA8E5]' : 'bg-[#7EA9E5]'} px-4 py-2`}>
                   <Text
                     allowFontScaling={false}

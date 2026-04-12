@@ -27,7 +27,7 @@ import Animated, {
 import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
-import AllAppListByCategoryScreen from './AllAppListByCategoryScreen';
+import AllAppsByCategoryScreen from './all-apps-by-category';
 import AllApps from './all-apps';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { openApplication } from 'expo-intent-launcher';
@@ -566,7 +566,7 @@ export default function Home() {
             animatedStyle,
           ]}>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
-            <AllAppListByCategoryScreen enableGestures={false} autoFocus={false} />
+            <AllAppsByCategoryScreen enableGestures={false} autoFocus={false} />
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
             {wallpaper && typeof wallpaper !== 'string' && (
