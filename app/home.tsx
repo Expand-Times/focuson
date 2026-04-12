@@ -162,7 +162,7 @@ export default function Home() {
       // Step 3: Wait for return to Home (Category -> Home)
       // Target: translateX approaches -SCREEN_WIDTH
       if (tutorialStep === 3 && currentX < -SCREEN_WIDTH * 0.9) {
-        runOnJS(updateTutorialStep)(4);
+        runOnJS(updateTutorialStep)(5);
       }
     },
     [showTutorial, tutorialStep]
@@ -362,21 +362,6 @@ export default function Home() {
       }
     })
     .onEnd((e) => {
-      const isHome = Math.abs(translateX.value - -SCREEN_WIDTH) < 10;
-
-      // Handle Vertical Swipe for Notifications/Quick Settings
-      if (isHome && e.translationY > 50 && Math.abs(e.translationY) > Math.abs(e.translationX)) {
-        if (e.translationY > 250) {
-          runOnJS(handleOpenQuickSettings)();
-          if (showTutorial && tutorialStep === 4) {
-            runOnJS(updateTutorialStep)(5);
-          }
-        } else {
-          runOnJS(handleOpenNotifications)();
-        }
-        return;
-      }
-
       // Handle Horizontal Page Swipe Snap
       if (Math.abs(e.translationX) > Math.abs(e.translationY)) {
         const currentPos = translateX.value;
@@ -1014,28 +999,6 @@ export default function Home() {
                         className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
                         allowFontScaling={false}>
                         To return to Home Screen
-                      </Text>
-                    </View>
-                  )}
-
-                  {/* Step 4: Swipe Down (Show on Home) */}
-                  {tutorialStep === 4 && (
-                    <View className="items-center rounded-3xl bg-transparent p-6">
-                      <LottieView
-                        autoPlay
-                        loop
-                        source={require('../assets/Animation/SwipedownE.json')}
-                        style={{ width: 96, height: 96 }}
-                      />
-                      <Text
-                        className={`mt-4 text-2xl font-bold italic ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                        allowFontScaling={false}>
-                        Swipe Down
-                      </Text>
-                      <Text
-                        className={`font-regular mt-2 justify-center text-center text-base ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}
-                        allowFontScaling={false}>
-                        To see Quick Settings
                       </Text>
                     </View>
                   )}
