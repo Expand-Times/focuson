@@ -61,7 +61,6 @@ export default function AllAppsByCategoryScreen({
     categoryOverrides,
     setCategoryOverride,
     hiddenApps,
-    toggleHideApp,
     appRenames,
     renameApp,
     customCategories,
@@ -94,7 +93,6 @@ export default function AllAppsByCategoryScreen({
   const [softInputEnabled, setSoftInputEnabled] = useState(false);
   const [tempAppName, setTempAppName] = useState('');
   const [blockModalVisible, setBlockModalVisible] = useState(false);
-  const [hideAppModalVisible, setHideAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [screenTimeVisible, setScreenTimeVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
@@ -111,7 +109,6 @@ export default function AllAppsByCategoryScreen({
     appCi,
     applistC,
     applistCbg,
-    applistCdu,
     modalbg,
     open,
     numberbg,
@@ -205,11 +202,7 @@ export default function AllAppsByCategoryScreen({
     }
   };
 
-  const handleCancelEditing = () => {
-    setEditingCategory(null);
-    setTempCategoryName('');
-    setRenameCategoryModalVisible(false);
-  };
+
 
   // loadAndCategorizeApps removed, logic moved to useEffect
 
@@ -362,21 +355,7 @@ export default function AllAppsByCategoryScreen({
     closeModal();
   };
 
-  const handleHideApp = async () => {
-    if (!selectedApp) return;
-    setHideAppModalVisible(true);
-  };
 
-  const confirmHideApp = async (dontShowAgain: boolean) => {
-    if (!selectedApp) return;
-    try {
-      await toggleHideApp(selectedApp.packageName);
-      setHideAppModalVisible(false);
-      closeModal();
-    } catch (e) {
-      console.error(e);
-    }
-  };
 
   const handleConfirmBlock = async (durationMs: number) => {
     if (!selectedApp) return;
@@ -403,15 +382,7 @@ export default function AllAppsByCategoryScreen({
       .filter((cat) => cat?.data?.length > 0);
   }, [categories, searchQuery]);
 
-  const formatUsageTime = (millis?: number) => {
-    if (!millis) return '0 min';
-    const minutes = Math.floor(millis / (1000 * 60));
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
 
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins} min`;
-  };
 
   const handlePress = useCallback((app: AppItem) => {
     onAppPress(app);

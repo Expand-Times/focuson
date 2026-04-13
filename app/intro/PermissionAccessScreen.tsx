@@ -5,7 +5,6 @@ import {
   TouchableOpacity,
   ScrollView,
   Platform,
-  Dimensions,
   Image,
   AppState,
   useColorScheme,
@@ -17,7 +16,7 @@ import Launcher from '../../modules/launcher';
 import { startActivityAsync, ActivityAction } from 'expo-intent-launcher';
 import Constants from 'expo-constants';
 
-const { width } = Dimensions.get('window');
+
 
 export default function PermissionAccessScreen({ onContinue }: { onContinue?: () => void }) {
   const router = useRouter();
@@ -195,7 +194,7 @@ export default function PermissionAccessScreen({ onContinue }: { onContinue?: ()
           <Text allowFontScaling={false} className={`px-2 text-center text-[10px] font-regular leading-4 ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>
             <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>FocusOn</Text> requires permission to track your screen
             time and distraction blocking features.{'\n\n'}
-            We don't collect or share your personal data. Your{' '}
+            We don&apos;t collect or share your personal data. Your{' '}
             <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>data store</Text> on your{' '}
             <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>device; not</Text> in our{' '}
             <Text allowFontScaling={false} className={`font-semibold ${isDarkMode ? 'text-[#738099]' : 'text-[#8698B2]'}`}>server</Text>. Feel free to give permission.

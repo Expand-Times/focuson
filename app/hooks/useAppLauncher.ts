@@ -1,5 +1,4 @@
 import { Alert } from 'react-native';
-import * as IntentLauncher from 'expo-intent-launcher';
 import { openApplication } from 'expo-intent-launcher';
 import Launcher from '../../modules/launcher';
 import { AppItem } from '../../modules/launcher/src/Launcher.types';

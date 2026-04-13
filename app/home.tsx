@@ -8,23 +8,20 @@ import {
   Image,
   StatusBar,
   Alert,
-} from 'react-native';
-import { Stack, Link, useFocusEffect, useRouter } from 'expo-router';
+ Dimensions } from 'react-native';
+import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback, useMemo, useRef } from 'react';
-import { Gesture, GestureDetector, GestureHandlerRootView, Directions } from 'react-native-gesture-handler';
+import { useEffect, useState, useCallback } from 'react';
+import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
   useSharedValue,
   useAnimatedStyle,
   withSpring,
-  interpolate,
-  Extrapolation,
   useAnimatedReaction,
 } from 'react-native-reanimated';
-import { Dimensions } from 'react-native';
 import Launcher from '../modules/launcher';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import AllAppsByCategoryScreen from './all-apps-by-category';
@@ -37,20 +34,16 @@ import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 import { BlockedInfoModal } from './components/BlockModals';
-import { PremiumModal } from './components/PremiumModal';
 import { SelectAppModal } from './components/SelectAppModal';
 
-const { height, width: SCREEN_WIDTH } = Dimensions.get('window');
+const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
   const {
-    apps: allApps,
     homeApps,
     updateHomeApps,
     appRenames,
-    pinnedPackageNames,
-    blockedPackageNames,
     hiddenApps,
     isExcludedFromTimer,
     isTemporarilyBlocked,
@@ -65,7 +58,6 @@ export default function Home() {
     dateFormat,
     timeOffset,
     isDarkMode,
-    isPremium,
     showStatusBar,
   } = useColorContext();
 
@@ -170,8 +162,6 @@ export default function Home() {
 
   // Home Apps State
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
-  const [premiumModalVisible, setPremiumModalVisible] = useState(false);
-  const [premiumModalConfig, setPremiumModalConfig] = useState({ title: '', description: '' });
   const [modalVisible, setModalVisible] = useState(false);
   const [selectAppModalVisible, setSelectAppModalVisible] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
@@ -278,43 +268,9 @@ export default function Home() {
     }
   }, []);
 
-  const handleOpenNotifications = useCallback(() => {
-    const success = Launcher.openNotifications();
-    if (!success) {
-      Alert.alert(
-        'Permission Required',
-        'To use swipe down for notifications, please enable the Accessibility Service for Minimal Life Launcher.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Open Settings',
-            onPress: () => {
-              Launcher.openAccessibilitySettings();
-            },
-          },
-        ]
-      );
-    }
-  }, []);
 
-  const handleOpenQuickSettings = useCallback(() => {
-    const success = Launcher.openQuickSettings();
-    if (!success) {
-      Alert.alert(
-        'Permission Required',
-        'To use swipe down for quick settings, please enable the Accessibility Service for Minimal Life Launcher.',
-        [
-          { text: 'Cancel', style: 'cancel' },
-          {
-            text: 'Open Settings',
-            onPress: () => {
-              Launcher.openAccessibilitySettings();
-            },
-          },
-        ]
-      );
-    }
-  }, []);
+
+
 
   // Double Tap Gesture
   const doubleTap = Gesture.Tap()
@@ -426,7 +382,6 @@ export default function Home() {
   const getFormattedTime = (date: Date) => {
     const h = date.getHours();
     const m = date.getMinutes();
-    const s = date.getSeconds();
     const z = (n: number) => n.toString().padStart(2, '0');
 
     let format = timeFormat;
@@ -534,11 +489,9 @@ export default function Home() {
     leave,
     bottom,
     dialer,
-    alpha,
     date,
     dot,
     camera,
-    bubblebg,
   } = fontConfig || ({} as any);
 
   return (
@@ -921,12 +874,7 @@ export default function Home() {
                 unblockAt={blockedUntil}
                 appIconBase64={selectedApp?.icon}
               />
-              <PremiumModal
-                visible={premiumModalVisible}
-                onClose={() => setPremiumModalVisible(false)}
-                title={premiumModalConfig.title}
-                description={premiumModalConfig.description}
-              />
+
               <SelectAppModal
                 visible={selectAppModalVisible}
                 onClose={() => setSelectAppModalVisible(false)}

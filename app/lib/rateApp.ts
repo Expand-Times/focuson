@@ -28,7 +28,7 @@ export async function openPlayStoreForRating(): Promise<void> {
         await markUserRated();
         return;
       }
-    } catch (e) {
+    } catch {
       // ignore and fallback
     }
     try {

@@ -1,8 +1,7 @@
 import React, { useEffect } from 'react';
-import { View, Image, StatusBar,useColorScheme  } from 'react-native';
+import { View, Image, StatusBar,useColorScheme  , Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Dimensions } from 'react-native';
 const { width, height } = Dimensions.get('window');
 
 

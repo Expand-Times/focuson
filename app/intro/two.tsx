@@ -6,10 +6,9 @@ import {
   StatusBar,
   useColorScheme,
   TouchableOpacity,
-} from 'react-native';
+ Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 const { width, height } = Dimensions.get('window');
 

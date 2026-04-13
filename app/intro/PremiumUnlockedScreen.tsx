@@ -2,7 +2,6 @@ import React from 'react';
 import { View, Text, Image, ImageBackground, TouchableOpacity, Dimensions } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
-import { useColorContext } from '../context/ColorContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import LottieView from 'lottie-react-native';
 

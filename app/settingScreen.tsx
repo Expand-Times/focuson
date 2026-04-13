@@ -9,22 +9,17 @@ import {
   Pressable,
   BackHandler,
   Animated,
-  ActivityIndicator,
-  Platform,
   Share,
   FlatList,
-} from 'react-native';
+ Linking , Dimensions , StatusBar } from 'react-native';
 import { useAppContext } from './context/AppContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { Link, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
-import { Linking } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignInWithGoogle from './SignInWithGoogle';
 import { openPlayStoreForRating } from './lib/rateApp';
-import { Dimensions } from 'react-native';
-import { StatusBar } from 'react-native';
 import { openApplication } from 'expo-intent-launcher';
 import { BlockedInfoModal } from './components/BlockModals';
 import { PremiumModal } from './components/PremiumModal';
@@ -32,7 +27,6 @@ import LottieView from 'lottie-react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
 const { width } = Dimensions.get('window');
-const { width: screenWidth, height: screenHeight } = Dimensions.get('window');
 
 // Define type for user metadata
 type UserMetadata = {
@@ -321,35 +315,7 @@ export default function SettingScreen() {
     }
   };
 
-  // Time Picker State
-  const [tempHour, setTempHour] = useState(0);
-  const [tempMinute, setTempMinute] = useState(0);
-  const [tempAmPm, setTempAmPm] = useState<'AM' | 'PM'>('AM');
-  const [tempDate, setTempDate] = useState(new Date());
 
-  // Initialize picker when modal opens
-  useEffect(() => {
-    if (timeFormatModalVisible) {
-      const now = new Date(Date.now() + (timeOffset || 0));
-      let h = now.getHours();
-      const m = now.getMinutes();
-
-      if (is12HourFormat(timeFormat)) {
-        setTempAmPm(h >= 12 ? 'PM' : 'AM');
-        h = h % 12;
-        h = h ? h : 12; // 0 should be 12
-      }
-      setTempHour(h);
-      setTempMinute(m);
-    }
-  }, [timeFormatModalVisible, timeOffset, timeFormat]);
-
-  // Initialize date picker
-  useEffect(() => {
-    if (dateModalVisible) {
-      setTempDate(new Date(Date.now() + (timeOffset || 0)));
-    }
-  }, [dateModalVisible, timeOffset]);
 
   // app issue
   const [selectedOption] = useState<'App Issue' | 'Suggestion'>('App Issue');
@@ -378,9 +344,7 @@ export default function SettingScreen() {
     setTimeFormat(formats[nextIndex]);
   };
 
-  const is12HourFormat = (format: string) => {
-    return format.includes('PM');
-  };
+
 
   const cycleDateFormat = () => {
     const formats = [
@@ -469,7 +433,6 @@ export default function SettingScreen() {
     const now = new Date(Date.now() + (timeOffset || 0));
     const h = now.getHours();
     const m = now.getMinutes();
-    const s = now.getSeconds();
 
     const z = (n: number) => n.toString().padStart(2, '0');
 

@@ -1,8 +1,7 @@
 import { View, Text, TouchableOpacity, ScrollView, Platform, useColorScheme } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter , useFocusEffect } from 'expo-router';
 import Launcher from '../modules/launcher';
-import { useState, useEffect, useCallback } from 'react';
-import { useFocusEffect } from 'expo-router';
+import { useState, useCallback } from 'react';
 import { startActivityAsync, ActivityAction } from 'expo-intent-launcher';
 import Constants from 'expo-constants';
 
@@ -21,7 +20,6 @@ export default function Permissions() {
   const packageName = Constants.expoConfig?.android?.package || "com.expandtimes.minimallife";
 
   const checkPermissions = useCallback(() => {
-    if (Platform.OS === 'android') {
       try {
         setPermissions({
           usageStats: Launcher.checkUsageStatsPermission(),
@@ -33,7 +31,6 @@ export default function Permissions() {
       } catch (e) {
         console.error("Error checking permissions:", e);
       }
-    }
   }, []);
 
   useFocusEffect(
@@ -71,7 +68,8 @@ export default function Permissions() {
       if (permissions.accessibility) {
         Launcher.watchPermissionAndReturn('notification');
       }
-      if (Platform.OS === 'android' && Platform.Version >= 33) {
+
+      if (typeof Platform.Version === 'number' && Platform.Version >= 33) {
           // Android 13+ requires explicit request
           Launcher.openNotificationSettings();
       } else {

@@ -1,4 +1,4 @@
-import { TextStyle } from 'react-native';
+
 
 const wallpaperFontConfig: Record<number, { 
    clock?: string; 

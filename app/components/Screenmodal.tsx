@@ -41,7 +41,7 @@ export default function Screenmodal({
   appLabel,
   packageName,
 }: Props) {
-  const { block, weeklytext1, weeklytext2, blockbuttontext, blockbutton1 } = theme || ({} as any);
+  const { blockbuttontext, blockbutton1 } = theme || ({} as any);
   const [dailyMs, setDailyMs] = useState<number[] | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -101,7 +101,7 @@ export default function Screenmodal({
         },
       ],
     }),
-    [labels, dailyMs, isDarkMode]
+    [labels, dailyMs]
   );
 
   const chartConfig = useMemo(
@@ -121,7 +121,7 @@ export default function Screenmodal({
         stroke: '#7EA6E0',
       },
     }),
-    [isDarkMode]
+    []
   );
 
   const formatPointLabel = (ms: number) => {

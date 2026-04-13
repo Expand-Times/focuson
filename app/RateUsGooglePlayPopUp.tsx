@@ -3,7 +3,7 @@ import {View, Text, TouchableOpacity, Dimensions} from 'react-native';
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { openPlayStoreForRating } from './lib/rateApp';
 
-const {width} = Dimensions.get('window');
+
 
 const RateUsGooglePlayPopUp = () => {
   const {height: screenHeight, width: screenWidth} = Dimensions.get('window');

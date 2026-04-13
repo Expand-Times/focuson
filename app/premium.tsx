@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, TouchableOpacity, ScrollView, Image, ImageBackground, ActivityIndicator, Alert , Dimensions } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
-import { Dimensions } from 'react-native';
 import * as IAP from 'expo-iap';
 
 const { width } = Dimensions.get('window');

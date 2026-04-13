@@ -36,7 +36,7 @@ export const BlockDurationModal = ({
   appIconBase64,
   packageName,
 }: BlockDurationModalProps) => {
-  const { block,blockcircle,blockgradient,blockText1,blockText2,blockText3,blockText4,blockText5,blockText6,blockText7,blockText8,blockbutton1,blockbutton2,blockbuttontext,weeklytext1,weeklytext2 ,blockbg} = theme || ({} as any);
+  const { block,blockcircle,blockgradient,blockText1,blockText2,blockText3,blockText4,blockText5,blockbutton1,blockbutton2,blockbuttontext,blockbg} = theme || ({} as any);
   const [weeklyMs, setWeeklyMs] = useState<number | null>(null);
   const formatHM = (millis: number) => {
     const hours = Math.floor(millis / (1000 * 60 * 60));
@@ -64,6 +64,7 @@ export const BlockDurationModal = ({
   const [sliderW, setSliderW] = useState(6);
   const SliderCmp = useMemo(() => {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
       const mod = require('@react-native-community/slider');
       return mod?.default || mod?.Slider || null;
     } catch {
@@ -85,7 +86,7 @@ export const BlockDurationModal = ({
       return { num: `${n}`, unit: n === 1 ? 'day' : 'days' };
     }
     return { num: lbl, unit: '' };
-  }, [selectedIdx]);
+  }, [selectedIdx, CHOICES]);
 
 
 
@@ -340,7 +341,7 @@ export const BlockedInfoModal = ({
   unblockAt,
   appIconBase64,
 }: BlockedInfoModalProps) => {
-  const { block,blockText6,blockText7,blockText8,blockbuttontext,blockbutton1,blockbutton2 } = theme || ({} as any);
+  const { block,blockText6,blockText7,blockText8,blockbuttontext,blockbutton2 } = theme || ({} as any);
   const remainingMs = unblockAt ? Math.max(unblockAt - Date.now(), 0) : 0;
   const remainingHours = Math.ceil(remainingMs / (1000 * 60 * 60));
   const remainingLabel =

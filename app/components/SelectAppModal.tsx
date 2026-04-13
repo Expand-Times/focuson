@@ -6,10 +6,8 @@ import {
   TouchableOpacity,
   TextInput,
   ScrollView,
-  Platform,
   Image,
   Alert,
-  KeyboardAvoidingView,
   Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
@@ -23,9 +21,7 @@ type SelectAppModalProps = {
   onClose: () => void;
 };
 
-type FlatListHeader = { type: 'header'; title: string };
-type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
-type FlatListDataItem = FlatListHeader | FlatListItem;
+
 
 const AppListItem = memo(({ 
   item, 

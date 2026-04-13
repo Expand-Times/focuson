@@ -21,15 +21,8 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useState, useEffect, useMemo, useRef, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
-import Launcher from '../modules/launcher';
-
-type FlatListHeader = { type: 'header'; title: string };
-type FlatListItem = { type: 'item'; data: AppItem; sectionTitle: string };
-type FlatListDataItem = FlatListHeader | FlatListItem;
-import { FlatList } from 'react-native';
 import { useRouter, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
 import { Ionicons } from '@expo/vector-icons';
@@ -39,6 +32,9 @@ import AppModal from './context/Modal';
 import wallpaperFontConfig from './constants/wallpaperFontConfig';
 import { BlockDurationModal, BlockedInfoModal } from './components/BlockModals';
 import { PremiumModal } from './components/PremiumModal';
+
+
+
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -79,11 +75,9 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     apps: rawApps,
     homeApps,
     updateHomeApps,
-    refreshApps,
     pinnedPackageNames,
     togglePinApp,
     blockedPackageNames,
-    toggleBlockApp,
     appRenames,
     renameApp,
     hiddenApps,
@@ -116,8 +110,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
   const router = useRouter();
 
-  // Track the previous active letter to determine if data actually needs to change
-  const prevActiveLetterRef = useRef<string | null>(null);
+
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
@@ -796,16 +789,6 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
 export default AllApps;
 
-const formatUsageTime = (millis?: number) => {
-  if (!millis) return '0 min';
-  const hours = Math.floor(millis / (1000 * 60 * 60));
-  const minutes = Math.floor((millis % (1000 * 60 * 60)) / (1000 * 60));
-
-  if (hours > 0) {
-    return `${hours}h ${minutes}m`;
-  }
-  return `${minutes} min`;
-};
 
 const AppListItem = memo(
   ({
@@ -817,7 +800,7 @@ const AppListItem = memo(
     theme,
     wallpaperIndex,
   }: any) => {
-    const { applist, applistbg, appdu } = theme || {};
+    const { applist, applistbg } = theme || {};
 
     return (
       <Pressable

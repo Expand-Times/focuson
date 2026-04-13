@@ -5,11 +5,10 @@ import {
   TouchableOpacity,
   ScrollView,
   StatusBar,
-  Image,
   useColorScheme,
 } from 'react-native';
 import { useRouter } from 'expo-router';
-import { Ionicons, MaterialCommunityIcons, Feather } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Checkbox from 'expo-checkbox';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -93,7 +92,7 @@ export default function PrivacyScreen({ onContinue }: { onContinue?: () => void 
             <Text
               allowFontScaling={false}
               className={`text-[16px] font-regular leading-snug ${isDarkMode ? 'text-[#C6C6C6]' : 'text-[#8698B2]'}`}>
-              Your data stays with you. We don't sync databases with our servers.
+              Your data stays with you. We don&apos;t sync databases with our servers.
             </Text>
           </View>
 
@@ -110,7 +109,7 @@ export default function PrivacyScreen({ onContinue }: { onContinue?: () => void 
             <Text
               allowFontScaling={false}
               className={`text-[16px] font-regular leading-snug ${isDarkMode ? 'text-[#C6C6C6]' : 'text-[#8698B2]'}`}>
-              Your privacy isn't for sale. We do not share or sale your personal information with any third-party marketing or analytics firms.
+              Your privacy isn&apos;t for sale. We do not share or sale your personal information with any third-party marketing or analytics firms.
             </Text>
           </View>
         </View>
@@ -176,7 +175,7 @@ export default function PrivacyScreen({ onContinue }: { onContinue?: () => void 
           <Text
             allowFontScaling={false}
             className={`text-[16px] font-regular leading-snug  ${isDarkMode ? 'text-[#DADFE5]' : 'text-[#2E3A4C]'}`}>
-            I've read the privacy manifest{'\n'} and I'm convinced
+            I&apos;ve read the privacy manifest{'\n'} and I&apos;m convinced
           </Text>
         </View>
 
