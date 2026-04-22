@@ -8,7 +8,6 @@ import {
   ScrollView,
   Image,
   Alert,
-  Pressable,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppContext } from '../context/AppContext';
@@ -21,25 +20,32 @@ type SelectAppModalProps = {
   onClose: () => void;
 };
 
-
-
-const AppListItem = memo(({ 
-  item, 
-  isSelected, 
-  onPress, 
-  isImageWallpaper, 
-  isDarkMode, 
-  applist, 
-  applistbg, 
-  wallpaperIndex 
+const AppListItem = memo(({
+  item,
+  initialSelected,
+  onPress,
+  isImageWallpaper,
+  isDarkMode,
+  applist,
+  applistbg,
+  wallpaperIndex,
 }: any) => {
+  const [isSelected, setIsSelected] = useState(initialSelected);
+
+  const handlePress = useCallback(() => {
+    const allowed = onPress(item.data, !isSelected);
+    if (allowed !== false) {
+      setIsSelected((prev: boolean) => !prev);
+    }
+  }, [item.data, isSelected, onPress]);
+
   return (
     <TouchableOpacity
       style={applistbg}
       className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3 ${
         isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
       }`}
-      onPress={() => onPress(item.data)}>
+      onPress={handlePress}>
       <View className="flex-1 flex-row items-center">
         <Ionicons
           name={isSelected ? 'checkbox' : 'square-outline'}
@@ -92,51 +98,28 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
     () => (wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null),
     [wallpaperIndex]
   );
-  
-  const { searchbg, searchCt, searchi, searchCi, allappt, header, applist, applistbg, modalbg,open } = fontConfig || ({} as any);
+
+  const { searchbg, searchCt, searchi, searchCi, allappt, header, applist, applistbg } = fontConfig || ({} as any);
 
   const apps = useMemo(() => {
     return [...rawApps].sort((a, b) => a.label.localeCompare(b.label));
   }, [rawApps]);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedPackageNames, setSelectedPackageNames] = useState<string[]>([]);
   const selectedPackageNamesRef = useRef<string[]>([]);
-  
+
   // State to defer rendering of the heavy list until after the modal is visible
   const [renderList, setRenderList] = useState(false);
 
-  // Modal states
-  const [selectModalVisible, setSelectModalVisible] = useState(false);
-  const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
-  const [lastAction, setLastAction] = useState<'added' | 'removed' | null>(null);
-  const selectModalTimerRef = useRef<any>(null);
-
-  // Cleanup timer on unmount
-  useEffect(() => {
-    return () => {
-      if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
-    };
-  }, []);
-
-  useEffect(() => {
-    selectedPackageNamesRef.current = selectedPackageNames;
-  }, [selectedPackageNames]);
-
   useEffect(() => {
     if (visible) {
-      setSelectedPackageNames(homeApps.map((a) => a.packageName));
+      selectedPackageNamesRef.current = homeApps.map((a) => a.packageName);
       setSearchQuery('');
-      // Delay list render slightly to allow modal to appear instantly
-      setTimeout(() => {
-        setRenderList(true);
-      }, 50);
+      setTimeout(() => setRenderList(true), 50);
     } else {
       setRenderList(false);
     }
   }, [visible, homeApps]);
-
-  const selectedSet = useMemo(() => new Set(selectedPackageNames), [selectedPackageNames]);
 
   const handleSaveSelection = async () => {
     try {
@@ -153,6 +136,23 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
       console.error('Failed to save selection', e);
     }
   };
+
+  // Returns false if the action was blocked (limit reached), so the item can skip toggling visually
+  const handleAppPress = useCallback((app: AppItem, willBeSelected: boolean): boolean => {
+    const currentSelected = selectedPackageNamesRef.current;
+
+    if (!willBeSelected) {
+      selectedPackageNamesRef.current = currentSelected.filter((p) => p !== app.packageName);
+    } else {
+      const max = isPremium ? 6 : 3;
+      if (currentSelected.length >= max) {
+        Alert.alert('Limit Reached', `You can only add up to ${max} apps to the home screen.`);
+        return false;
+      }
+      selectedPackageNamesRef.current = [...currentSelected, app.packageName];
+    }
+    return true;
+  }, [isPremium]);
 
   const sections = useMemo(() => {
     if (!apps.length) return [];
@@ -223,34 +223,6 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, hiddenApps, appRenames]);
 
-  // Removed FlatListData logic
-
-  const handleAppPress = useCallback((app: AppItem) => {
-    const currentSelected = selectedPackageNamesRef.current;
-    const isAlreadySelected = currentSelected.includes(app.packageName);
-
-    if (isAlreadySelected) {
-      setSelectedPackageNames((prev) => prev.filter((p) => p !== app.packageName));
-      setLastAction('removed');
-    } else {
-      const max = isPremium ? 6 : 3;
-      if (currentSelected.length >= max) {
-        Alert.alert('Limit Reached', `You can only add up to ${max} apps to the home screen.`);
-        return;
-      }
-      setSelectedPackageNames((prev) => [...prev, app.packageName]);
-      setLastAction('added');
-    }
-
-    setSelectedApp(app);
-    setSelectModalVisible(true);
-
-    if (selectModalTimerRef.current) clearTimeout(selectModalTimerRef.current);
-    selectModalTimerRef.current = setTimeout(() => {
-      setSelectModalVisible(false);
-    }, 1000);
-  }, [isPremium]);
-
   return (
     <Modal
       visible={visible}
@@ -263,7 +235,6 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
           <Image source={wallpaper as any} className="absolute h-full w-full" resizeMode="cover" />
         )}
         <View className="flex-1 px-4 pt-12">
-        
 
           {/* Search Bar */}
           <View className="mb-6 flex-row items-center">
@@ -306,7 +277,8 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
               />
             </View>
           </View>
-            {/* Header */}
+
+          {/* Header */}
           <View className="mb-4 w-full flex-row items-center justify-between">
             <Text
               allowFontScaling={false}
@@ -345,6 +317,7 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
               </TouchableOpacity>
             </View>
           </View>
+
           {/* App List */}
           <ScrollView
             showsVerticalScrollIndicator={false}
@@ -366,7 +339,7 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
                       <AppListItem
                         key={app.packageName}
                         item={{ data: app }}
-                        isSelected={selectedSet.has(app.packageName)}
+                        initialSelected={selectedPackageNamesRef.current.includes(app.packageName)}
                         onPress={handleAppPress}
                         isImageWallpaper={isImageWallpaper}
                         isDarkMode={isDarkMode}
@@ -389,44 +362,6 @@ export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
               </View>
             )}
           </ScrollView>
-
-          {/* Select Mode App Options Modal */}
-        
-          <Modal
-            animationType="fade"
-            transparent={true}
-            visible={selectModalVisible && selectedApp !== null}
-            onRequestClose={() => setSelectModalVisible(false)}>
-            <View className="absolute inset-0 z-50 items-center justify-center">
-              <Pressable className="absolute inset-0 bg-black/70" onPress={() => setSelectModalVisible(false)} />
-              <View
-                style={modalbg}
-                className={`w-[85%] items-center rounded-2xl p-6 shadow-lg ${isDarkMode ? 'bg-[#131B27]' : 'bg-white'}`}>
-                <View className="w-full max-w-[520px] items-center">
-                  <Text
-                  style={open}
-                    allowFontScaling={false}
-                    className={`mb-6 text-center text-[16px] font-bold ${isDarkMode ? 'text-white' : 'text-[#2E3B4D]'}`}>
-                    {lastAction === 'added' ? 'Added Successfully!' : 'Removed Successfully!'}
-                  </Text>
-                  <View className="mb-4 h-20 w-20 rounded-full">
-                    {selectedApp?.icon && (
-                      <Image
-                        source={{ uri: `data:image/png;base64,${selectedApp.icon}` }}
-                        className="h-full w-full rounded-full"
-                      />
-                    )}
-                  </View>
-                  <Text
-                  style={open}
-                    allowFontScaling={false}
-                    className={`mb-6 text-center text-[14px] ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                    <Text className="font-bold">{selectedApp?.label}</Text> has been {lastAction === 'added' ? 'added to' : 'removed from'} your home screen.
-                  </Text>
-                </View>
-              </View>
-            </View>
-          </Modal>
 
         </View>
       </View>

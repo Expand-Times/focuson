@@ -3,6 +3,7 @@ import {
   View,
   Text,
   TouchableOpacity,
+  Pressable,
   Linking,
   Platform,
   Image,
@@ -13,7 +14,7 @@ import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -34,7 +35,10 @@ import AppModal from './context/Modal';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import LottieView from 'lottie-react-native';
 import { BlockedInfoModal } from './components/BlockModals';
-import { SelectAppModal } from './components/SelectAppModal';
+
+const SelectAppModal = lazy(() =>
+  import('./components/SelectAppModal').then((m) => ({ default: m.SelectAppModal }))
+);
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 export default function Home() {
@@ -174,14 +178,6 @@ export default function Home() {
     const timer = setInterval(() => setCurrentTime(new Date(Date.now() + (timeOffset || 0))), 1000);
     return () => clearInterval(timer);
   }, [timeOffset]);
-
-  // Reset to Home screen whenever focused
-  // Reset to Home screen whenever focused to ensure "first homescreen" experience
-  useFocusEffect(
-    useCallback(() => {
-      translateX.value = -SCREEN_WIDTH;
-    }, [])
-  );
 
   useFocusEffect(
     useCallback(() => {
@@ -698,11 +694,10 @@ export default function Home() {
                 )}
 
                 {/* Add Icon */}
-                <TouchableOpacity
+                <Pressable
                   className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}
-                  onPress={() => {
-                    setSelectAppModalVisible(true);
-                  }}>
+                  onPress={() => setSelectAppModalVisible(true)}
+                  style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, transform: [{ scale: pressed ? 0.93 : 1 }] })}>
                   <MaterialCommunityIcons
                     name="plus-circle-outline"
                     style={icon}
@@ -716,7 +711,6 @@ export default function Home() {
                     }
                   />
 
-                  {/* do */}
                   <Text
                     allowFontScaling={false}
                     style={don}
@@ -724,7 +718,7 @@ export default function Home() {
                     Don&apos;t add unnecessary{' '}
                     {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
                   </Text>
-                </TouchableOpacity>
+                </Pressable>
               </View>
 
               {/* Set as Default Launcher */}
@@ -744,7 +738,11 @@ export default function Home() {
                           : 'border-[#405B80] bg-[#405B80]/10'
                     }`}
                     onPress={() => {
-                      Launcher.openHomeSettings();
+                      try {
+                        Launcher.openHomeSettings();
+                      } catch (e) {
+                        console.error('Failed to open home settings', e);
+                      }
                     }}>
                     <Text
                       allowFontScaling={false}
@@ -875,10 +873,14 @@ export default function Home() {
                 appIconBase64={selectedApp?.icon}
               />
 
-              <SelectAppModal
-                visible={selectAppModalVisible}
-                onClose={() => setSelectAppModalVisible(false)}
-              />
+              {selectAppModalVisible && (
+                <Suspense fallback={null}>
+                  <SelectAppModal
+                    visible={selectAppModalVisible}
+                    onClose={() => setSelectAppModalVisible(false)}
+                  />
+                </Suspense>
+              )}
 
               {/* Tutorial Overlay inside Home Screen View */}
               {showTutorial && (
