@@ -44,7 +44,20 @@
       },
       "package": "com.expandtimes.focuson.launcher",
       "edgeToEdgeEnabled": true,
-      "launchMode": "singleTask"
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "data": [
+            {
+              "scheme": "focusonlauncher"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ]
     }
   }
 }

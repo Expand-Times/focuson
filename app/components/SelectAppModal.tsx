@@ -18,6 +18,7 @@ import { AppItem } from '../../modules/launcher/src/Launcher.types';
 type SelectAppModalProps = {
   visible: boolean;
   onClose: () => void;
+  onLoaded?: () => void;
 };
 
 const AppListItem = memo(({
@@ -81,7 +82,13 @@ const AppListItem = memo(({
   );
 });
 
-export const SelectAppModal = ({ visible, onClose }: SelectAppModalProps) => {
+export const SelectAppModal = ({ visible, onClose, onLoaded }: SelectAppModalProps) => {
+  useEffect(() => {
+    if (visible && onLoaded) {
+      onLoaded();
+    }
+  }, [visible, onLoaded]);
+
   const {
     apps: rawApps,
     homeApps,

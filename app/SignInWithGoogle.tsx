@@ -2,21 +2,14 @@ import React, { useState } from 'react';
 import { Modal, View, Text, TouchableOpacity, Alert } from 'react-native';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
-import { StackNavigationProp } from '@react-navigation/stack';
+import { useRouter } from 'expo-router';
 import { useColorContext } from './context/ColorContext';
 import { supabase } from './lib/supabase';
-
-type RootStackParamList = {
-  TodaysTaskToDoScreen: undefined;
-};
-
-type SignInNavigationProp = StackNavigationProp<RootStackParamList, 'TodaysTaskToDoScreen'>;
 
 export default function SignInWithGoogle() {
   const [showModal, setShowModal] = useState(false);
   const { isDarkMode, selectedColor } = useColorContext();
-  const navigation = useNavigation<SignInNavigationProp>();
+  const router = useRouter();
 
   GoogleSignin.configure({
     webClientId: '350173649156-upg946fmamu4bpk7gicdk53rcrag5jfd.apps.googleusercontent.com',
@@ -55,7 +48,7 @@ export default function SignInWithGoogle() {
 
   const handleContinue = () => {
     setShowModal(false);
-    navigation.navigate('TodaysTaskToDoScreen');
+    router.push('/settingScreen');
   };
 
   return (

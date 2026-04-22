@@ -9,6 +9,7 @@ import {
   Image,
   StatusBar,
   Alert,
+  ActivityIndicator,
  Dimensions } from 'react-native';
 import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -168,6 +169,7 @@ export default function Home() {
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [selectAppModalVisible, setSelectAppModalVisible] = useState(false);
+  const [isSelectAppLoading, setIsSelectAppLoading] = useState(false);
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [isDefaultLauncher, setIsDefaultLauncher] = useState(true);
@@ -696,27 +698,48 @@ export default function Home() {
                 {/* Add Icon */}
                 <Pressable
                   className={`mt-4 w-full ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start' : 'items-center'}`}
-                  onPress={() => setSelectAppModalVisible(true)}
-                  style={({ pressed }) => ({ opacity: pressed ? 0.5 : 1, transform: [{ scale: pressed ? 0.93 : 1 }] })}>
-                  <MaterialCommunityIcons
-                    name="plus-circle-outline"
-                    style={icon}
-                    size={30}
-                    color={
-                      wallpaper && typeof wallpaper !== 'string'
-                        ? '#A3B9D9'
-                        : isDarkMode
-                          ? '#738099'
-                          : '#B8CBE5'
-                    }
-                  />
+                  onPress={() => {
+                    setIsSelectAppLoading(true);
+                    setSelectAppModalVisible(true);
+                  }}
+                  disabled={isSelectAppLoading}
+                  style={({ pressed }) => ({
+                    opacity: pressed || isSelectAppLoading ? 0.5 : 1,
+                    transform: [{ scale: pressed ? 0.93 : 1 }],
+                  })}>
+                  {isSelectAppLoading ? (
+                    <ActivityIndicator
+                      size={30}
+                      color={
+                        wallpaper && typeof wallpaper !== 'string'
+                          ? '#A3B9D9'
+                          : isDarkMode
+                            ? '#738099'
+                            : '#B8CBE5'
+                      }
+                    />
+                  ) : (
+                    <MaterialCommunityIcons
+                      name="plus-circle-outline"
+                      style={icon}
+                      size={30}
+                      color={
+                        wallpaper && typeof wallpaper !== 'string'
+                          ? '#A3B9D9'
+                          : isDarkMode
+                            ? '#738099'
+                            : '#B8CBE5'
+                      }
+                    />
+                  )}
 
                   <Text
                     allowFontScaling={false}
                     style={don}
                     className={`mt-2 text-[12px] font-light ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#405B7F]' : isDarkMode ? 'text-[#434C59]' : 'text-[#A4B5CC]'}`}>
-                    Don&apos;t add unnecessary{' '}
-                    {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ''}addictive app!
+                    {isSelectAppLoading ? 'Loading...' : "Don't add unnecessary"}
+                    {wallpaperIndex === 11 || wallpaperIndex === 15 ? '\n' : ' '}
+                    {isSelectAppLoading ? '' : 'addictive app!'}
                   </Text>
                 </Pressable>
               </View>
@@ -877,7 +900,11 @@ export default function Home() {
                 <Suspense fallback={null}>
                   <SelectAppModal
                     visible={selectAppModalVisible}
-                    onClose={() => setSelectAppModalVisible(false)}
+                    onClose={() => {
+                      setSelectAppModalVisible(false);
+                      setIsSelectAppLoading(false);
+                    }}
+                    onLoaded={() => setIsSelectAppLoading(false)}
                   />
                 </Suspense>
               )}

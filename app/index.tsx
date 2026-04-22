@@ -27,10 +27,13 @@ export default function Index() {
   };
 
   useEffect(() => {
-    if (!isLoading && rootNavigationState?.key) {
-      router.replace(hasSeenIntro ? "/home" : "/intro/one");
+    if (!isLoading && rootNavigationState?.key && !rootNavigationState?.stale) {
+      // Small timeout to ensure the layout has fully mounted its navigators
+      setTimeout(() => {
+        router.replace(hasSeenIntro ? "/home" : "/intro/one");
+      }, 0);
     }
-  }, [isLoading, hasSeenIntro, rootNavigationState?.key]);
+  }, [isLoading, hasSeenIntro, rootNavigationState?.key, rootNavigationState?.stale]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
