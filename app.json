@@ -43,21 +43,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.expandtimes.focuson.launcher",
-      "edgeToEdgeEnabled": true,
-      "intentFilters": [
-        {
-          "action": "VIEW",
-          "data": [
-            {
-              "scheme": "focusonlauncher"
-            }
-          ],
-          "category": [
-            "BROWSABLE",
-            "DEFAULT"
-          ]
-        }
-      ]
+      "edgeToEdgeEnabled": true
     }
   }
 }

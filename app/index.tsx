@@ -1,6 +1,6 @@
 import { useRouter, useRootNavigationState } from 'expo-router';
-import { useEffect, useState } from 'react';
-import { View, ActivityIndicator } from 'react-native';
+import { useEffect, useState, useRef, useCallback } from 'react';
+import { View, ActivityIndicator, InteractionManager } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
@@ -8,6 +8,7 @@ export default function Index() {
   const [hasSeenIntro, setHasSeenIntro] = useState(false);
   const router = useRouter();
   const rootNavigationState = useRootNavigationState();
+  const hasNavigated = useRef(false);
 
   useEffect(() => {
     checkIntro();
@@ -27,13 +28,21 @@ export default function Index() {
   };
 
   useEffect(() => {
-    if (!isLoading && rootNavigationState?.key && !rootNavigationState?.stale) {
-      // Small timeout to ensure the layout has fully mounted its navigators
-      setTimeout(() => {
-        router.replace(hasSeenIntro ? "/home" : "/intro/one");
-      }, 0);
-    }
-  }, [isLoading, hasSeenIntro, rootNavigationState?.key, rootNavigationState?.stale]);
+    if (hasNavigated.current) return;
+    if (isLoading) return;
+    // Wait until the root navigator is mounted and not stale
+    if (!rootNavigationState?.key) return;
+
+    hasNavigated.current = true;
+
+    // Use InteractionManager to wait until all pending interactions
+    // (including child navigator mounting) have completed
+    const task = InteractionManager.runAfterInteractions(() => {
+      router.replace(hasSeenIntro ? "/home" : "/intro/one");
+    });
+
+    return () => task.cancel();
+  }, [isLoading, hasSeenIntro, rootNavigationState?.key]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>
