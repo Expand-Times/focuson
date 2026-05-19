@@ -43,7 +43,16 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.expandtimes.focuson.launcher",
-      "edgeToEdgeEnabled": true
+      "edgeToEdgeEnabled": true,
+      "permissions": [
+        "android.permission.INTERNET",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.VIBRATE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.WAKE_LOCK",
+        "com.android.vending.BILLING"
+      ]
     }
   }
 }

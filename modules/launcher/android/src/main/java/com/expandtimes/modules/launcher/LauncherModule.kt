@@ -30,6 +30,8 @@ import android.content.pm.ApplicationInfo
 class LauncherModule : Module() {
   private val context: Context
     get() = appContext.reactContext ?: throw IllegalStateException("React Context is null")
+
+  private val iconCache = mutableMapOf<String, String>()
     
   private fun isSystemApp(packageName: String): Boolean {
      return try {
@@ -86,17 +88,25 @@ class LauncherModule : Module() {
   }
 
   private fun getIconBase64(drawable: Drawable): String {
-      val bitmap = if (drawable is BitmapDrawable) {
+      val TARGET_SIZE = 96
+      val srcBitmap = if (drawable is BitmapDrawable) {
           drawable.bitmap
       } else {
-          val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+          val w = drawable.intrinsicWidth.coerceAtLeast(1)
+          val h = drawable.intrinsicHeight.coerceAtLeast(1)
+          val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
           val canvas = Canvas(bitmap)
           drawable.setBounds(0, 0, canvas.width, canvas.height)
           drawable.draw(canvas)
           bitmap
       }
+      val scaled = if (srcBitmap.width > TARGET_SIZE || srcBitmap.height > TARGET_SIZE) {
+          Bitmap.createScaledBitmap(srcBitmap, TARGET_SIZE, TARGET_SIZE, true)
+      } else {
+          srcBitmap
+      }
       val outputStream = ByteArrayOutputStream()
-      bitmap.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
+      scaled.compress(Bitmap.CompressFormat.PNG, 100, outputStream)
       return Base64.encodeToString(outputStream.toByteArray(), Base64.NO_WRAP)
   }
 
@@ -430,36 +440,35 @@ class LauncherModule : Module() {
         return@Function resolveInfo?.activityInfo?.packageName == context.packageName
     }
 
-    Function("getInstalledApps") {
+    AsyncFunction("getInstalledApps") {
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN, null)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val apps = pm.queryIntentActivities(intent, 0)
         val appList = mutableListOf<Map<String, Any>>()
         val currentPackageName = context.packageName
-        
+
         val usageMap = getUsageStatsMap()
         val launchCountMap = getAppLaunchCounts()
 
         for (app in apps) {
             try {
                 val packageName = app.activityInfo.packageName
-                // Skip the launcher itself
                 if (packageName == currentPackageName) continue
 
                 val label = app.loadLabel(pm).toString()
-                val iconDrawable = app.loadIcon(pm)
-                val iconBase64 = getIconBase64(iconDrawable)
+                val iconBase64 = iconCache.getOrPut(packageName) {
+                    getIconBase64(app.loadIcon(pm))
+                }
                 val usageTime = usageMap[packageName] ?: 0L
                 val launchCount = launchCountMap[packageName] ?: 0
-                
+
                 var category = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                     getCategoryLabel(app.activityInfo.applicationInfo.category)
                 } else {
                     "Other"
                 }
 
-                // If category is "Other", try to infer from package name
                 if (category == "Other") {
                     category = inferCategoryFromPackage(packageName, label)
                 }
@@ -476,11 +485,10 @@ class LauncherModule : Module() {
                 e.printStackTrace()
             }
         }
-        
-        // Sort by label
+
         appList.sortBy { (it["label"] as String).lowercase() }
-        
-        return@Function appList
+
+        return@AsyncFunction appList
     }
 
     Function("launchApp") { packageName: String ->
@@ -553,7 +561,7 @@ class LauncherModule : Module() {
         )
     }
 
-    Function("getTodayUsageStats") {
+    AsyncFunction("getTodayUsageStats") {
         val calendar = Calendar.getInstance()
         calendar.set(Calendar.HOUR_OF_DAY, 0)
         calendar.set(Calendar.MINUTE, 0)
@@ -567,24 +575,21 @@ class LauncherModule : Module() {
         endCalendar.set(Calendar.SECOND, 59)
         endCalendar.set(Calendar.MILLISECOND, 999)
         val endTime = endCalendar.timeInMillis
-        
+
         val usageStatsManager = context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
         val currentPackageName = context.packageName
-        
-        // Get installed apps (launcher activities) to filter usage
+
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN, null)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         val resolveInfos = pm.queryIntentActivities(intent, 0)
         val installedPackages = resolveInfos.map { it.activityInfo.packageName }.toSet()
 
-        // Get home apps (launchers) to exclude
         val homeIntent = Intent(Intent.ACTION_MAIN)
         homeIntent.addCategory(Intent.CATEGORY_HOME)
         val homeResolveInfos = pm.queryIntentActivities(homeIntent, 0)
         val homePackages = homeResolveInfos.map { it.activityInfo.packageName }.toSet()
-        
-        // Total Screen Time
+
         val usageStatsMap = usageStatsManager.queryAndAggregateUsageStats(startTime, endTime)
         var totalTime = 0L
         val packageUsage = mutableMapOf<String, Long>()
@@ -592,13 +597,10 @@ class LauncherModule : Module() {
         for ((packageName, usageStats) in usageStatsMap) {
             val time = usageStats.totalTimeInForeground
             if (time > 0) {
-                // Apply strict filtering based on user request
-                // We use installedPackages to ensure it has a launcher icon (user-facing)
-                // And then filter out broad system apps, launchers, and the current app itself
-                if (installedPackages.contains(packageName) && 
-                    packageName != currentPackageName && 
+                if (installedPackages.contains(packageName) &&
+                    packageName != currentPackageName &&
                     !homePackages.contains(packageName) &&
-                    !isLauncherPackage(packageName) && 
+                    !isLauncherPackage(packageName) &&
                     !isBroadSystemApp(packageName) &&
                     !isSystemApp(packageName)) {
                     totalTime += time
@@ -606,21 +608,19 @@ class LauncherModule : Module() {
                 packageUsage[packageName] = time
             }
         }
-        
-        // Unlocks
+
         var unlockCount = 0
         val events = usageStatsManager.queryEvents(startTime, endTime)
         val event = UsageEvents.Event()
-        
+
         while (events.hasNextEvent()) {
             events.getNextEvent(event)
-            // Event.KEYGUARD_HIDDEN = 18 (API 28+)
             if (event.eventType == 18) {
                 unlockCount++
             }
         }
-        
-        return@Function mapOf(
+
+        return@AsyncFunction mapOf(
             "totalUsageTime" to totalTime,
             "unlockCount" to unlockCount,
             "packageUsage" to packageUsage

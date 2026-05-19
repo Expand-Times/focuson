@@ -15,7 +15,7 @@ import { Stack, useFocusEffect, useRouter } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense, useMemo, memo } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -42,6 +42,101 @@ const SelectAppModal = lazy(() =>
 );
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
+
+const MONTH_NAMES = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const WEEKDAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+const formatUsageTime = (millis: number) => {
+  const minutes = Math.floor(millis / (1000 * 60));
+  const hours = Math.floor(minutes / 60);
+  const mins = minutes % 60;
+  if (hours > 0) return `${hours}h ${mins}m`;
+  return `${mins}m`;
+};
+
+const getFormattedTime = (date: Date, timeFormat: string) => {
+  const h = date.getHours();
+  const m = date.getMinutes();
+  const z = (n: number) => n.toString().padStart(2, '0');
+  let format = timeFormat;
+  if (format === 'HH:MM PM' || format === 'HH:MM:SS PM') format = '12h PM';
+  if (format === 'HH:MM' || format === 'HH:MM:SS') format = '24h';
+  const h12 = h % 12 || 12;
+  const suffix = h >= 12 ? 'PM' : 'AM';
+  if (format === '12h' || format === '12h PM') return { main: `${h12}:${z(m)}`, suffix: ` ${suffix}` };
+  if (format === '24h' || format === '24h PM') return { main: `${z(h)}:${z(m)}`, suffix: '' };
+  return { main: `${z(h)}:${z(m)}`, suffix: '' };
+};
+
+const getFormattedDate = (date: Date, dateFormat: string) => {
+  const d = date.getDate();
+  const m = date.getMonth() + 1;
+  const y = date.getFullYear();
+  const yy = y.toString().slice(-2);
+  const mon = MONTH_NAMES[date.getMonth()];
+  const dayName = WEEKDAY_NAMES[date.getDay()];
+  const z = (n: number) => n.toString().padStart(2, '0');
+  if (dateFormat === 'weekday, day month year') return `${dayName}, ${d} ${mon} ${y}`;
+  let datePart = '';
+  switch (dateFormat) {
+    case 'DD:MM:YYYY': datePart = `${z(d)}:${z(m)}:${y}`; break;
+    case 'DD:MM:YY': datePart = `${z(d)}:${z(m)}:${yy}`; break;
+    case 'MM:DD:YYYY': datePart = `${z(m)}:${z(d)}:${y}`; break;
+    case 'MM:DD:YY': datePart = `${z(m)}:${z(d)}:${yy}`; break;
+    case 'DD:Mon:YYYY': datePart = `${z(d)} ${mon} ${y}`; break;
+    case 'Mon:DD:YYYY': datePart = `${mon} ${z(d)}, ${y}`; break;
+    case 'day month year': datePart = `${d} ${mon} ${y}`; break;
+    case 'day/month/year': datePart = `${z(d)}/${z(m)}/${y}`; break;
+    case 'month/day/year': datePart = `${z(m)}/${z(d)}/${y}`; break;
+    case 'year-month-day': datePart = `${y}-${z(m)}-${z(d)}`; break;
+    default: return dateFormat;
+  }
+  return `${dayName}, ${datePart}`;
+};
+
+const ClockWidget = memo(({
+  timeOffset, timeFormat, dateFormat, isDarkMode, wallpaper, wallpaperIndex, time, pm, date,
+}: any) => {
+  const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
+
+  useEffect(() => {
+    setCurrentTime(new Date(Date.now() + (timeOffset || 0)));
+    const timer = setInterval(() => setCurrentTime(new Date(Date.now() + (timeOffset || 0))), 1000);
+    return () => clearInterval(timer);
+  }, [timeOffset]);
+
+  const isImageWallpaper = wallpaper && typeof wallpaper !== 'string';
+  const timeDisplay = getFormattedTime(currentTime, timeFormat);
+
+  return (
+    <View
+      className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 || wallpaperIndex === 19 ? 'items-start' : 'items-center'}`}>
+      <View className="flex-row  items-baseline">
+        <Text
+          allowFontScaling={false}
+          style={time}
+          className={`font-regular  text-[36px] ${isImageWallpaper ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+          {timeDisplay.main}
+        </Text>
+        {timeDisplay.suffix ? (
+          <Text
+            allowFontScaling={false}
+            style={pm}
+            className={`font-regular ml-1 text-[14px] ${isImageWallpaper ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
+            {timeDisplay.suffix}
+          </Text>
+        ) : null}
+      </View>
+      <Text
+        allowFontScaling={false}
+        style={date}
+        className={`font-regular mt-1 text-[14px] ${isImageWallpaper ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
+        {getFormattedDate(currentTime, dateFormat)}
+      </Text>
+    </View>
+  );
+});
+
 export default function Home() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
@@ -66,7 +161,6 @@ export default function Home() {
     showStatusBar,
   } = useColorContext();
 
-  const [currentTime, setCurrentTime] = useState(new Date(Date.now() + (timeOffset || 0)));
   const [todayStats, setTodayStats] = useState({ totalUsageTime: 0, unlockCount: 0 });
 
   // Tutorial State
@@ -174,12 +268,6 @@ export default function Home() {
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [isDefaultLauncher, setIsDefaultLauncher] = useState(true);
 
-  useEffect(() => {
-    // Update time immediately when timeOffset changes
-    setCurrentTime(new Date(Date.now() + (timeOffset || 0)));
-    const timer = setInterval(() => setCurrentTime(new Date(Date.now() + (timeOffset || 0))), 1000);
-    return () => clearInterval(timer);
-  }, [timeOffset]);
 
   useFocusEffect(
     useCallback(() => {
@@ -189,14 +277,14 @@ export default function Home() {
 
   useFocusEffect(
     useCallback(() => {
-      const fetchStats = () => {
+      const fetchStats = async () => {
         try {
-          const stats = Launcher.getTodayUsageStats();
-          setTodayStats(stats);
-          
-          // Also check default launcher
-          const isDefault = Launcher.isDefaultLauncher();
-          setIsDefaultLauncher(isDefault);
+          const [stats, isDefault] = await Promise.all([
+            Promise.resolve(Launcher.getTodayUsageStats()),
+            Promise.resolve(Launcher.isDefaultLauncher()),
+          ]);
+          setTodayStats(stats as any);
+          setIsDefaultLauncher(isDefault as boolean);
         } catch (e) {
           console.error('Failed to fetch stats or check default launcher', e);
         }
@@ -209,14 +297,6 @@ export default function Home() {
     }, [])
   );
 
-  const formatUsageTime = (millis: number) => {
-    const minutes = Math.floor(millis / (1000 * 60));
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-
-    if (hours > 0) return `${hours}h ${mins}m`;
-    return `${mins}m`;
-  };
 
   const { launchAppWithTimer } = useAppLauncher();
 
@@ -377,106 +457,10 @@ export default function Home() {
     transform: [{ translateX: translateX.value }],
   }));
 
-  const getFormattedTime = (date: Date) => {
-    const h = date.getHours();
-    const m = date.getMinutes();
-    const z = (n: number) => n.toString().padStart(2, '0');
-
-    let format = timeFormat;
-    if (format === 'HH:MM PM' || format === 'HH:MM:SS PM') format = '12h PM';
-    if (format === 'HH:MM' || format === 'HH:MM:SS') format = '24h';
-
-    const h12 = h % 12 || 12;
-    const suffix = h >= 12 ? 'PM' : 'AM';
-
-    if (format === '12h' || format === '12h PM') return { main: `${h12}:${z(m)}`, suffix: ` ${suffix}` };
-    if (format === '24h' || format === '24h PM') return { main: `${z(h)}:${z(m)}`, suffix: '' };
-
-    return { main: `${z(h)}:${z(m)}`, suffix: '' };
-  };
-
-  const getFormattedDate = (date: Date) => {
-    const d = date.getDate();
-    const m = date.getMonth() + 1;
-    const y = date.getFullYear();
-    const yy = y.toString().slice(-2);
-
-    const monthNames = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    const mon = monthNames[date.getMonth()];
-
-    const weekdayNames = [
-      'Sunday',
-      'Monday',
-      'Tuesday',
-      'Wednesday',
-      'Thursday',
-      'Friday',
-      'Saturday',
-    ];
-    const dayName = weekdayNames[date.getDay()];
-
-    const z = (n: number) => n.toString().padStart(2, '0');
-
-    if (dateFormat === 'weekday, day month year') {
-      return `${dayName}, ${d} ${mon} ${y}`;
-    }
-
-    let datePart = '';
-    switch (dateFormat) {
-      case 'DD:MM:YYYY':
-        datePart = `${z(d)}:${z(m)}:${y}`;
-        break;
-      case 'DD:MM:YY':
-        datePart = `${z(d)}:${z(m)}:${yy}`;
-        break;
-      case 'MM:DD:YYYY':
-        datePart = `${z(m)}:${z(d)}:${y}`;
-        break;
-      case 'MM:DD:YY':
-        datePart = `${z(m)}:${z(d)}:${yy}`;
-        break;
-      case 'DD:Mon:YYYY':
-        datePart = `${z(d)} ${mon} ${y}`;
-        break;
-      case 'Mon:DD:YYYY':
-        datePart = `${mon} ${z(d)}, ${y}`;
-        break;
-
-      case 'day month year':
-        datePart = `${d} ${mon} ${y}`;
-        break;
-      case 'day/month/year':
-        datePart = `${z(d)}/${z(m)}/${y}`;
-        break;
-      case 'month/day/year':
-        datePart = `${z(m)}/${z(d)}/${y}`;
-        break;
-      case 'year-month-day':
-        datePart = `${y}-${z(m)}-${z(d)}`;
-        break;
-      default:
-        return dateFormat;
-    }
-
-    return `${dayName}, ${datePart}`;
-  };
-
-  const timeDisplay = getFormattedTime(currentTime);
-
-  const fontConfig = wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null;
+  const fontConfig = useMemo(
+    () => (wallpaperIndex >= 0 ? wallpaperFontConfig[wallpaperIndex] : null),
+    [wallpaperIndex]
+  );
   const {
     time,
     pm,
@@ -491,6 +475,11 @@ export default function Home() {
     dot,
     camera,
   } = fontConfig || ({} as any);
+
+  const visibleHomeApps = useMemo(
+    () => homeApps.filter((app) => !hiddenApps.includes(app.packageName)),
+    [homeApps, hiddenApps]
+  );
 
   return (
     <GestureHandlerRootView className={`flex-1 ${isDarkMode ? 'bg-[#0D121A]' : 'bg-[#E1EAF5]'}`}>
@@ -530,31 +519,17 @@ export default function Home() {
               <Stack.Screen options={{ headerShown: false }} />
 
               {/* Header: Time, Date */}
-              <View
-                className={`mt-10 ${wallpaperIndex === 3 || wallpaperIndex === 10 || wallpaperIndex === 15 || wallpaperIndex === 19 ? 'items-start' : 'items-center'}`}>
-                <View className="flex-row  items-baseline">
-                  <Text
-                    allowFontScaling={false}
-                    style={time}
-                    className={`font-regular  text-[36px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                    {timeDisplay.main}
-                  </Text>
-                  {timeDisplay.suffix ? (
-                    <Text
-                      allowFontScaling={false}
-                      style={pm}
-                      className={`font-regular ml-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#E6EBF2]' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#132C4D]'}`}>
-                      {timeDisplay.suffix}
-                    </Text>
-                  ) : null}
-                </View>
-                <Text
-                  allowFontScaling={false}
-                  style={date}
-                  className={`font-regular mt-1 text-[14px] ${wallpaper && typeof wallpaper !== 'string' ? 'text-[#FFFFFF]' : isDarkMode ? 'text-[#728099]' : 'text-[#A4B5CC]'}`}>
-                  {getFormattedDate(currentTime)}
-                </Text>
-              </View>
+              <ClockWidget
+                timeOffset={timeOffset}
+                timeFormat={timeFormat}
+                dateFormat={dateFormat}
+                isDarkMode={isDarkMode}
+                wallpaper={wallpaper}
+                wallpaperIndex={wallpaperIndex}
+                time={time}
+                pm={pm}
+                date={date}
+              />
 
               {/* Main Actions */}
               <View className="w-full ">
@@ -578,7 +553,7 @@ export default function Home() {
                       ]}
                     />
 
-                    {homeApps.filter(app => !hiddenApps.includes(app.packageName)).map((app) => (
+                    {visibleHomeApps.map((app) => (
                       <View
                         key={app.packageName}
                         className="relative mb-4 w-full flex-row items-center py-2">
@@ -649,7 +624,7 @@ export default function Home() {
                     ))}
                   </View>
                 ) : (
-                  homeApps.filter(app => !hiddenApps.includes(app.packageName)).map((app) => (
+                  visibleHomeApps.map((app) => (
                     <TouchableOpacity
                       key={app.packageName}
                       className={`w-fulL mb-4  ${wallpaperIndex === 11 || wallpaperIndex === 15 ? 'items-start ' : 'items-center'} py-2 `}

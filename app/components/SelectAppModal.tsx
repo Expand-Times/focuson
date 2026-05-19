@@ -5,7 +5,7 @@ import {
   Modal,
   TouchableOpacity,
   TextInput,
-  ScrollView,
+  SectionList,
   Image,
   Alert,
 } from 'react-native';
@@ -22,7 +22,7 @@ type SelectAppModalProps = {
 };
 
 const AppListItem = memo(({
-  item,
+  data,
   initialSelected,
   onPress,
   isImageWallpaper,
@@ -32,13 +32,16 @@ const AppListItem = memo(({
   wallpaperIndex,
 }: any) => {
   const [isSelected, setIsSelected] = useState(initialSelected);
+  const isSelectedRef = useRef(initialSelected);
 
   const handlePress = useCallback(() => {
-    const allowed = onPress(item.data, !isSelected);
+    const next = !isSelectedRef.current;
+    const allowed = onPress(data, next);
     if (allowed !== false) {
-      setIsSelected((prev: boolean) => !prev);
+      isSelectedRef.current = next;
+      setIsSelected(next);
     }
-  }, [item.data, isSelected, onPress]);
+  }, [data, onPress]);
 
   return (
     <TouchableOpacity
@@ -75,7 +78,7 @@ const AppListItem = memo(({
             isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DADFE5]' : 'text-[#142C4D]'
           }`}
           numberOfLines={1}>
-          {item.data.label.length > 15 ? `${item.data.label.slice(0, 15)}...` : item.data.label}
+          {data.label.length > 15 ? `${data.label.slice(0, 15)}...` : data.label}
         </Text>
       </View>
     </TouchableOpacity>
@@ -164,8 +167,12 @@ export const SelectAppModal = ({ visible, onClose, onLoaded }: SelectAppModalPro
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
+    const blockedSet = new Set(blockedPackageNames);
+    const hiddenSet = new Set(hiddenApps);
+    const pinnedSet = new Set(pinnedPackageNames);
+
     const visibleApps = apps.filter(
-      (app) => !blockedPackageNames.includes(app.packageName) && !hiddenApps.includes(app.packageName)
+      (app) => !blockedSet.has(app.packageName) && !hiddenSet.has(app.packageName)
     );
 
     const pinned: AppItem[] = [];
@@ -175,7 +182,7 @@ export const SelectAppModal = ({ visible, onClose, onLoaded }: SelectAppModalPro
       const rename = appRenames[app.packageName];
       const displayApp = rename ? { ...app, label: rename } : app;
 
-      if (pinnedPackageNames.includes(app.packageName)) {
+      if (pinnedSet.has(app.packageName)) {
         pinned.push(displayApp);
       } else {
         unpinned.push(displayApp);
@@ -326,49 +333,49 @@ export const SelectAppModal = ({ visible, onClose, onLoaded }: SelectAppModalPro
           </View>
 
           {/* App List */}
-          <ScrollView
-            showsVerticalScrollIndicator={false}
-            keyboardShouldPersistTaps="handled"
-            contentContainerStyle={{ paddingBottom: 40 }}
-          >
-            {renderList ? (
-              <>
-                {sections.map((section, index) => (
-                  <View key={index}>
-                    <Text
-                      style={header}
-                      className={`mt-4 text-lg ${header ? '' : 'font-bold'} ${
-                        isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
-                      }`}>
-                      {section.title}
-                    </Text>
-                    {section.data.map((app) => (
-                      <AppListItem
-                        key={app.packageName}
-                        item={{ data: app }}
-                        initialSelected={selectedPackageNamesRef.current.includes(app.packageName)}
-                        onPress={handleAppPress}
-                        isImageWallpaper={isImageWallpaper}
-                        isDarkMode={isDarkMode}
-                        applist={applist}
-                        applistbg={applistbg}
-                        wallpaperIndex={wallpaperIndex}
-                      />
-                    ))}
-                  </View>
-                ))}
-                {sections.length === 0 && (
-                  <View className="mt-10 items-center">
-                    <Text className="text-slate-400">No apps found</Text>
-                  </View>
-                )}
-              </>
-            ) : (
-              <View className="mt-10 items-center justify-center">
-                <Text className="text-slate-400">Loading apps...</Text>
-              </View>
-            )}
-          </ScrollView>
+          {renderList ? (
+            <SectionList
+              sections={sections}
+              keyExtractor={(item) => item.packageName}
+              renderItem={({ item }) => (
+                <AppListItem
+                  data={item}
+                  initialSelected={selectedPackageNamesRef.current.includes(item.packageName)}
+                  onPress={handleAppPress}
+                  isImageWallpaper={isImageWallpaper}
+                  isDarkMode={isDarkMode}
+                  applist={applist}
+                  applistbg={applistbg}
+                  wallpaperIndex={wallpaperIndex}
+                />
+              )}
+              renderSectionHeader={({ section: { title } }) => (
+                <Text
+                  style={header}
+                  className={`mt-4 text-lg ${header ? '' : 'font-bold'} ${
+                    isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                  }`}>
+                  {title}
+                </Text>
+              )}
+              ListEmptyComponent={
+                <View className="mt-10 items-center">
+                  <Text className="text-slate-400">No apps found</Text>
+                </View>
+              }
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 40 }}
+              initialNumToRender={12}
+              maxToRenderPerBatch={8}
+              windowSize={3}
+              removeClippedSubviews={true}
+            />
+          ) : (
+            <View className="mt-10 items-center justify-center">
+              <Text className="text-slate-400">Loading apps...</Text>
+            </View>
+          )}
 
         </View>
       </View>

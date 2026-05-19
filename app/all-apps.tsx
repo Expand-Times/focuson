@@ -11,7 +11,7 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   StatusBar,
-  ScrollView,
+  SectionList,
   Pressable,
 } from 'react-native';
 import * as IntentLauncher from 'expo-intent-launcher';
@@ -115,9 +115,13 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
+    const blockedSet = new Set(blockedPackageNames);
+    const hiddenSet = new Set(hiddenApps);
+    const pinnedSet = new Set(pinnedPackageNames);
+
     // Filter blocked and hidden apps
     const visibleApps = apps.filter(
-      (app) => !blockedPackageNames.includes(app.packageName) && !hiddenApps.includes(app.packageName)
+      (app) => !blockedSet.has(app.packageName) && !hiddenSet.has(app.packageName)
     );
 
     // Separate pinned and unpinned, and apply renames
@@ -129,7 +133,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       const rename = appRenames[app.packageName];
       const displayApp = rename ? { ...app, label: rename } : app;
 
-      if (pinnedPackageNames.includes(app.packageName)) {
+      if (pinnedSet.has(app.packageName)) {
         pinned.push(displayApp);
       } else {
         unpinned.push(displayApp);
@@ -216,6 +220,21 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       setOptionsModalVisible(true);
     },
     []
+  );
+
+  const renderItem = useCallback(
+    ({ item }: { item: AppItem }) => (
+      <AppListItem
+        item={item}
+        onPress={handleAppPress}
+        onLongPress={handleAppLongPress}
+        isImageWallpaper={isImageWallpaper}
+        isDarkMode={isDarkMode}
+        theme={fontConfig}
+        wallpaperIndex={wallpaperIndex}
+      />
+    ),
+    [handleAppPress, handleAppLongPress, isImageWallpaper, isDarkMode, fontConfig, wallpaperIndex]
   );
 
   const { launchAppWithTimer } = useAppLauncher();
@@ -454,72 +473,67 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
           {/* Apps List */}
           <View className="flex-1 flex-row">
-            <View className="w-full px-3 ">
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 40 }}>
-                <View className="mb-4 w-full flex-row items-center justify-between">
+            <View className="flex-1 px-3">
+              <SectionList
+                sections={sections}
+                keyExtractor={(item) => item.packageName}
+                renderItem={renderItem}
+                renderSectionHeader={({ section: { title } }) => (
                   <Text
-                    allowFontScaling={false}
-                    style={allappt}
-                    className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
-                      isImageWallpaper
-                        ? 'text-white decoration-white'
-                        : isDarkMode
-                          ? 'text-[#DADFE5] decoration-[#DADFE5]'
-                          : 'text-[#858E9D] decoration-[#858E9D]'
+                    style={header}
+                    className={`mt-4 text-lg ${header ? '' : 'font-bold'} ${
+                      isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
                     }`}>
-                    All Apps
+                    {title}
                   </Text>
-                  <Link href="/settingScreen" asChild>
-                    <TouchableOpacity
-                      className="p-2"
-                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                      <View style={allappi}>
-                        <Image
-                          source={require('../assets/images/SettingIcon.png')}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            tintColor:
-                              allappi?.color ||
-                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                          }}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-                {sections.map((section, index) => (
-                  <View key={index}>
+                )}
+                ListHeaderComponent={
+                  <View className="mb-4 w-full flex-row items-center justify-between">
                     <Text
-                      style={header}
-                      className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
-                        isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                      allowFontScaling={false}
+                      style={allappt}
+                      className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
+                        isImageWallpaper
+                          ? 'text-white decoration-white'
+                          : isDarkMode
+                            ? 'text-[#DADFE5] decoration-[#DADFE5]'
+                            : 'text-[#858E9D] decoration-[#858E9D]'
                       }`}>
-                      {section.title}
+                      All Apps
                     </Text>
-                    {section.data.map((app) => (
-                      <AppListItem
-                        key={app.packageName}
-                        item={app}
-                        onPress={handleAppPress}
-                        onLongPress={handleAppLongPress}
-                        isImageWallpaper={isImageWallpaper}
-                        isDarkMode={isDarkMode}
-                        theme={fontConfig}
-                        wallpaperIndex={wallpaperIndex}
-                      />
-                    ))}
+                    <Link href="/settingScreen" asChild>
+                      <TouchableOpacity
+                        className="p-2"
+                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                        <View style={allappi}>
+                          <Image
+                            source={require('../assets/images/SettingIcon.png')}
+                            style={{
+                              width: 30,
+                              height: 30,
+                              tintColor:
+                                allappi?.color ||
+                                (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </Link>
                   </View>
-                ))}
-                {sections.length === 0 && (
+                }
+                ListEmptyComponent={
                   <View className="mt-10 items-center">
                     <Text className="text-slate-400">No apps found</Text>
                   </View>
-                )}
-              </ScrollView>
+                }
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 40 }}
+                initialNumToRender={12}
+                maxToRenderPerBatch={8}
+                windowSize={3}
+                removeClippedSubviews={true}
+              />
             </View>
           </View>
 
@@ -790,6 +804,8 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 export default AllApps;
 
 
+const RIPPLE = { color: 'rgba(0,0,0,0.08)' };
+
 const AppListItem = memo(
   ({
     item,
@@ -802,16 +818,19 @@ const AppListItem = memo(
   }: any) => {
     const { applist, applistbg } = theme || {};
 
+    const handlePress = useCallback(() => onPress(item), [onPress, item]);
+    const handleLongPress = useCallback(() => onLongPress(item), [onLongPress, item]);
+
     return (
       <Pressable
         style={applistbg}
         className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
           isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
         }`}
-        onPress={() => onPress(item)}
-        onLongPress={() => onLongPress(item)}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
         delayLongPress={300}
-        android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+        android_ripple={RIPPLE}>
         <View className="flex-1 flex-row items-center">
           {wallpaperIndex === 6 && (
             <View

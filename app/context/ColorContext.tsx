@@ -1,4 +1,4 @@
-import React, {createContext, useState, ReactNode, useContext, useEffect} from 'react';
+import React, {createContext, useState, ReactNode, useContext, useEffect, useMemo} from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { ImageSourcePropType, useColorScheme } from 'react-native';
 
@@ -101,18 +101,16 @@ const ColorProvider = ({children}: ColorProviderProps) => {
 
   const loadPersistedData = async () => {
     try {
-      const [savedColor, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon, savedTimeFormat, savedDateFormat, savedTimeOffset, savedShowStatusBar, savedShowUsageInfo] = await Promise.all([
-        AsyncStorage.getItem('selectedColor'),
-        AsyncStorage.getItem('isPremium'),
-        AsyncStorage.getItem('selectedWallpaperIndex'),
-        AsyncStorage.getItem('showPhoneDialer'),
-        AsyncStorage.getItem('showCameraIcon'),
-        AsyncStorage.getItem('timeFormat'),
-        AsyncStorage.getItem('dateFormat'),
-        AsyncStorage.getItem('timeOffset'),
-        AsyncStorage.getItem('showStatusBar'),
-        AsyncStorage.getItem('showUsageInfo'),
-      ]);
+      const colorKeys = [
+        'selectedColor', 'isPremium', 'selectedWallpaperIndex', 'showPhoneDialer',
+        'showCameraIcon', 'timeFormat', 'dateFormat', 'timeOffset', 'showStatusBar', 'showUsageInfo',
+      ] as const;
+
+      const colorResults = await AsyncStorage.multiGet(colorKeys);
+      const colorStorage = Object.fromEntries(colorResults.map(([k, v]) => [k, v])) as Record<string, string | null>;
+      const [savedColor, savedPremium, savedWallpaperIndex, savedPhoneDialer, savedCameraIcon,
+             savedTimeFormat, savedDateFormat, savedTimeOffset, savedShowStatusBar, savedShowUsageInfo] =
+        colorKeys.map((k) => colorStorage[k]);
 
       if (savedColor) setSelectedColorState(savedColor);
       if (savedPremium) setIsPremium(savedPremium === 'true');
@@ -272,34 +270,49 @@ const ColorProvider = ({children}: ColorProviderProps) => {
     }
   };
 
+  const contextValue = useMemo(() => ({
+    selectedColor,
+    setSelectedColor,
+    isPremium,
+    unlockPremium,
+    isDarkMode,
+    isLoading,
+    wallpaper,
+    wallpaperIndex,
+    setWallpaper,
+    showPhoneDialer,
+    setShowPhoneDialer,
+    showCameraIcon,
+    setShowCameraIcon,
+    timeFormat,
+    setTimeFormat,
+    toggleTimeFormat,
+    dateFormat,
+    setDateFormat,
+    timeOffset,
+    setTimeOffset,
+    showStatusBar,
+    setShowStatusBar,
+    showUsageInfo,
+    setShowUsageInfo,
+  }), [
+    selectedColor,
+    isPremium,
+    isDarkMode,
+    isLoading,
+    wallpaper,
+    wallpaperIndex,
+    showPhoneDialer,
+    showCameraIcon,
+    timeFormat,
+    dateFormat,
+    timeOffset,
+    showStatusBar,
+    showUsageInfo,
+  ]);
+
   return (
-    <ColorContext.Provider
-      value={{
-        selectedColor,
-        setSelectedColor,
-        isPremium,
-        unlockPremium,
-        isDarkMode,
-        isLoading,
-        wallpaper,
-        wallpaperIndex,
-        setWallpaper,
-        showPhoneDialer,
-        setShowPhoneDialer,
-        showCameraIcon,
-        setShowCameraIcon,
-        timeFormat,
-        setTimeFormat,
-        toggleTimeFormat,
-        dateFormat,
-        setDateFormat,
-        timeOffset,
-        setTimeOffset,
-        showStatusBar,
-        setShowStatusBar,
-        showUsageInfo,
-        setShowUsageInfo,
-      }}>
+    <ColorContext.Provider value={contextValue}>
       {children}
     </ColorContext.Provider>
   );
