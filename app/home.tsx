@@ -267,7 +267,13 @@ export default function Home() {
   const [blockedInfoVisible, setBlockedInfoVisible] = useState(false);
   const [blockedUntil, setBlockedUntil] = useState<number | null>(null);
   const [isDefaultLauncher, setIsDefaultLauncher] = useState(true);
+  const [sidesReady, setSidesReady] = useState(false);
 
+  // Defer mounting of side panels so the home screen renders fast on startup
+  useEffect(() => {
+    const t = setTimeout(() => setSidesReady(true), 500);
+    return () => clearTimeout(t);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -496,7 +502,7 @@ export default function Home() {
             animatedStyle,
           ]}>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
-            <AllAppsByCategoryScreen enableGestures={false} autoFocus={false} />
+            {sidesReady && <AllAppsByCategoryScreen enableGestures={false} autoFocus={false} />}
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
             {wallpaper && typeof wallpaper !== 'string' && (
@@ -1003,7 +1009,7 @@ export default function Home() {
             </View>
           </View>
           <View style={{ width: SCREEN_WIDTH, height: '100%' }}>
-            <AllApps enableGestures={false} showSidebar={false} />
+            {sidesReady && <AllApps enableGestures={false} />}
           </View>
         </Animated.View>
       </GestureDetector>
