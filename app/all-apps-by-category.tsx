@@ -1,5 +1,6 @@
 import { useAppLauncher } from './hooks/useAppLauncher';
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { FlashList } from '@shopify/flash-list';
 import {
   View,
   Text,
@@ -43,6 +44,10 @@ type Category = {
   title: string;
   data: AppItem[];
 };
+
+type CategoryFlatItem =
+  | { type: 'category-header'; title: string; displayTitle: string; appCount: number }
+  | { type: 'app'; app: AppItem };
 
 export default function AllAppsByCategoryScreen({
   enableGestures = true,
@@ -382,7 +387,15 @@ export default function AllAppsByCategoryScreen({
       .filter((cat) => cat?.data?.length > 0);
   }, [categories, searchQuery]);
 
-
+  const flatCategoryData = useMemo<CategoryFlatItem[]>(() => {
+    const result: CategoryFlatItem[] = [];
+    filteredCategories.forEach((cat) => {
+      const displayTitle = renamedCategories[cat.title] || cat.title;
+      result.push({ type: 'category-header', title: cat.title, displayTitle, appCount: cat.data.length });
+      cat.data.forEach((app) => result.push({ type: 'app', app }));
+    });
+    return result;
+  }, [filteredCategories, renamedCategories]);
 
   const handlePress = useCallback((app: AppItem) => {
     onAppPress(app);
@@ -520,182 +533,112 @@ export default function AllAppsByCategoryScreen({
               />
             </View>
 
-            <ScrollView
-              showsVerticalScrollIndicator={false}
-              keyboardShouldPersistTaps="handled"
-              contentContainerStyle={{ paddingBottom: 40 }}>
-              {/* Header */}
-              <View className="mb-[6%] flex-row items-center justify-between">
-                <Text
-                  allowFontScaling={false}
-                  style={appC}
-                  className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
-                    isImageWallpaper
-                      ? 'text-white decoration-white'
-                      : isDarkMode
-                        ? 'text-[#DBDFE4] decoration-slate-400'
-                        : 'text-[#142C4D] decoration-[#142C4D]'
-                  }`}>
-                  App Category
-                </Text>
-                <View className="flex-row items-center gap-4">
-                  <TouchableOpacity
-                    onPress={() => {
-                      if (ensurePremium()) {
-                        setCreateCategoryModalVisible(true);
-                      }
-                    }}>
+            <FlashList
+              data={flatCategoryData}
+              getItemType={(item) => item.type}
+              keyExtractor={(item) =>
+                item.type === 'category-header' ? `cat-${item.title}` : item.app.packageName
+              }
+              renderItem={({ item, index }) => {
+                if (item.type === 'category-header') {
+                  return (
                     <View
-                      style={[
-                        appi,
-                        {
-                          borderColor:
-                            appi?.color ||
-                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                        },
-                      ]}
-                      className={`rounded-lg border border-2 ${
-                        isImageWallpaper
-                          ? 'border-white/50'
-                          : isDarkMode
-                            ? 'border-[#728099]'
-                            : 'border-[#858E9D]'
-                      }`}>
-                      <MaterialCommunityIcons
-                        name="plus"
-                        size={25}
-                        color={
-                          appi?.color ||
-                          (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
-                        }
-                      />
-                    </View>
-                  </TouchableOpacity>
-                  <Link href="/settingScreen" asChild>
-                    <TouchableOpacity>
-                      <View style={appi}>
-                        <Image
-                          source={require('../assets/images/SettingIcon.png')}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            tintColor:
-                              appi?.color ||
-                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                          }}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-              </View>
-
-              {filteredCategories.map((category, index) => {
-                const displayTitle = renamedCategories[category.title] || category.title;
-
-                return (
-                  <View key={index} className="">
-                    {/* Category Header */}
-                    <View className="mb-2 flex-row items-center justify-end">
+                      style={{ marginTop: index === 0 ? 0 : 20, marginBottom: 8 }}
+                      className="flex-row items-center justify-end">
                       <Text
                         allowFontScaling={false}
                         style={appCn}
                         className={`mr-2 text-[16px] ${
-                          isImageWallpaper
-                            ? 'text-white'
-                            : isDarkMode
-                              ? 'text-[#728099]'
-                              : 'text-[#142C4D]'
+                          isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
                         }`}>
-                        {displayTitle} ({category.data.length})
+                        {item.displayTitle} ({item.appCount})
                       </Text>
                       <TouchableOpacity
-                        style={[
-                          appCi,
-                          {
-                            borderColor:
-                              appCi?.color ||
-                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                          },
-                        ]}
-                        className={`border-b ${
-                          isImageWallpaper
-                            ? 'border-white/50'
-                            : isDarkMode
-                              ? 'border-slate-400'
-                              : 'border-[#858E9D]'
-                        }`}
-                        onPress={() => handleStartEditing(category.title, displayTitle)}>
+                        style={[appCi, { borderColor: appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }]}
+                        className={`border-b ${isImageWallpaper ? 'border-white/50' : isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}
+                        onPress={() => handleStartEditing(item.title, item.displayTitle)}>
                         <MaterialCommunityIcons
                           name="pencil-outline"
                           size={16}
-                          color={
-                            appCi?.color ||
-                            (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')
-                          }
+                          color={appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                         />
                       </TouchableOpacity>
                     </View>
-
-                    {/* App List */}
-                    <View className="mb-[6%]">
-                      {category.data.map((app) => (
-                        <Pressable
-                          key={app.packageName}
-                          style={applistCbg}
-                          className={`mb-[2%] w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
-                            isImageWallpaper
-                              ? 'bg-black/40'
-                              : isDarkMode
-                                ? 'bg-[#131B27]'
-                                : 'bg-[#CEDDF2]'
-                          }`}
-                          onPress={() => handlePress(app)}
-                          onLongPress={() => handleLongPress(app)}
-                          delayLongPress={300} // ⚡ ultra fast
-                          android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
-                          <View className="mr-2 flex-1 flex-row items-center">
-                            {wallpaperIndex === 6 && (
-                              <View
-                                style={{
-                                  width: 10,
-                                  height: 10,
-                                  borderRadius: 5,
-                                  backgroundColor: '#132C4D',
-                                  marginRight: 8,
-                                  opacity: 0.8,
-                                }}
-                              />
-                            )}
-                            <Text
-                              allowFontScaling={false}
-                              style={[applistC, { maxWidth: '90%' }]}
-                              className={`font-regular text-[17px] ${
-                                isImageWallpaper
-                                  ? 'text-white'
-                                  : isDarkMode
-                                    ? 'text-[#DBDFE5]'
-                                    : 'text-[#142C4D]'
-                              }`}
-                              numberOfLines={1}>
-                              {(appRenames[app.packageName] || app.label).length > 15
-                                ? (appRenames[app.packageName] || app.label).slice(0, 15) + '...'
-                                : appRenames[app.packageName] || app.label}
-                            </Text>
-                          </View>
-                        </Pressable>
-                      ))}
+                  );
+                }
+                return (
+                  <Pressable
+                    style={[applistCbg, { marginBottom: 8 }]}
+                    className={`w-full flex-row items-center justify-between rounded-xl px-4 py-3 ${
+                      isImageWallpaper ? 'bg-black/40' : isDarkMode ? 'bg-[#131B27]' : 'bg-[#CEDDF2]'
+                    }`}
+                    onPress={() => handlePress(item.app)}
+                    onLongPress={() => handleLongPress(item.app)}
+                    delayLongPress={300}
+                    android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+                    <View className="mr-2 flex-1 flex-row items-center">
+                      {wallpaperIndex === 6 && (
+                        <View style={{ width: 10, height: 10, borderRadius: 5, backgroundColor: '#132C4D', marginRight: 8, opacity: 0.8 }} />
+                      )}
+                      <Text
+                        allowFontScaling={false}
+                        style={[applistC, { maxWidth: '90%' }]}
+                        className={`font-regular text-[17px] ${
+                          isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DBDFE5]' : 'text-[#142C4D]'
+                        }`}
+                        numberOfLines={1}>
+                        {(appRenames[item.app.packageName] || item.app.label).length > 15
+                          ? (appRenames[item.app.packageName] || item.app.label).slice(0, 15) + '...'
+                          : appRenames[item.app.packageName] || item.app.label}
+                      </Text>
                     </View>
-                  </View>
+                  </Pressable>
                 );
-              })}
-
-              {filteredCategories.length === 0 && (
+              }}
+              ListHeaderComponent={
+                <View className="mb-[6%] flex-row items-center justify-between">
+                  <Text
+                    allowFontScaling={false}
+                    style={appC}
+                    className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
+                      isImageWallpaper ? 'text-white decoration-white' : isDarkMode ? 'text-[#DBDFE4] decoration-slate-400' : 'text-[#142C4D] decoration-[#142C4D]'
+                    }`}>
+                    App Category
+                  </Text>
+                  <View className="flex-row items-center gap-4">
+                    <TouchableOpacity onPress={() => { if (ensurePremium()) setCreateCategoryModalVisible(true); }}>
+                      <View
+                        style={[appi, { borderColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }]}
+                        className={`rounded-lg border-2 ${isImageWallpaper ? 'border-white/50' : isDarkMode ? 'border-[#728099]' : 'border-[#858E9D]'}`}>
+                        <MaterialCommunityIcons
+                          name="plus"
+                          size={25}
+                          color={appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                        />
+                      </View>
+                    </TouchableOpacity>
+                    <Link href="/settingScreen" asChild>
+                      <TouchableOpacity>
+                        <View style={appi}>
+                          <Image
+                            source={require('../assets/images/SettingIcon.png')}
+                            style={{ width: 30, height: 30, tintColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </Link>
+                  </View>
+                </View>
+              }
+              ListEmptyComponent={
                 <View className="mt-10 items-center">
                   <Text className="text-slate-400">No apps found</Text>
                 </View>
-              )}
-            </ScrollView>
+              }
+              showsVerticalScrollIndicator={false}
+              keyboardShouldPersistTaps="handled"
+              contentContainerStyle={{ paddingBottom: 40 }}
+            />
           </View>
 
           {/* Launch App Modal */}

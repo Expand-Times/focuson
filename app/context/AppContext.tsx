@@ -115,7 +115,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const fetchApps = async () => {
     try {
-      const installedApps = Launcher.getInstalledApps();
+      const installedApps = await Promise.resolve(Launcher.getInstalledApps());
       setApps(installedApps);
     } catch (error) {
       console.error('Failed to fetch apps:', error);
@@ -125,33 +125,42 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
   const loadData = async () => {
     setLoading(true);
     try {
-      await fetchApps();
-      
-      const [
-        storedHomeApps,
-        storedPinned,
-        storedBlocked,
-        storedHidden,
-        storedRenames,
-        storedCustomCats,
-        storedCatOverrides,
-        storedCatRenames,
-        storedReminder,
-        storedTimedBlocks
-      ] = await Promise.all([
-        AsyncStorage.getItem('homeApps'),
-        AsyncStorage.getItem('pinnedApps'),
-        AsyncStorage.getItem('blockedApps'),
-        AsyncStorage.getItem('hiddenApps'),
-        AsyncStorage.getItem('appRenames'),
-        AsyncStorage.getItem('customCategories'),
-        AsyncStorage.getItem('categoryOverrides'),
-        AsyncStorage.getItem('renamedCategories'),
-        AsyncStorage.getItem('reminderOption'),
-        AsyncStorage.getItem('timedBlocks')
+      const storageKeys = [
+        'homeApps', 'pinnedApps', 'blockedApps', 'hiddenApps', 'appRenames',
+        'customCategories', 'categoryOverrides', 'renamedCategories', 'reminderOption', 'timedBlocks',
+      ] as const;
+
+      const [installedApps, storageResults] = await Promise.all([
+        Promise.resolve(Launcher.getInstalledApps()).catch(() => [] as AppItem[]),
+        AsyncStorage.multiGet(storageKeys),
       ]);
 
-      if (storedHomeApps) setHomeApps(JSON.parse(storedHomeApps));
+      const storage = Object.fromEntries(storageResults.map(([k, v]) => [k, v])) as Record<string, string | null>;
+      const [
+        storedHomeApps, storedPinned, storedBlocked, storedHidden, storedRenames,
+        storedCustomCats, storedCatOverrides, storedCatRenames, storedReminder, storedTimedBlocks,
+      ] = storageKeys.map((k) => storage[k]);
+
+      setApps(installedApps);
+
+      if (storedHomeApps) {
+        try {
+          const parsed = JSON.parse(storedHomeApps);
+          if (Array.isArray(parsed) && parsed.length > 0 && typeof parsed[0] === 'string') {
+            // New format: string[] of packageNames — reconstruct from installed apps
+            const reconstructed = (parsed as string[])
+              .map((pkg) => installedApps.find((a) => a.packageName === pkg))
+              .filter((a): a is AppItem => Boolean(a));
+            setHomeApps(reconstructed);
+          } else if (Array.isArray(parsed)) {
+            // Old format: AppItem[] — migrate to packageNames-only storage
+            setHomeApps(parsed);
+            AsyncStorage.setItem('homeApps', JSON.stringify((parsed as AppItem[]).map((a) => a.packageName)));
+          }
+        } catch {
+          // ignore corrupt data
+        }
+      }
       if (storedPinned) setPinnedPackageNames(JSON.parse(storedPinned));
       if (storedBlocked) setBlockedPackageNames(JSON.parse(storedBlocked));
       if (storedHidden) setHiddenApps(JSON.parse(storedHidden));
@@ -197,7 +206,7 @@ export const AppProvider = ({ children }: { children: React.ReactNode }) => {
 
   const updateHomeApps = async (newApps: AppItem[]) => {
     setHomeApps(newApps);
-    await AsyncStorage.setItem('homeApps', JSON.stringify(newApps));
+    await AsyncStorage.setItem('homeApps', JSON.stringify(newApps.map((a) => a.packageName)));
   };
 
   const togglePinApp = async (packageName: string) => {

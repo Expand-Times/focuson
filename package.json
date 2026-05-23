@@ -56,6 +56,7 @@
     "@react-native-google-signin/google-signin": "^16.0.0",
     "@react-navigation/native": "^7.1.6",
     "@react-navigation/stack": "^7.6.12",
+    "@shopify/flash-list": "2.0.2",
     "@supabase/supabase-js": "^2.87.1",
     "expo": "^54.0.0",
     "expo-checkbox": "^55.0.4",

@@ -11,9 +11,9 @@ import {
   TouchableWithoutFeedback,
   KeyboardAvoidingView,
   StatusBar,
-  ScrollView,
   Pressable,
 } from 'react-native';
+import { FlashList, FlashListRef } from '@shopify/flash-list';
 import * as IntentLauncher from 'expo-intent-launcher';
 import {
   Gesture,
@@ -21,7 +21,7 @@ import {
   GestureHandlerRootView,
   Directions,
 } from 'react-native-gesture-handler';
-import { useState, useMemo, useCallback, memo } from 'react';
+import { useState, useMemo, useCallback, memo, useRef } from 'react';
 import { AppItem } from '../modules/launcher/src/Launcher.types';
 import { useRouter, Link } from 'expo-router';
 import { openApplication } from 'expo-intent-launcher';
@@ -35,6 +35,8 @@ import { PremiumModal } from './components/PremiumModal';
 
 
 
+
+type FlatItem = { type: 'header'; title: string } | { type: 'app'; app: AppItem };
 
 export type AllAppsProps = {
   enableGestures?: boolean;
@@ -95,6 +97,11 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedApp, setSelectedApp] = useState<AppItem | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [activeLetter, setActiveLetter] = useState<string | null>(null);
+
+  const sectionListRef = useRef<FlashListRef<FlatItem>>(null);
+  const activeLetterRef = useRef<string | null>(null);
+  const sidebarHeight = useRef(0);
 
   // New State for Features
   const [optionsModalVisible, setOptionsModalVisible] = useState(false);
@@ -115,9 +122,13 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
   const sections = useMemo(() => {
     if (!apps.length) return [];
 
+    const blockedSet = new Set(blockedPackageNames);
+    const hiddenSet = new Set(hiddenApps);
+    const pinnedSet = new Set(pinnedPackageNames);
+
     // Filter blocked and hidden apps
     const visibleApps = apps.filter(
-      (app) => !blockedPackageNames.includes(app.packageName) && !hiddenApps.includes(app.packageName)
+      (app) => !blockedSet.has(app.packageName) && !hiddenSet.has(app.packageName)
     );
 
     // Separate pinned and unpinned, and apply renames
@@ -129,7 +140,7 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       const rename = appRenames[app.packageName];
       const displayApp = rename ? { ...app, label: rename } : app;
 
-      if (pinnedPackageNames.includes(app.packageName)) {
+      if (pinnedSet.has(app.packageName)) {
         pinned.push(displayApp);
       } else {
         unpinned.push(displayApp);
@@ -188,7 +199,50 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
     return result;
   }, [apps, searchQuery, pinnedPackageNames, blockedPackageNames, hiddenApps, appRenames]);
 
+  const flatData = useMemo<FlatItem[]>(() => {
+    const result: FlatItem[] = [];
+    sections.forEach((section) => {
+      result.push({ type: 'header', title: section.title });
+      section.data.forEach((app) => result.push({ type: 'app', app }));
+    });
+    return result;
+  }, [sections]);
 
+  const sectionStartIndices = useMemo<Record<string, number>>(() => {
+    const indices: Record<string, number> = {};
+    let i = 0;
+    sections.forEach((section) => {
+      indices[section.title] = i;
+      i += 1 + section.data.length;
+    });
+    return indices;
+  }, [sections]);
+
+  const scrollToSection = useCallback((letter: string) => {
+    const index = sectionStartIndices[letter];
+    if (index !== undefined && sectionListRef.current) {
+      sectionListRef.current.scrollToIndex({ index, animated: false });
+    }
+  }, [sectionStartIndices]);
+
+  const handleLetterAt = useCallback((y: number) => {
+    if (!sidebarHeight.current || !sections.length) return;
+    const idx = Math.max(0, Math.min(sections.length - 1, Math.floor((y / sidebarHeight.current) * sections.length)));
+    const letter = sections[idx].title;
+    if (letter !== activeLetterRef.current) {
+      activeLetterRef.current = letter;
+      setActiveLetter(letter);
+      scrollToSection(letter);
+    }
+  }, [sections, scrollToSection]);
+
+  const sidebarPanGesture = useMemo(() => Gesture.Pan()
+    .runOnJS(true)
+    .minDistance(0)
+    .onStart((e) => handleLetterAt(e.y))
+    .onUpdate((e) => handleLetterAt(e.y))
+    .onEnd(() => { activeLetterRef.current = null; setActiveLetter(null); }),
+  [handleLetterAt]);
 
   const handleAppPress = useCallback(
     (app: AppItem) => {
@@ -216,6 +270,39 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
       setOptionsModalVisible(true);
     },
     []
+  );
+
+  const renderAppItem = useCallback(
+    (app: AppItem) => (
+      <AppListItem
+        item={app}
+        onPress={handleAppPress}
+        onLongPress={handleAppLongPress}
+        isImageWallpaper={isImageWallpaper}
+        isDarkMode={isDarkMode}
+        theme={fontConfig}
+        wallpaperIndex={wallpaperIndex}
+      />
+    ),
+    [handleAppPress, handleAppLongPress, isImageWallpaper, isDarkMode, fontConfig, wallpaperIndex]
+  );
+
+  const renderFlatItem = useCallback(
+    ({ item }: { item: FlatItem }) => {
+      if (item.type === 'header') {
+        return (
+          <Text
+            style={header}
+            className={`mt-4 text-lg ${header ? '' : 'font-bold'} ${
+              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+            }`}>
+            {item.title}
+          </Text>
+        );
+      }
+      return renderAppItem(item.app);
+    },
+    [renderAppItem, header, isImageWallpaper, isDarkMode]
   );
 
   const { launchAppWithTimer } = useAppLauncher();
@@ -454,73 +541,106 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 
           {/* Apps List */}
           <View className="flex-1 flex-row">
-            <View className="w-full px-3 ">
-              <ScrollView
-                showsVerticalScrollIndicator={false}
-                keyboardShouldPersistTaps="handled"
-                contentContainerStyle={{ paddingBottom: 40 }}>
-                <View className="mb-4 w-full flex-row items-center justify-between">
-                  <Text
-                    allowFontScaling={false}
-                    style={allappt}
-                    className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
-                      isImageWallpaper
-                        ? 'text-white decoration-white'
-                        : isDarkMode
-                          ? 'text-[#DADFE5] decoration-[#DADFE5]'
-                          : 'text-[#858E9D] decoration-[#858E9D]'
-                    }`}>
-                    All Apps
-                  </Text>
-                  <Link href="/settingScreen" asChild>
-                    <TouchableOpacity
-                      className="p-2"
-                      hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
-                      <View style={allappi}>
-                        <Image
-                          source={require('../assets/images/SettingIcon.png')}
-                          style={{
-                            width: 30,
-                            height: 30,
-                            tintColor:
-                              allappi?.color ||
-                              (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
-                          }}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                  </Link>
-                </View>
-                {sections.map((section, index) => (
-                  <View key={index}>
+            <View className="flex-1 px-3" style={{ paddingRight: 28 }}>
+              <FlashList
+                ref={sectionListRef}
+                data={flatData}
+                getItemType={(item) => (item as FlatItem).type}
+                keyExtractor={(item) =>
+                  (item as FlatItem).type === 'header'
+                    ? `h-${(item as { type: 'header'; title: string }).title}`
+                    : (item as { type: 'app'; app: AppItem }).app.packageName
+                }
+                renderItem={renderFlatItem}
+                ListHeaderComponent={
+                  <View className="mb-4 w-full flex-row items-center justify-between">
                     <Text
-                      style={header}
-                      className={` mt-4 text-lg ${header ? '' : 'font-bold'} ${
-                        isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                      allowFontScaling={false}
+                      style={allappt}
+                      className={`text-[18px] ${allappt ? '' : 'font-bold'} underline-offset-4 ${
+                        isImageWallpaper
+                          ? 'text-white decoration-white'
+                          : isDarkMode
+                            ? 'text-[#DADFE5] decoration-[#DADFE5]'
+                            : 'text-[#858E9D] decoration-[#858E9D]'
                       }`}>
-                      {section.title}
+                      All Apps
                     </Text>
-                    {section.data.map((app) => (
-                      <AppListItem
-                        key={app.packageName}
-                        item={app}
-                        onPress={handleAppPress}
-                        onLongPress={handleAppLongPress}
-                        isImageWallpaper={isImageWallpaper}
-                        isDarkMode={isDarkMode}
-                        theme={fontConfig}
-                        wallpaperIndex={wallpaperIndex}
-                      />
-                    ))}
+                    <Link href="/settingScreen" asChild>
+                      <TouchableOpacity
+                        className="p-2"
+                        hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}>
+                        <View style={allappi}>
+                          <Image
+                            source={require('../assets/images/SettingIcon.png')}
+                            style={{
+                              width: 30,
+                              height: 30,
+                              tintColor:
+                                allappi?.color ||
+                                (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D'),
+                            }}
+                          />
+                        </View>
+                      </TouchableOpacity>
+                    </Link>
                   </View>
-                ))}
-                {sections.length === 0 && (
+                }
+                ListEmptyComponent={
                   <View className="mt-10 items-center">
                     <Text className="text-slate-400">No apps found</Text>
                   </View>
-                )}
-              </ScrollView>
+                }
+                showsVerticalScrollIndicator={false}
+                keyboardShouldPersistTaps="handled"
+                contentContainerStyle={{ paddingBottom: 40 }}
+              />
             </View>
+
+            {/* Alphabet sidebar */}
+            {sections.length > 0 && (
+              <GestureDetector gesture={sidebarPanGesture}>
+                <View
+                  style={{ width: 22, justifyContent: 'center', alignItems: 'center' }}
+                  onLayout={(e) => { sidebarHeight.current = e.nativeEvent.layout.height; }}>
+                  {sections.map((section) => (
+                    <View key={section.title} style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+                      <Text
+                        allowFontScaling={false}
+                        style={{
+                          fontSize: activeLetter === section.title ? 13 : 10,
+                          fontWeight: activeLetter === section.title ? 'bold' : 'normal',
+                          color: activeLetter === section.title
+                            ? '#7EA6E0'
+                            : isImageWallpaper ? 'rgba(255,255,255,0.6)' : isDarkMode ? '#728099' : '#8698B2',
+                        }}>
+                        {section.title === '*' ? '★' : section.title}
+                      </Text>
+                    </View>
+                  ))}
+                </View>
+              </GestureDetector>
+            )}
+
+            {/* Floating letter bubble */}
+            {activeLetter !== null && (
+              <View
+                style={{
+                  position: 'absolute',
+                  right: 30,
+                  top: '40%',
+                  width: 44,
+                  height: 44,
+                  borderRadius: 22,
+                  backgroundColor: '#7EA6E0',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text style={{ color: 'white', fontSize: 20, fontWeight: 'bold' }}>
+                  {activeLetter === '*' ? '★' : activeLetter}
+                </Text>
+              </View>
+            )}
           </View>
 
           <AppModal
@@ -790,6 +910,8 @@ const AllApps = memo(({ enableGestures = true, autoFocus = false }: AllAppsProps
 export default AllApps;
 
 
+const RIPPLE = { color: 'rgba(0,0,0,0.08)' };
+
 const AppListItem = memo(
   ({
     item,
@@ -802,16 +924,19 @@ const AppListItem = memo(
   }: any) => {
     const { applist, applistbg } = theme || {};
 
+    const handlePress = useCallback(() => onPress(item), [onPress, item]);
+    const handleLongPress = useCallback(() => onLongPress(item), [onLongPress, item]);
+
     return (
       <Pressable
         style={applistbg}
         className={`mb-2 w-full flex-row items-center justify-between rounded-xl px-4 py-3  ${
           isImageWallpaper ? '' : isDarkMode ? 'bg-[#131B26]' : 'bg-[#CEDDF2]'
         }`}
-        onPress={() => onPress(item)}
-        onLongPress={() => onLongPress(item)}
+        onPress={handlePress}
+        onLongPress={handleLongPress}
         delayLongPress={300}
-        android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
+        android_ripple={RIPPLE}>
         <View className="flex-1 flex-row items-center">
           {wallpaperIndex === 6 && (
             <View
