@@ -15,7 +15,8 @@ import {
 import { useAppContext } from './context/AppContext';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { MaterialCommunityIcons, Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useRouter, useNavigation } from 'expo-router';
+import { CommonActions } from '@react-navigation/native';
 import { useColorContext, AVAILABLE_WALLPAPERS, ColorContext } from './context/ColorContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import SignInWithGoogle from './SignInWithGoogle';
@@ -130,6 +131,19 @@ const THEME_DATA = [
 
 export default function SettingScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
+
+  // Robust "back to home" that doesn't rely on router.push/replace with an
+  // href. Those carry a navigator-key target that can go stale during launcher
+  // lifecycle churn — leading to:
+  //   "The action 'PUSH' ... was not handled by any navigator".
+  const goHome = () => {
+    if (router.canGoBack()) {
+      router.back();
+    } else {
+      navigation.dispatch(CommonActions.navigate({ name: 'home' }));
+    }
+  };
   const scrollX = useRef(new Animated.Value(0)).current;
   // State for toggles
   const [alarmClock, setAlarmClock] = useState(true);
@@ -259,7 +273,7 @@ export default function SettingScreen() {
 
     setTimeout(() => {
       setIsProcessing(false);
-      router.push('/home');
+      goHome();
       setThemeModalVisible(false);
     }, 10000);
   };
@@ -292,11 +306,7 @@ export default function SettingScreen() {
 
   useEffect(() => {
     const backAction = () => {
-      if (router.canGoBack()) {
-        router.back();
-      } else {
-        router.replace('/home');
-      }
+      goHome();
       return true;
     };
 
@@ -467,7 +477,7 @@ export default function SettingScreen() {
       {/* Header */}
       <View
         className={`flex-row items-center px-4 py-3 ${isDarkMode ? 'bg-[]' : 'bg-[#EBF1F7]'}`}>
-        <TouchableOpacity onPress={() => router.push('/home')} className="absolute left-4 z-10">
+        <TouchableOpacity onPress={goHome} className="absolute left-4 z-10">
           <MaterialCommunityIcons
             name="arrow-left"
             size={26}

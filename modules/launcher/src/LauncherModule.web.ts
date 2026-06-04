@@ -25,6 +25,7 @@ class LauncherModule extends NativeModule<LauncherModuleEvents> {
   openHomeSettings() {}
   isIgnoringBatteryOptimizations() { return true; }
   isDefaultLauncher() { return true; }
+  reloadApp() {}
   getInstalledApps() { return []; }
   launchApp(packageName: string) { return false; }
   uninstallApp(packageName: string) { console.log("Uninstalling " + packageName); }
