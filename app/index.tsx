@@ -1,34 +1,41 @@
-import { router } from 'expo-router';
+import { useNavigation } from 'expo-router';
+import { StackActions } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { View, ActivityIndicator } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function Index() {
-  const [destination, setDestination] = useState<'/home' | '/intro/one' | null>(null);
+  const navigation = useNavigation();
+  const [destination, setDestination] = useState<'home' | 'intro' | null>(null);
 
   useEffect(() => {
     AsyncStorage.getItem('hasSeenIntro')
-      .then((v) => setDestination(v === 'true' ? '/home' : '/intro/one'))
-      .catch(() => setDestination('/intro/one'));
+      .then((v) => setDestination(v === 'true' ? 'home' : 'intro'))
+      .catch(() => setDestination('intro'));
   }, []);
 
   useEffect(() => {
     if (!destination) return;
 
+    // Dispatch via the live navigation prop using StackActions — these actions
+    // carry no `target` navigator key, so they bubble up the live tree instead
+    // of being silently dropped when the navigator gets rebuilt during
+    // launcher cold-start churn. We keep retrying until this screen unmounts
+    // (which only happens when the redirect actually lands).
+    const action =
+      destination === 'home'
+        ? StackActions.replace('home')
+        : StackActions.replace('intro', { screen: 'one' });
+
     let timer: ReturnType<typeof setTimeout> | undefined;
     let cancelled = false;
 
-    // Redirect to the real entry screen. On a cold start — which is what
-    // happens when this app is the default launcher and Android relaunches it
-    // via the HOME intent — the navigator may not be ready on the first try,
-    // so we keep retrying. A successful redirect unmounts this screen, which
-    // runs the cleanup below and stops the loop.
     const go = () => {
       if (cancelled) return;
       try {
-        router.replace(destination);
+        navigation.dispatch(action);
       } catch {
-        // Navigator not mounted yet — retry on the next tick.
+        // navigator not mounted yet — retry on the next tick
       }
       timer = setTimeout(go, 150);
     };
@@ -38,7 +45,7 @@ export default function Index() {
       cancelled = true;
       if (timer) clearTimeout(timer);
     };
-  }, [destination]);
+  }, [destination, navigation]);
 
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: '#fff' }}>

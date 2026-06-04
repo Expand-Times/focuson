@@ -10,12 +10,13 @@ import {
   StatusBar,
   Alert,
   ActivityIndicator,
+  AppState,
  Dimensions } from 'react-native';
-import { Stack, useFocusEffect, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useRouter, useNavigation } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as IntentLauncher from 'expo-intent-launcher';
-import { useEffect, useState, useCallback, lazy, Suspense, useMemo, memo } from 'react';
+import { useEffect, useState, useCallback, lazy, Suspense, useMemo, memo, useRef } from 'react';
 import { Gesture, GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, {
   runOnJS,
@@ -140,6 +141,7 @@ const ClockWidget = memo(({
 export default function Home() {
   const insets = useSafeAreaInsets();
   const router = useRouter();
+  const navigation = useNavigation();
   const {
     homeApps,
     updateHomeApps,
@@ -273,6 +275,31 @@ export default function Home() {
   useEffect(() => {
     const t = setTimeout(() => setSidesReady(true), 500);
     return () => clearTimeout(t);
+  }, []);
+
+  // JS-side safety net for the launcher-role transition: when the user picks
+  // FocusOn in the Android home-picker and returns, the activity can be
+  // recreated while the JS context survives, orphaning expo-router's module
+  // state. If we observe the default-launcher flag flipping false → true on
+  // resume, we trigger a clean native reload so the new tree starts fresh.
+  // (The native MainActivity.onCreate also catches this on most devices; this
+  // is a belt-and-suspenders safety net for cases where the recreation
+  // doesn't actually trigger a fresh onCreate.)
+  const wasDefaultRef = useRef<boolean | null>(null);
+  useEffect(() => {
+    try { wasDefaultRef.current = Launcher.isDefaultLauncher(); } catch { /* ignore */ }
+    const sub = AppState.addEventListener('change', (next) => {
+      if (next !== 'active') return;
+      try {
+        const isNow = Launcher.isDefaultLauncher();
+        if (wasDefaultRef.current === false && isNow === true) {
+          Launcher.reloadApp();
+          return;
+        }
+        wasDefaultRef.current = isNow;
+      } catch { /* ignore */ }
+    });
+    return () => sub.remove();
   }, []);
 
   useFocusEffect(
@@ -453,7 +480,11 @@ export default function Home() {
         if (showTutorial && tutorialStep === 5) {
           updateTutorialStep(6);
         }
-        router.push('/settingScreen');
+        // Use navigation.navigate (target-less) instead of router.push so the
+        // PUSH action doesn't carry a navigator-key target that can go stale
+        // during launcher lifecycle churn — which caused:
+        //   "The action 'PUSH' ... was not handled by any navigator".
+        navigation.navigate('settingScreen' as never);
       }
     });
 
@@ -1016,5 +1047,3 @@ export default function Home() {
     </GestureHandlerRootView>
   );
 }
-
-// aftab code has been published

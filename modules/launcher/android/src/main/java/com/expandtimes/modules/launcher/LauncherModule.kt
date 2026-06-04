@@ -440,6 +440,29 @@ class LauncherModule : Module() {
         return@Function resolveInfo?.activityInfo?.packageName == context.packageName
     }
 
+    // JS-side safety-net for the launcher-role corruption: when the app
+    // returns from the Android home-picker as the new default launcher, the
+    // JS code calls this to wipe module-level state (orphaned navigationRef,
+    // linking handlers, etc.) by triggering a clean React Native reload.
+    //
+    // Uses reflection because this Gradle module deliberately doesn't depend
+    // on react-android — calling reactHost.reload(...) directly would require
+    // adding RN as a direct compile dependency. The reflective call resolves
+    // to: (application as ReactApplication).reactHost.reload(reason).
+    Function("reloadApp") {
+        val app = context.applicationContext
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            try {
+                val getReactHost = app.javaClass.getMethod("getReactHost")
+                val reactHost = getReactHost.invoke(app) ?: return@post
+                val reloadMethod = reactHost.javaClass.getMethod("reload", String::class.java)
+                reloadMethod.invoke(reactHost, "JS-triggered reload (default launcher transition)")
+            } catch (e: Exception) {
+                android.util.Log.w("LauncherModule", "reloadApp failed", e)
+            }
+        }
+    }
+
     AsyncFunction("getInstalledApps") {
         val pm = context.packageManager
         val intent = Intent(Intent.ACTION_MAIN, null)
