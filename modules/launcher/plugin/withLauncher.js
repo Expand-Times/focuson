@@ -85,6 +85,17 @@ const withLauncherMainActivity = (config) => {
       );
     }
 
+    // Override the default-back behavior to send the task to the background
+    // instead of finishing the activity. As the default launcher, finishing on
+    // back triggers an Android relaunch via HOME intent, which would fire our
+    // onCreate auto-reload and bounce the user back to a freshly-mounted home.
+    if (!contents.includes('// FocusOn: launcher back override')) {
+      contents = contents.replace(
+        /override fun invokeDefaultOnBackPressed\(\)[\s\S]*?\n  \}\n/,
+        `override fun invokeDefaultOnBackPressed() {\n    // FocusOn: launcher back override — send to background, don't finish.\n    if (!moveTaskToBack(false)) {\n      super.invokeDefaultOnBackPressed()\n    }\n  }\n`
+      );
+    }
+
     // Modify onCreate to strip HOME intent data BEFORE React Native processes it.
     // When this app is the default launcher, Android launches the activity with an intent
     // that has CATEGORY_HOME. React Native's Linking.getInitialURL() reads this intent
@@ -103,19 +114,16 @@ const withLauncherMainActivity = (config) => {
         setPackage(packageName)
       }
     }
-    // Detect activity recreation with surviving JS context. This happens when
-    // Android recreates the launcher activity (most notably during the
-    // default-launcher role transition) but the React instance in the
-    // Application's ReactHost survives. The old React tree's module state
-    // (expo-router navigationRef, linking handlers, routingQueue) orphans
-    // against the new tree, leaving navigation half-dead until force-quit.
-    // We force a clean JS reload so the new activity gets fresh module state.
+    // Detect launcher-role transition: HOME intent + surviving JS context.
+    // Only THIS combination causes the orphaned-tree corruption we need to
+    // recover from. Reloading on every recreation (e.g. back-gesture-induced)
+    // would bounce the user back to a fresh home on every back press.
     val jsAlreadyAlive = (application as? ReactApplication)?.reactHost?.currentReactContext != null
     super.onCreate(null)
-    if (jsAlreadyAlive) {
+    if (jsAlreadyAlive && isHomeIntent) {
       android.os.Handler(android.os.Looper.getMainLooper()).post {
         (application as? ReactApplication)?.reactHost?.reload(
-          "Activity recreated — refreshing JS to clear orphaned module state"
+          "Launcher-role transition — refreshing JS to clear orphaned module state"
         )
       }
     }`
