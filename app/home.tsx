@@ -11,6 +11,7 @@ import {
   Alert,
   ActivityIndicator,
   AppState,
+  BackHandler,
  Dimensions } from 'react-native';
 import { Stack, useFocusEffect, useRouter, useNavigation } from 'expo-router';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
@@ -305,6 +306,20 @@ export default function Home() {
   useFocusEffect(
     useCallback(() => {
       translateX.value = -SCREEN_WIDTH;
+    }, [])
+  );
+
+  // Swallow the hardware/gesture back on the home screen. The launcher IS the
+  // root — back has nowhere to go. Returning true here stops the event before
+  // it reaches React Navigation's container handler or the native activity,
+  // so Android (especially MIUI/Xiaomi, which is aggressive about killing the
+  // launcher activity on back) never gets a chance to finish-and-relaunch us.
+  // Registered via useFocusEffect so it only fires while home is focused;
+  // other screens keep their normal back behavior.
+  useFocusEffect(
+    useCallback(() => {
+      const sub = BackHandler.addEventListener('hardwareBackPress', () => true);
+      return () => sub.remove();
     }, [])
   );
 
