@@ -39,6 +39,36 @@ import { useColorScheme } from 'react-native';
 
 SplashScreen.preventAutoHideAsync();
 
+// Swallow the transient "Attempted to navigate before mounting the Root Layout
+// component" error thrown by expo-router's assertIsReady. It fires when a press
+// handler dispatches router.push/replace/back/navigate during the brief window
+// when the NavigationContainer is between unmount and remount — most commonly
+// during the launcher-role JS reload. In dev this just shows a redbox, but in
+// release it's an uncaught JS exception that crashes the app via the native
+// ExceptionsManager. The press itself is harmless to drop on the floor;
+// whatever the user wanted to do, they can tap again once the new tree is
+// ready. Every other error still bubbles to the original handler.
+{
+  const globalAny = global as unknown as {
+    ErrorUtils?: {
+      getGlobalHandler: () => (e: Error, isFatal?: boolean) => void;
+      setGlobalHandler: (cb: (e: Error, isFatal?: boolean) => void) => void;
+    };
+  };
+  const eu = globalAny.ErrorUtils;
+  if (eu) {
+    const previous = eu.getGlobalHandler();
+    eu.setGlobalHandler((error, isFatal) => {
+      const msg = (error && (error as Error).message) || '';
+      if (msg.includes('Attempted to navigate before mounting')) {
+        console.warn('[focuson] swallowed transient nav-not-ready:', msg);
+        return;
+      }
+      previous(error, isFatal);
+    });
+  }
+}
+
 export default function Layout() {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';

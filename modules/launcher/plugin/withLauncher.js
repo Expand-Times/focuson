@@ -92,7 +92,7 @@ const withLauncherMainActivity = (config) => {
     if (!contents.includes('// FocusOn: launcher back override')) {
       contents = contents.replace(
         /override fun invokeDefaultOnBackPressed\(\)[\s\S]*?\n  \}\n/,
-        `override fun invokeDefaultOnBackPressed() {\n    // FocusOn: launcher back override — send to background, don't finish.\n    if (!moveTaskToBack(false)) {\n      super.invokeDefaultOnBackPressed()\n    }\n  }\n`
+        `override fun invokeDefaultOnBackPressed() {\n    // FocusOn: launcher back override — never finish the activity on back.\n    // moveTaskToBack returns false for the default launcher (already at the\n    // bottom of the stack); if we fell through to super, the activity would\n    // be finished, Android would relaunch us via HOME intent, and the user\n    // would see the app restart on every back press.\n    moveTaskToBack(false)\n  }\n`
       );
     }
 
