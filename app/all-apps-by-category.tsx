@@ -1,5 +1,5 @@
 import { useAppLauncher } from './hooks/useAppLauncher';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { FlashList } from '@shopify/flash-list';
 import {
   View,
@@ -18,6 +18,7 @@ import {
   StatusBar,
   Alert,
   Pressable,
+  FlatList,
 } from 'react-native';
 import {
   Gesture,
@@ -84,6 +85,8 @@ export default function AllAppsByCategoryScreen({
   const [editingCategory, setEditingCategory] = useState<string | null>(null);
   const [tempCategoryName, setTempCategoryName] = useState('');
 
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+
   const RootContainer = enableGestures ? GestureHandlerRootView : View;
 
   // Modal State
@@ -135,6 +138,9 @@ export default function AllAppsByCategoryScreen({
         apps.filter((app) => !hiddenApps.includes(app.packageName) && !blockedPackageNames.includes(app.packageName))
       );
       setCategories(categorized);
+      if (categorized.length > 0 && (!activeCategory || !categorized.find(c => c.title === activeCategory))) {
+        setActiveCategory(categorized[0].title);
+      }
     }
   }, [apps, appsLoading, categoryOverrides, appRenames, customCategories, hiddenApps, blockedPackageNames]);
 
@@ -387,15 +393,114 @@ export default function AllAppsByCategoryScreen({
       .filter((cat) => cat?.data?.length > 0);
   }, [categories, searchQuery]);
 
-  const flatCategoryData = useMemo<CategoryFlatItem[]>(() => {
-    const result: CategoryFlatItem[] = [];
-    filteredCategories.forEach((cat) => {
-      const displayTitle = renamedCategories[cat.title] || cat.title;
-      result.push({ type: 'category-header', title: cat.title, displayTitle, appCount: cat.data.length });
-      cat.data.forEach((app) => result.push({ type: 'app', app }));
-    });
-    return result;
-  }, [filteredCategories, renamedCategories]);
+  const appsToShow = useMemo(() => {
+    if (!activeCategory) return [];
+    const cat = filteredCategories.find(c => c.title === activeCategory);
+    return cat ? cat.data : [];
+  }, [filteredCategories, activeCategory]);
+
+  useEffect(() => {
+    if (filteredCategories.length > 0 && (!activeCategory || !filteredCategories.find(c => c.title === activeCategory))) {
+      setActiveCategory(filteredCategories[0].title);
+    }
+  }, [filteredCategories, activeCategory]);
+
+  const MULTIPLIER = 100;
+  const infiniteCategories = useMemo(() => {
+    if (!filteredCategories.length) return [];
+    return Array.from({ length: MULTIPLIER }, (_, chunkIndex) =>
+      filteredCategories.map(cat => ({ ...cat, chunkIndex, uniqueKey: `${cat.title}-${chunkIndex}` }))
+    ).flat();
+  }, [filteredCategories]);
+
+  const categoryLength = filteredCategories.length;
+  const middleChunkIndex = useMemo(() => Math.floor(MULTIPLIER / 2) * categoryLength, [categoryLength]);
+
+  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 50 }).current;
+  const currentIndexRef = useRef(0);
+  const isProgrammaticScroll = useRef(false);
+
+  const onViewableItemsChanged = useRef(({ viewableItems }: any) => {
+    if (viewableItems.length > 0) {
+      const firstItem = viewableItems[0];
+      currentIndexRef.current = firstItem.index;
+      if (!isProgrammaticScroll.current) {
+        setActiveCategory(firstItem.item.title);
+      }
+    }
+  }).current;
+
+  const categoryListRef = useRef<FlatList>(null);
+  const activeCategoryRef = useRef(activeCategory);
+  const scrollTimeout = useRef<any>(null);
+
+  useEffect(() => {
+    activeCategoryRef.current = activeCategory;
+  }, [activeCategory]);
+
+  const snapToActiveCategory = useCallback((category: string) => {
+    if (!categoryListRef.current || !filteredCategories.length) return;
+
+    const baseIndex = currentIndexRef.current;
+    const catLength = filteredCategories.length;
+
+    const originalIndex = filteredCategories.findIndex(c => c.title === category);
+    if (originalIndex === -1) return;
+
+    const currentChunk = Math.floor(baseIndex / catLength) || Math.floor(MULTIPLIER / 2);
+    let indexToScroll = currentChunk * catLength + originalIndex;
+
+    const indexInChunk = baseIndex % catLength;
+    if (originalIndex - indexInChunk > catLength / 2) {
+      indexToScroll -= catLength;
+    } else if (indexInChunk - originalIndex > catLength / 2) {
+      indexToScroll += catLength;
+    }
+
+    try {
+      isProgrammaticScroll.current = true;
+      categoryListRef.current.scrollToIndex({
+        index: indexToScroll,
+        animated: true,
+        viewPosition: 0,
+      });
+      currentIndexRef.current = indexToScroll;
+      setTimeout(() => { isProgrammaticScroll.current = false; }, 300);
+    } catch (e) {
+      console.log('Scroll to index failed', e);
+    }
+  }, [filteredCategories]);
+
+  const [isListReady, setIsListReady] = useState(false);
+  useEffect(() => {
+    if (isListReady && infiniteCategories.length > 0) {
+      setTimeout(() => {
+        try {
+          categoryListRef.current?.scrollToIndex({
+            index: middleChunkIndex,
+            animated: false,
+            viewPosition: 0
+          });
+          currentIndexRef.current = middleChunkIndex;
+        } catch(e) {}
+      }, 100);
+    }
+  }, [isListReady, middleChunkIndex, infiniteCategories.length]);
+
+  const handleScrollEndDrag = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+    scrollTimeout.current = setTimeout(() => {
+      if (activeCategoryRef.current) snapToActiveCategory(activeCategoryRef.current);
+    }, 100);
+  };
+
+  const handleMomentumScrollBegin = () => {
+    if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
+  };
+
+  const handleMomentumScrollEnd = () => {
+    if (activeCategoryRef.current) snapToActiveCategory(activeCategoryRef.current);
+  };
 
   const handlePress = useCallback((app: AppItem) => {
     onAppPress(app);
@@ -534,46 +639,17 @@ export default function AllAppsByCategoryScreen({
             </View>
 
             <FlashList
-              data={flatCategoryData}
-              getItemType={(item) => item.type}
-              keyExtractor={(item) =>
-                item.type === 'category-header' ? `cat-${item.title}` : item.app.packageName
-              }
-              renderItem={({ item, index }) => {
-                if (item.type === 'category-header') {
-                  return (
-                    <View
-                      style={{ marginTop: index === 0 ? 0 : 20, marginBottom: 8 }}
-                      className="flex-row items-center justify-end">
-                      <Text
-                        allowFontScaling={false}
-                        style={appCn}
-                        className={`mr-2 text-[16px] ${
-                          isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
-                        }`}>
-                        {item.displayTitle} ({item.appCount})
-                      </Text>
-                      <TouchableOpacity
-                        style={[appCi, { borderColor: appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }]}
-                        className={`border-b ${isImageWallpaper ? 'border-white/50' : isDarkMode ? 'border-slate-400' : 'border-[#858E9D]'}`}
-                        onPress={() => handleStartEditing(item.title, item.displayTitle)}>
-                        <MaterialCommunityIcons
-                          name="pencil-outline"
-                          size={16}
-                          color={appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
-                        />
-                      </TouchableOpacity>
-                    </View>
-                  );
-                }
+              data={appsToShow}
+              keyExtractor={(item) => item.packageName}
+              renderItem={({ item }) => {
                 return (
                   <Pressable
                     style={[applistCbg, { marginBottom: 8 }]}
                     className={`w-full flex-row items-center justify-between rounded-xl px-4 py-3 ${
                       isImageWallpaper ? 'bg-black/40' : isDarkMode ? 'bg-[#131B27]' : 'bg-[#CEDDF2]'
                     }`}
-                    onPress={() => handlePress(item.app)}
-                    onLongPress={() => handleLongPress(item.app)}
+                    onPress={() => handlePress(item)}
+                    onLongPress={() => handleLongPress(item)}
                     delayLongPress={300}
                     android_ripple={{ color: 'rgba(0,0,0,0.08)' }}>
                     <View className="mr-2 flex-1 flex-row items-center">
@@ -587,47 +663,104 @@ export default function AllAppsByCategoryScreen({
                           isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#DBDFE5]' : 'text-[#142C4D]'
                         }`}
                         numberOfLines={1}>
-                        {(appRenames[item.app.packageName] || item.app.label).length > 15
-                          ? (appRenames[item.app.packageName] || item.app.label).slice(0, 15) + '...'
-                          : appRenames[item.app.packageName] || item.app.label}
+                        {(appRenames[item.packageName] || item.label).length > 15
+                          ? (appRenames[item.packageName] || item.label).slice(0, 15) + '...'
+                          : appRenames[item.packageName] || item.label}
                       </Text>
                     </View>
                   </Pressable>
                 );
               }}
               ListHeaderComponent={
-                <View className="mb-[6%] flex-row items-center justify-between">
-                  <Text
-                    allowFontScaling={false}
-                    style={appC}
-                    className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
-                      isImageWallpaper ? 'text-white decoration-white' : isDarkMode ? 'text-[#DBDFE4] decoration-slate-400' : 'text-[#142C4D] decoration-[#142C4D]'
-                    }`}>
-                    App Category
-                  </Text>
-                  <View className="flex-row items-center gap-4">
-                    <TouchableOpacity onPress={() => { if (ensurePremium()) setCreateCategoryModalVisible(true); }}>
-                      <View
-                        style={[appi, { borderColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }]}
-                        className={`rounded-lg border-2 ${isImageWallpaper ? 'border-white/50' : isDarkMode ? 'border-[#728099]' : 'border-[#858E9D]'}`}>
-                        <MaterialCommunityIcons
-                          name="plus"
-                          size={25}
-                          color={appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
-                        />
-                      </View>
-                    </TouchableOpacity>
-                    <Link href="/settingScreen" asChild>
-                      <TouchableOpacity>
-                        <View style={appi}>
-                          <Image
-                            source={require('../assets/images/SettingIcon.png')}
-                            style={{ width: 30, height: 30, tintColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }}
+                <View className="mb-[6%]">
+                  <View className="mb-4 flex-row items-center justify-between">
+                    <Text
+                      allowFontScaling={false}
+                      style={appC}
+                      className={`text-[18px] ${appC ? '' : 'font-bold'} underline-offset-4 ${
+                        isImageWallpaper ? 'text-white decoration-white' : isDarkMode ? 'text-[#DBDFE4] decoration-slate-400' : 'text-[#142C4D] decoration-[#142C4D]'
+                      }`}>
+                      App Category
+                    </Text>
+                    <View className="flex-row items-center gap-4">
+                      <TouchableOpacity onPress={() => { if (ensurePremium()) setCreateCategoryModalVisible(true); }}>
+                        <View
+                          style={[appi, { borderColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }]}
+                          className={`rounded-lg border-2 ${isImageWallpaper ? 'border-white/50' : isDarkMode ? 'border-[#728099]' : 'border-[#858E9D]'}`}>
+                          <MaterialCommunityIcons
+                            name="plus"
+                            size={25}
+                            color={appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
                           />
                         </View>
                       </TouchableOpacity>
-                    </Link>
+                      <Link href="/settingScreen" asChild>
+                        <TouchableOpacity>
+                          <View style={appi}>
+                            <Image
+                              source={require('../assets/images/SettingIcon.png')}
+                              style={{ width: 30, height: 30, tintColor: appi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D') }}
+                            />
+                          </View>
+                        </TouchableOpacity>
+                      </Link>
+                    </View>
                   </View>
+                  
+                  <FlatList
+                    ref={categoryListRef}
+                    horizontal
+                    showsHorizontalScrollIndicator={false}
+                    className="mb-4"
+                    data={infiniteCategories}
+                    keyExtractor={(item) => item.uniqueKey}
+                    onLayout={() => setIsListReady(true)}
+                    onViewableItemsChanged={onViewableItemsChanged}
+                    viewabilityConfig={viewabilityConfig}
+                    onScrollEndDrag={handleScrollEndDrag}
+                    onMomentumScrollBegin={handleMomentumScrollBegin}
+                    onMomentumScrollEnd={handleMomentumScrollEnd}
+                    onScrollToIndexFailed={(info) => {
+                      const wait = new Promise(resolve => setTimeout(resolve, 100));
+                      wait.then(() => {
+                        categoryListRef.current?.scrollToIndex({ index: info.index, animated: true, viewPosition: 0 });
+                      });
+                    }}
+                    renderItem={({ item: cat }) => {
+                      const isActive = activeCategory === cat.title;
+                      const displayTitle = renamedCategories[cat.title] || cat.title;
+                      return (
+                        <TouchableOpacity
+                          onPress={() => {
+                            setActiveCategory(cat.title);
+                            snapToActiveCategory(cat.title);
+                          }}
+                          className={`flex-row items-center mr-6 ${isActive ? 'border-b-2' : ''} ${isImageWallpaper ? 'border-white' : isDarkMode ? 'border-white' : 'border-[#142C4D]'}`}
+                          style={{ paddingBottom: 4 }}
+                        >
+                          <Text
+                            allowFontScaling={false}
+                            style={appCn}
+                            className={`text-[16px] ${isActive ? 'font-bold' : ''} ${
+                              isImageWallpaper ? 'text-white' : isDarkMode ? 'text-[#728099]' : 'text-[#142C4D]'
+                            }`}
+                          >
+                            {displayTitle}
+                          </Text>
+                          <TouchableOpacity
+                            style={[appCi]}
+                            className="ml-2"
+                            onPress={() => handleStartEditing(cat.title, displayTitle)}>
+                            <MaterialCommunityIcons
+                              name="pencil-outline"
+                              size={14}
+                              color={appCi?.color || (isImageWallpaper ? '#E2E8F0' : isDarkMode ? '#728099' : '#858E9D')}
+                            />
+                          </TouchableOpacity>
+                        </TouchableOpacity>
+                      );
+                    }}
+                  />
                 </View>
               }
               ListEmptyComponent={
